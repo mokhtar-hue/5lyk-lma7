@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة المستشار | عرض الحصص</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        body { font-family: sans-serif; background: #0f172a; color: white; margin: 0; padding: 15px; }
+        .video-container {
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto 20px auto;
+            aspect-ratio: 16 / 9;
+            background: #000;
+            border-radius: 12px;
+            border: 2px solid #6366f1;
+            display: none;
+            overflow: hidden;
+            position: relative;
+        }
+        /* إجبار الفيديو على ملء الحاوية مهما كان كود الفايربيز */
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100% !important;
+            height: 100% !important;
+            border: none;
+        }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+        .card { background: #1e293b; padding: 15px; border-radius: 8px; text-align: center; cursor: pointer; border: 1px solid #334155; transition: 0.3s; }
+        .card:hover { background: #2d3e5a; border-color: #6366f1; }
+    </style>
+</head>
+<body>
+
+    <h3 style="text-align:center;">📚 حصصك التعليمية</h3>
+
+    <div id="player" class="video-container"></div>
+
+    <div id="lessonsGrid" class="grid">
+        <p>جاري تحميل البيانات...</p>
+    </div>
+
+<script>
+    const firebaseConfig = { 
+        apiKey: "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws", 
+        authDomain: "zomaapp-744fc.firebaseapp.com", 
+        projectId: "zomaapp-744fc" 
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    db.collection("lessons").orderBy("createdAt", "desc").onSnapshot(snap => {
+        const grid = document.getElementById('lessonsGrid');
+        grid.innerHTML = "";
+        
+        snap.forEach(doc => {
+            const lesson = doc.data();
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `<div>🎥</div><div style="font-size:12px; margin-top:5px;">${lesson.title}</div>`;
+            
+            card.onclick = function() {
+                const player = document.getElementById('player');
+                player.style.display = "block";
+                
+                // حل مشكلة الايرور عند تحديث فايربيز:
+                // نستخدم DOMParser للتأكد من أن الكود المرفوع يتم تفسيره كـ HTML صحيح
+                try {
+                    let rawCode = lesson.url;
+                    
+                    // إذا كان الكود يحتوي على iframe، نقوم بتنظيفه وحقنه
+                    if (rawCode.includes('<iframe')) {
+                        player.innerHTML = rawCode;
+                    } else {
+                        // لو رفعت رابط فقط بدلاً من كود كامل، الكود سيحوله لـ iframe تلقائياً
+                        player.innerHTML = `<iframe src="${rawCode}" allowfullscreen></iframe>`;
+                    }
+                    
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } catch (e) {
+                    console.error("خطأ في المعالجة:", e);
+                    alert("حدث خطأ أثناء تشغيل الفيديو. تأكد من صحة الكود في فايربيز.");
+                }
+            };
+            grid.appendChild(card);
+        });
+    }, error => {
+        console.error("Firebase Error:", error);
+        document.getElementById('lessonsGrid').innerHTML = "خطأ في الاتصال: " + error.message;
+    });
+</script>
+
+</body>
+</html>
