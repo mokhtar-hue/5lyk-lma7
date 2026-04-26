@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة المستشار | عرض الدروس</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        body { font-family: sans-serif; background: #0f172a; color: white; margin: 0; padding: 15px; }
+        
+        /* 1. منطقة الفريم الأساسية (المشغل) */
+        .video-frame-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto 20px auto;
+            aspect-ratio: 16 / 9; /* لضمان تناسب أبعاد الفيديو */
+            background: #000;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 3px solid #6366f1;
+            display: none; /* هيظهر أول ما تدوس على درس */
+            position: relative;
+        }
+
+        /* إجبار أي iframe جاي من الفايربيز إنه يملأ الحاوية */
+        .video-frame-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100% !important;
+            height: 100% !important;
+            border: none;
+        }
+
+        /* 2. تصميم الكروت */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
+        .lesson-card {
+            background: #1e293b;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            border-bottom: 4px solid transparent;
+            transition: 0.3s;
+        }
+        .lesson-card:hover { border-color: #6366f1; background: #26334d; }
+        .icon { font-size: 30px; margin-bottom: 10px; }
+        .title { font-size: 14px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h2 style="text-align:center;">🎬 مشغل الحصص الذكي</h2>
+
+    <div id="displayArea" class="video-frame-container"></div>
+
+    <div id="lessonsGrid" class="grid">
+        <p style="text-align:center; width:100%;">جاري تحميل الحصص من السيرفر...</p>
+    </div>
+
+<script>
+    // إعدادات الفايربيز بتاعتك (شغالة تمام)
+    const firebaseConfig = { 
+        apiKey: "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws", 
+        authDomain: "zomaapp-744fc.firebaseapp.com", 
+        projectId: "zomaapp-744fc" 
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // جلب البيانات من Firestore
+    db.collection("lessons").orderBy("createdAt", "desc").onSnapshot(snap => {
+        const grid = document.getElementById('lessonsGrid');
+        grid.innerHTML = "";
+        
+        snap.forEach(doc => {
+            const lesson = doc.data();
+            
+            const card = document.createElement('div');
+            card.className = 'lesson-card';
+            card.innerHTML = `
+                <div class="icon">📖</div>
+                <div class="title">${lesson.title}</div>
+            `;
+            
+            // عند الضغط: نحقن الـ iframe جوه الحاوية اللي فوق
+            card.onclick = function() {
+                const area = document.getElementById('displayArea');
+                area.style.display = "block"; // إظهار المشغل
+                
+                // حقن كود الـ iframe اللي أنت مخزنه (اللي بيبدأ بـ <iframe...)
+                area.innerHTML = lesson.url; 
+                
+                // تمرير الشاشة للفيديو
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+            
+            grid.appendChild(card);
+        });
+    });
+</script>
+
+</body>
+</html>
