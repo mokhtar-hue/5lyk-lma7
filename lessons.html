@@ -13,12 +13,12 @@
     <style>
         :root { --primary: #6366f1; --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; }
         
-        /* منع تحديد النصوص */
         * { -webkit-user-select: none; user-select: none; outline: none; }
         
         body { font-family: 'Cairo', sans-serif; background: var(--bg); color: white; margin: 0; padding: 15px; }
         
-        .back-btn { background: var(--card); color: white; border: 1px solid var(--primary); padding: 8px 15px; border-radius: 10px; cursor: pointer; margin-bottom: 15px; }
+        .back-btn { background: var(--card); color: white; border: 1px solid var(--primary); padding: 8px 15px; border-radius: 10px; cursor: pointer; margin-bottom: 15px; transition: 0.3s; }
+        .back-btn:hover { background: var(--primary); }
 
         .video-wrapper {
             position: relative;
@@ -32,29 +32,32 @@
             overflow: hidden;
             display: none; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            transition: filter 0.3s ease, opacity 0.3s ease;
+            transition: filter 0.3s ease;
         }
 
         #watermark {
             position: absolute;
             z-index: 9999;
-            color: rgba(255, 255, 255, 0.3);
+            color: rgba(255, 255, 255, 0.2);
             font-size: 14px;
             font-weight: bold;
             pointer-events: none;
             white-space: nowrap;
             transition: all 0.8s ease-in-out;
+            background: rgba(0,0,0,0.1);
+            padding: 4px;
+            border-radius: 4px;
         }
 
-        /* تعتيم وحماية المحتوى فقط دون إغلاق */
+        /* حماية تعتيم فقط */
         .security-lock {
-            filter: blur(40px) brightness(0.2) !important;
+            filter: blur(50px) brightness(0.3) !important;
             pointer-events: none !important;
         }
 
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
-        .card { background: var(--card); padding: 20px; border-radius: 15px; text-align: center; cursor: pointer; border: 1px solid #334155; }
-        .card:hover { border-color: var(--primary); background: #243147; }
+        .card { background: var(--card); padding: 20px; border-radius: 15px; text-align: center; cursor: pointer; border: 1px solid #334155; transition: 0.3s; }
+        .card:hover { border-color: var(--primary); background: #243147; transform: translateY(-5px); }
         .card i { font-size: 35px; color: var(--primary); margin-bottom: 10px; }
 
         @media print { body { display: none !important; } }
@@ -64,7 +67,7 @@
 
     <button class="back-btn" onclick="location.href='home.html'"><i class="fas fa-chevron-right"></i> العودة للرئيسية</button>
 
-    <h3 style="text-align:center; margin-bottom: 20px;">🎥 محاضراتك التعليمية (حماية مرنة)</h3>
+    <h3 style="text-align:center; margin-bottom: 20px;">🎥 محاضراتك التعليمية المباشرة</h3>
 
     <div id="videoArea" class="video-wrapper">
         <div id="watermark">...</div>
@@ -76,7 +79,7 @@
     </div>
 
 <script>
-    // 1. Firebase
+    // 1. Firebase Config
     const firebaseConfig = { 
         apiKey: "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws", 
         authDomain: "zomaapp-744fc.firebaseapp.com", 
@@ -85,20 +88,20 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // 2. العلامة المائية
+    // 2. Watermark Logic
     const studentName = localStorage.getItem("userName") || "طالب مستشار";
     const studentPhone = localStorage.getItem("userPhone") || "مستخدم المنصة";
     const watermark = document.getElementById('watermark');
     watermark.innerText = `${studentName} | ${studentPhone}`;
 
     setInterval(() => {
-        const x = Math.random() * 70;
+        const x = Math.random() * 75;
         const y = Math.random() * 85;
         watermark.style.top = y + "%";
         watermark.style.left = x + "%";
     }, 3000);
 
-    // 3. نظام الحماية المرن (تعتيم فقط)
+    // 3. Security (Blur Only)
     function setSecurity(isLocked) {
         const videoArea = document.getElementById('videoArea');
         if (isLocked) {
@@ -108,23 +111,22 @@
         }
     }
 
-    // منع اختصارات التصوير
+    // منع الاختصارات
     document.addEventListener('keydown', function(e) {
-        const forbidden = ["PrintScreen", "F12", "u", "s", "p", "i", "j", "c"];
+        const forbidden = ["printscreen", "f12", "u", "s", "p", "i", "j", "c"];
         if (forbidden.includes(e.key.toLowerCase()) && (e.ctrlKey || e.metaKey || e.key === "PrintScreen")) {
             e.preventDefault();
-            alert("⚠️ تنبيه: تصوير الشاشة غير مسموح به.");
         }
     });
 
-    // التعتيم عند الخروج من التاب أو فتح نافذة فوق المتصفح
+    // التعتيم عند الخروج والعودة
     window.addEventListener('blur', () => setSecurity(true));
     window.addEventListener('focus', () => setSecurity(false));
     document.addEventListener('visibilitychange', () => {
         setSecurity(document.visibilityState === 'hidden');
     });
 
-    // 4. جلب البيانات
+    // 4. Fetch Lessons
     db.collection("lessons").orderBy("createdAt", "desc").onSnapshot(snap => {
         const grid = document.getElementById('lessonsGrid');
         grid.innerHTML = "";
@@ -133,19 +135,30 @@
             const lesson = doc.data();
             const card = document.createElement('div');
             card.className = 'card';
-            card.innerHTML = `<i class="fas fa-play-circle"></i><div style="margin-top:10px;">${lesson.title}</div>`;
+            card.innerHTML = `<i class="fas fa-play-circle"></i><div style="margin-top:10px; font-weight:bold;">${lesson.title}</div>`;
             
             card.onclick = function() {
                 const videoArea = document.getElementById('videoArea');
                 const player = document.getElementById('player');
                 videoArea.style.display = "block";
+                
+                // حقن كود الفيديو
                 player.innerHTML = lesson.url; 
                 
                 const iframe = player.querySelector('iframe');
                 if(iframe) {
                     iframe.style.width = "100%";
                     iframe.style.height = "100%";
-                    iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms');
+                    // تعديل الـ Sandbox: شلنا القيود اللي كانت بتسبب "خروج" أو تعارض
+                    // دلوقتي الـ iframe هيشتغل بس هيمنع فتح نوافذ جديدة تخرج الطالب
+                    iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-presentation');
+                    
+                    // منع ظهور شاشة "شاهد على يوتيوب" قدر الإمكان
+                    let src = iframe.getAttribute('src');
+                    if(src && src.includes('youtube.com')) {
+                        const separator = src.includes('?') ? '&' : '?';
+                        iframe.setAttribute('src', src + separator + "modestbranding=1&rel=0&iv_load_policy=3&showinfo=0");
+                    }
                 }
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             };
