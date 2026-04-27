@@ -13,7 +13,6 @@
     <style>
         :root { --primary: #6366f1; --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; }
         
-        /* منع تحديد النصوص نهائياً */
         * { 
             -webkit-user-select: none; 
             user-select: none; 
@@ -38,6 +37,7 @@
             overflow: hidden;
             display: none; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: opacity 0.3s ease;
         }
 
         #watermark {
@@ -50,9 +50,16 @@
             white-space: nowrap;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
             transition: all 0.8s ease-in-out;
-            background: rgba(0,0,0,0.2);
+            background: rgba(0,0,0,0.1);
             padding: 4px 8px;
             border-radius: 5px;
+        }
+
+        /* حالة الحماية - تعتيم الشاشة */
+        .security-blur {
+            filter: blur(20px) grayscale(1);
+            opacity: 0.1;
+            pointer-events: none;
         }
 
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
@@ -60,17 +67,14 @@
         .card:hover { transform: scale(1.03); border-color: var(--primary); background: #243147; }
         .card i { font-size: 35px; color: var(--primary); margin-bottom: 10px; }
 
-        /* حماية إضافية: إخفاء المحتوى تماماً عند الطباعة */
-        @media print {
-            body { display: none !important; }
-        }
+        @media print { body { display: none !important; } }
     </style>
 </head>
 <body oncontextmenu="return false;" onselectstart="return false;">
 
     <button class="back-btn" onclick="location.href='home.html'"><i class="fas fa-chevron-right"></i> العودة للرئيسية</button>
 
-    <h3 style="text-align:center; margin-bottom: 20px;">🎥 محاضراتك التعليمية (محمي ضد التسجيل)</h3>
+    <h3 id="pageTitle" style="text-align:center; margin-bottom: 20px;">🎥 محاضراتك التعليمية (منطقة آمنة)</h3>
 
     <div id="videoArea" class="video-wrapper">
         <div id="watermark">...</div>
@@ -91,9 +95,9 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // 2. إعدادات العلامة المائية المتحركة
+    // 2. إعدادات العلامة المائية
     const studentName = localStorage.getItem("userName") || "طالب مستشار";
-    const studentPhone = localStorage.getItem("userPhone") || "ID_SECRET";
+    const studentPhone = localStorage.getItem("userPhone") || "مستخدم منصة";
     const watermark = document.getElementById('watermark');
     watermark.innerText = `${studentName} | ${studentPhone}`;
 
@@ -105,22 +109,18 @@
     }
     setInterval(moveWatermark, 3000);
 
-    // 3. دالة الطرد الأمني (Logout & Redirect)
-    function securityLogout(reason) {
-        // إخفاء المحتوى فوراً لمنع أي لقطة ناجحة
-        document.body.style.display = "none";
-        
-        alert("⚠️ أمن المنصة: " + reason + "!\nسيتم تسجيل خروجك فوراً لحماية المحتوى.");
-        
-        // مسح بيانات الجلسة
-        localStorage.removeItem("isLoggedIn");
-        // التوجه لصفحة تسجيل الدخول
-        window.location.replace('index.html');
+    // 3. نظام الحماية المرن (بدون تسجيل خروج)
+    function applyProtection(enable) {
+        const videoWrapper = document.getElementById('videoArea');
+        if (enable) {
+            videoWrapper.classList.add('security-blur');
+            console.warn("⚠️ تم تفعيل حماية المحتوى بسبب نشاط خارجي");
+        } else {
+            videoWrapper.classList.remove('security-blur');
+        }
     }
 
-    // 4. نظام المراقبة النشط (Security Observer)
-
-    // أ- مراقبة مفاتيح الكيبورد (تصوير الشاشة، برامج التسجيل، أدوات المطور)
+    // أ- منع الاختصارات
     document.addEventListener('keydown', function(e) {
         const forbiddenKeys = [
             "PrintScreen", "F12", 
@@ -130,46 +130,36 @@
             (e.ctrlKey && e.key === 'u'),
             (e.ctrlKey && e.key === 'p'),
             (e.ctrlKey && e.key === 's'),
-            (e.metaKey && e.shiftKey && e.key === 's'), // Mac Screenshot
-            (e.metaKey && e.shiftKey && e.key === '4')  // Mac Screenshot area
+            (e.metaKey && e.shiftKey && e.key === 's'),
+            (e.metaKey && e.shiftKey && e.key === '4')
         ];
 
         if (forbiddenKeys.some(key => key === true || e.key === key)) {
             e.preventDefault();
-            securityLogout("تم رصد محاولة تصوير أو فتح أدوات محظورة");
+            alert("⚠️ عذراً: تصوير الشاشة أو استخدام أدوات المطور غير مسموح به.");
         }
     });
 
-    // ب- مراقبة حالة النافذة (الخروج من الصفحة أو فتح برامج تسجيل فوقها)
+    // ب- مراقبة التركيز (Blur/Focus)
+    // عند محاولة فتح برنامج خارجي أو سحب أداة تصوير، الفيديو يتشفر
     window.addEventListener('blur', function() {
-        // إذا فقدت الصفحة التركيز، غالباً المستخدم فتح برنامج خارجي أو أداة تصوير
-        const videoWrapper = document.getElementById('videoArea');
-        if (videoWrapper.style.display === "block") {
-             securityLogout("تم رصد نشاط خارجي أثناء تشغيل الفيديو");
-        }
+        applyProtection(true);
+    });
+    
+    window.addEventListener('focus', function() {
+        applyProtection(false);
     });
 
-    // ج- مراقبة تغيير وضوح الصفحة (تبديل التابات)
+    // ج- مراقبة تبديل التابات
     document.addEventListener('visibilitychange', function() {
         if (document.visibilityState === 'hidden') {
-            const videoWrapper = document.getElementById('videoArea');
-            if (videoWrapper.style.display === "block") {
-                securityLogout("ممنوع مغادرة الصفحة أثناء المشاهدة");
-            }
+            applyProtection(true);
+        } else {
+            applyProtection(false);
         }
     });
 
-    // د- مراقبة أدوات المطور (كشف الـ Console)
-    setInterval(function() {
-        const devtools = /./;
-        devtools.toString = function() {
-            securityLogout("محاولة اختراق النظام البرمجي");
-        };
-        console.log("%c", devtools);
-    }, 2000);
-
-
-    // 5. جلب المحاضرات وعرضها
+    // 4. جلب المحاضرات
     db.collection("lessons").orderBy("createdAt", "desc").onSnapshot(snap => {
         const grid = document.getElementById('lessonsGrid');
         grid.innerHTML = "";
@@ -183,36 +173,26 @@
             const lesson = doc.data();
             const card = document.createElement('div');
             card.className = 'card';
-            card.innerHTML = `
-                <i class="fas fa-play-circle"></i>
-                <div style="font-size:14px; font-weight:bold; margin-top:10px;">${lesson.title}</div>
-            `;
+            card.innerHTML = `<i class="fas fa-play-circle"></i><div style="font-size:14px; font-weight:bold; margin-top:10px;">${lesson.title}</div>`;
             
             card.onclick = function() {
                 const videoArea = document.getElementById('videoArea');
                 const player = document.getElementById('player');
-                
                 videoArea.style.display = "block";
-                
-                // تنظيف المشغل قبل الحقن
-                player.innerHTML = ""; 
                 player.innerHTML = lesson.url; 
                 
                 const iframe = player.querySelector('iframe');
                 if(iframe) {
                     iframe.style.width = "100%";
                     iframe.style.height = "100%";
-                    // وضع الحماية (Sandbox) لمنع الروابط الخارجية داخل اليوتيوب
                     iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms');
                 }
-                
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             };
             grid.appendChild(card);
         });
     });
 
-    // منع السحب والإفلات للصور أو الفيديو
     document.addEventListener('dragstart', (e) => e.preventDefault());
 </script>
 
