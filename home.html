@@ -113,18 +113,6 @@
         .menu-card h3 { font-size: 22px; font-weight: 800; margin: 0 0 12px; }
         .menu-card p { color: var(--text-dim); font-size: 14px; margin: 0; line-height: 1.6; }
 
-        /* ألوان التميز للكروت */
-        .card-video:hover { border-color: #f43f5e; }
-        .card-video:hover .icon-box { background: #f43f5e; }
-        .card-files:hover { border-color: #0ea5e9; }
-        .card-files:hover .icon-box { background: #0ea5e9; }
-        .card-exams:hover { border-color: #10b981; }
-        .card-exams:hover .icon-box { background: #10b981; }
-        
-        /* كارت لوحة الدرجات الجديد */
-        .card-dash:hover { border-color: #f59e0b; }
-        .card-dash:hover .icon-box { background: #f59e0b; }
-
         @media (max-width: 768px) {
             .hero h1 { font-size: 26px; }
             .top-nav { padding: 15px 20px; }
@@ -157,7 +145,7 @@
             <div class="user-avatar"><i class="fas fa-user-graduate"></i></div>
             <div class="sidebar-info">
                 <h4 id="sideName">جاري التحميل...</h4>
-                <p id="sideEmail">... @mail.com</p>
+                <p id="sideEmail">...</p>
             </div>
         </div>
         <ul class="sidebar-menu">
@@ -176,35 +164,31 @@
 
     <div class="container">
         <div class="main-grid">
-            <a href="lessons.html" class="menu-card card-video">
+            <a href="lessons.html" class="menu-card">
                 <div class="icon-box"><i class="fas fa-video"></i></div>
                 <h3>المحاضرات المرئية</h3>
                 <p>شرح تفصيلي للمنهج بأحدث الوسائل.</p>
             </a>
-            <a href="homework.html" class="menu-card card-files">
+            <a href="homework.html" class="menu-card">
                 <div class="icon-box"><i class="fas fa-file-pdf"></i></div>
                 <h3>المذكرات والملفات</h3>
                 <p>حمل مذكرات الشرح والتدريبات بصيغة PDF.</p>
             </a>
-            <a href="exams.html" class="menu-card card-exams">
+            <a href="exams.html" class="menu-card">
                 <div class="icon-box"><i class="fas fa-edit"></i></div>
                 <h3>بوابة الامتحانات</h3>
                 <p>قيم مستواك باستمرار من خلال اختباراتنا التفاعلية.</p>
             </a>
-            <a href="student-dash.html" class="menu-card card-dash">
+            <a href="student-dash.html" class="menu-card">
                 <div class="icon-box"><i class="fas fa-chart-line"></i></div>
                 <h3>لوحة درجاتي</h3>
                 <p>تحليل كامل لأدائك ودرجاتك في جميع الاختبارات.</p>
-            </a>
-            <a href="https://wa.me/201060234399" target="_blank" class="menu-card">
-                <div class="icon-box"><i class="fab fa-whatsapp"></i></div>
-                <h3>اسأل المستشار</h3>
-                <p>خدمة الرد على الاستفسارات العلمية المباشرة.</p>
             </a>
         </div>
     </div>
 
     <script>
+        // تكوين Firebase (تأكد من صحتها)
         const firebaseConfig = { 
             apiKey: "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws", 
             authDomain: "zomaapp-744fc.firebaseapp.com", 
@@ -213,19 +197,26 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // جلب بيانات المستخدم من الذاكرة المحلية
-        const storedName = localStorage.getItem("userName");
-        const storedEmail = localStorage.getItem("userEmail");
+        // --- نظام التحقق من المستخدم ومنع التكرار ---
+        function initUser() {
+            const name = localStorage.getItem("userName");
+            const email = localStorage.getItem("userEmail");
 
-        // التحقق: إذا لم يكن هناك اسم مسجل، يتم التوجيه لصفحة الدخول
-        if (!storedName) {
-            window.location.href = "index.html";
-        } else {
-            // عرض اسم الطالب الحقيقي بدلاً من "يا بطل"
-            document.getElementById('userNameTop').innerText = storedName;
-            document.getElementById('sideName').innerText = storedName;
-            document.getElementById('sideEmail').innerText = storedEmail || "طالب غير مسجل بريدياً";
+            // إذا لم يتم العثور على الاسم أو الإيميل، يتم التوجيه لصفحة تسجيل الدخول
+            if (!name || name === "null" || name === "undefined") {
+                console.log("No user found, redirecting...");
+                window.location.replace("index.html"); // استخدام replace لمنع الرجوع للخلف
+                return;
+            }
+
+            // تحديث الواجهة بالبيانات الحقيقية
+            document.getElementById('userNameTop').innerText = name;
+            document.getElementById('sideName').innerText = name;
+            document.getElementById('sideEmail').innerText = email || "طالب منصة المستشار";
         }
+
+        // تشغيل التحقق فوراً
+        initUser();
 
         // جلب التنبيهات من Firebase
         let currentAnnouncementId = null;
@@ -241,7 +232,7 @@
                         document.getElementById("announcementBanner").style.display = "flex";
                     }
                 }
-            } catch (error) { console.log(error); }
+            } catch (error) { console.error("Error fetching announcements:", error); }
         }
         
         function dismissAnnouncement() {
@@ -261,7 +252,7 @@
         function logout() {
             if(confirm("هل تريد تسجيل الخروج؟")) {
                 localStorage.clear();
-                window.location.href = "index.html";
+                window.location.replace("index.html");
             }
         }
     </script>
