@@ -13,17 +13,12 @@
     <style>
         :root { --primary: #6366f1; --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; }
         
-        * { 
-            -webkit-user-select: none; 
-            user-select: none; 
-            -webkit-touch-callout: none; 
-            outline: none;
-        }
+        /* منع تحديد النصوص */
+        * { -webkit-user-select: none; user-select: none; outline: none; }
         
-        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: white; margin: 0; padding: 15px; overflow-x: hidden; }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: white; margin: 0; padding: 15px; }
         
-        .back-btn { background: var(--card); color: white; border: 1px solid var(--primary); padding: 8px 15px; border-radius: 10px; cursor: pointer; margin-bottom: 15px; transition: 0.3s; }
-        .back-btn:hover { background: var(--primary); }
+        .back-btn { background: var(--card); color: white; border: 1px solid var(--primary); padding: 8px 15px; border-radius: 10px; cursor: pointer; margin-bottom: 15px; }
 
         .video-wrapper {
             position: relative;
@@ -37,7 +32,7 @@
             overflow: hidden;
             display: none; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            transition: opacity 0.3s ease;
+            transition: filter 0.3s ease, opacity 0.3s ease;
         }
 
         #watermark {
@@ -48,33 +43,28 @@
             font-weight: bold;
             pointer-events: none;
             white-space: nowrap;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
             transition: all 0.8s ease-in-out;
-            background: rgba(0,0,0,0.1);
-            padding: 4px 8px;
-            border-radius: 5px;
         }
 
-        /* حالة الحماية - تعتيم الشاشة */
-        .security-blur {
-            filter: blur(20px) grayscale(1);
-            opacity: 0.1;
-            pointer-events: none;
+        /* تعتيم وحماية المحتوى فقط دون إغلاق */
+        .security-lock {
+            filter: blur(40px) brightness(0.2) !important;
+            pointer-events: none !important;
         }
 
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
-        .card { background: var(--card); padding: 20px; border-radius: 15px; text-align: center; cursor: pointer; border: 1px solid #334155; transition: 0.3s; }
-        .card:hover { transform: scale(1.03); border-color: var(--primary); background: #243147; }
+        .card { background: var(--card); padding: 20px; border-radius: 15px; text-align: center; cursor: pointer; border: 1px solid #334155; }
+        .card:hover { border-color: var(--primary); background: #243147; }
         .card i { font-size: 35px; color: var(--primary); margin-bottom: 10px; }
 
         @media print { body { display: none !important; } }
     </style>
 </head>
-<body oncontextmenu="return false;" onselectstart="return false;">
+<body oncontextmenu="return false;">
 
     <button class="back-btn" onclick="location.href='home.html'"><i class="fas fa-chevron-right"></i> العودة للرئيسية</button>
 
-    <h3 id="pageTitle" style="text-align:center; margin-bottom: 20px;">🎥 محاضراتك التعليمية (منطقة آمنة)</h3>
+    <h3 style="text-align:center; margin-bottom: 20px;">🎥 محاضراتك التعليمية (حماية مرنة)</h3>
 
     <div id="videoArea" class="video-wrapper">
         <div id="watermark">...</div>
@@ -82,11 +72,11 @@
     </div>
 
     <div id="lessonsGrid" class="grid">
-        <p style="text-align:center; width:100%">جاري تحميل المحاضرات المؤمنة...</p>
+        <p style="text-align:center; width:100%">جاري تحميل المحاضرات...</p>
     </div>
 
 <script>
-    // 1. إعدادات Firebase
+    // 1. Firebase
     const firebaseConfig = { 
         apiKey: "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws", 
         authDomain: "zomaapp-744fc.firebaseapp.com", 
@@ -95,85 +85,55 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // 2. إعدادات العلامة المائية
+    // 2. العلامة المائية
     const studentName = localStorage.getItem("userName") || "طالب مستشار";
-    const studentPhone = localStorage.getItem("userPhone") || "مستخدم منصة";
+    const studentPhone = localStorage.getItem("userPhone") || "مستخدم المنصة";
     const watermark = document.getElementById('watermark');
     watermark.innerText = `${studentName} | ${studentPhone}`;
 
-    function moveWatermark() {
+    setInterval(() => {
         const x = Math.random() * 70;
         const y = Math.random() * 85;
         watermark.style.top = y + "%";
         watermark.style.left = x + "%";
-    }
-    setInterval(moveWatermark, 3000);
+    }, 3000);
 
-    // 3. نظام الحماية المرن (بدون تسجيل خروج)
-    function applyProtection(enable) {
-        const videoWrapper = document.getElementById('videoArea');
-        if (enable) {
-            videoWrapper.classList.add('security-blur');
-            console.warn("⚠️ تم تفعيل حماية المحتوى بسبب نشاط خارجي");
+    // 3. نظام الحماية المرن (تعتيم فقط)
+    function setSecurity(isLocked) {
+        const videoArea = document.getElementById('videoArea');
+        if (isLocked) {
+            videoArea.classList.add('security-lock');
         } else {
-            videoWrapper.classList.remove('security-blur');
+            videoArea.classList.remove('security-lock');
         }
     }
 
-    // أ- منع الاختصارات
+    // منع اختصارات التصوير
     document.addEventListener('keydown', function(e) {
-        const forbiddenKeys = [
-            "PrintScreen", "F12", 
-            (e.ctrlKey && e.shiftKey && e.key === 'I'),
-            (e.ctrlKey && e.shiftKey && e.key === 'J'),
-            (e.ctrlKey && e.shiftKey && e.key === 'C'),
-            (e.ctrlKey && e.key === 'u'),
-            (e.ctrlKey && e.key === 'p'),
-            (e.ctrlKey && e.key === 's'),
-            (e.metaKey && e.shiftKey && e.key === 's'),
-            (e.metaKey && e.shiftKey && e.key === '4')
-        ];
-
-        if (forbiddenKeys.some(key => key === true || e.key === key)) {
+        const forbidden = ["PrintScreen", "F12", "u", "s", "p", "i", "j", "c"];
+        if (forbidden.includes(e.key.toLowerCase()) && (e.ctrlKey || e.metaKey || e.key === "PrintScreen")) {
             e.preventDefault();
-            alert("⚠️ عذراً: تصوير الشاشة أو استخدام أدوات المطور غير مسموح به.");
+            alert("⚠️ تنبيه: تصوير الشاشة غير مسموح به.");
         }
     });
 
-    // ب- مراقبة التركيز (Blur/Focus)
-    // عند محاولة فتح برنامج خارجي أو سحب أداة تصوير، الفيديو يتشفر
-    window.addEventListener('blur', function() {
-        applyProtection(true);
-    });
-    
-    window.addEventListener('focus', function() {
-        applyProtection(false);
+    // التعتيم عند الخروج من التاب أو فتح نافذة فوق المتصفح
+    window.addEventListener('blur', () => setSecurity(true));
+    window.addEventListener('focus', () => setSecurity(false));
+    document.addEventListener('visibilitychange', () => {
+        setSecurity(document.visibilityState === 'hidden');
     });
 
-    // ج- مراقبة تبديل التابات
-    document.addEventListener('visibilitychange', function() {
-        if (document.visibilityState === 'hidden') {
-            applyProtection(true);
-        } else {
-            applyProtection(false);
-        }
-    });
-
-    // 4. جلب المحاضرات
+    // 4. جلب البيانات
     db.collection("lessons").orderBy("createdAt", "desc").onSnapshot(snap => {
         const grid = document.getElementById('lessonsGrid');
         grid.innerHTML = "";
         
-        if (snap.empty) {
-            grid.innerHTML = "<p style='text-align:center; width:100%'>لا توجد محاضرات متاحة حالياً.</p>";
-            return;
-        }
-
         snap.forEach(doc => {
             const lesson = doc.data();
             const card = document.createElement('div');
             card.className = 'card';
-            card.innerHTML = `<i class="fas fa-play-circle"></i><div style="font-size:14px; font-weight:bold; margin-top:10px;">${lesson.title}</div>`;
+            card.innerHTML = `<i class="fas fa-play-circle"></i><div style="margin-top:10px;">${lesson.title}</div>`;
             
             card.onclick = function() {
                 const videoArea = document.getElementById('videoArea');
