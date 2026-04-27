@@ -3,98 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة الأداء | المستشار</title>
+    <title>لوحة الأداء التحليلية | المستشار</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --primary: #6366f1; --bg: #0b0f1a; --card: #161e2d; --accent: #10b981; --danger: #f43f5e; --warning: #f59e0b; }
+        :root { --primary: #6366f1; --bg: #0b0f1a; --card: #161e2d; --accent: #10b981; --danger: #f43f5e; --warning: #f59e0b; --info: #3b82f6; }
         body { font-family: 'Cairo', sans-serif; background: var(--bg); color: #f1f5f9; margin: 0; padding-bottom: 50px; }
 
-        .navbar { background: var(--card); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2d3748; }
-        .btn-back { text-decoration: none; color: #fff; background: rgba(255,255,255,0.1); padding: 8px 15px; border-radius: 10px; font-size: 14px; transition: 0.3s; }
+        .navbar { background: var(--card); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2d3748; sticky: top; z-index: 100; }
+        .btn-back { text-decoration: none; color: #fff; background: rgba(255,255,255,0.1); padding: 8px 15px; border-radius: 10px; font-size: 14px; transition: 0.3s; display: flex; align-items: center; gap: 8px; }
         .btn-back:hover { background: var(--primary); }
 
         .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
 
-        /* Statistics Grid */
+        /* Stats Cards */
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 40px; }
         .stat-card { background: var(--card); padding: 25px; border-radius: 20px; border: 1px solid #2d3748; position: relative; overflow: hidden; }
-        .stat-card i { position: absolute; left: -10px; bottom: -10px; font-size: 80px; opacity: 0.05; color: #fff; }
-        .stat-val { font-size: 32px; font-weight: 900; display: block; margin: 10px 0; }
-        .stat-label { color: #94a3b8; font-size: 14px; }
+        .stat-card i { position: absolute; left: -10px; bottom: -10px; font-size: 70px; opacity: 0.1; color: #fff; }
+        .stat-val { font-size: 28px; font-weight: 900; display: block; margin: 10px 0; }
+        .stat-label { color: #94a3b8; font-size: 14px; font-weight: bold; }
 
-        /* تقدير الطالب */
         .rank-excellent { color: var(--accent); }
         .rank-good { color: var(--warning); }
         .rank-fail { color: var(--danger); }
 
-        /* Table Style */
-        .table-container { background: var(--card); border-radius: 20px; border: 1px solid #2d3748; overflow: hidden; }
-        table { width: 100%; border-collapse: collapse; text-align: right; }
-        th { background: rgba(255,255,255,0.03); padding: 15px; color: #94a3b8; font-weight: 600; border-bottom: 1px solid #2d3748; }
-        td { padding: 15px; border-bottom: 1px solid #2d3748; font-size: 15px; }
-        tr:last-child td { border: none; }
+        /* Error Analysis Section */
+        .section-title { display: flex; align-items: center; gap: 10px; margin: 40px 0 20px 0; font-size: 22px; }
+        .error-item { background: rgba(244, 63, 94, 0.05); border: 1px solid rgba(244, 63, 94, 0.2); padding: 15px; border-radius: 15px; margin-bottom: 10px; border-right: 4px solid var(--danger); }
+        .error-q { font-weight: bold; display: block; margin-bottom: 5px; color: #fff; }
+        .error-ans { font-size: 13px; color: var(--danger); }
+        .correct-ans { font-size: 13px; color: var(--accent); margin-right: 15px; }
+
+        /* Table */
+        .table-container { background: var(--card); border-radius: 20px; border: 1px solid #2d3748; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: right; min-width: 600px; }
+        th { background: rgba(255,255,255,0.03); padding: 15px; color: #94a3b8; font-size: 14px; border-bottom: 1px solid #2d3748; }
+        td { padding: 15px; border-bottom: 1px solid #2d3748; font-size: 14px; }
         
-        .badge { padding: 5px 12px; border-radius: 8px; font-size: 12px; font-weight: bold; }
+        .badge { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; }
         .badge-success { background: rgba(16, 185, 129, 0.1); color: var(--accent); }
         .badge-danger { background: rgba(244, 63, 94, 0.1); color: var(--danger); }
 
-        /* تحليل الخطأ */
-        .error-analysis { margin-top: 40px; background: var(--card); padding: 25px; border-radius: 20px; border: 1px solid #2d3748; }
-        .progress-box { background: #2d3748; height: 12px; border-radius: 10px; margin: 15px 0; overflow: hidden; }
-        .progress-fill { height: 100%; background: var(--primary); transition: 1s ease-out; }
+        .progress-box { background: #1e293b; height: 10px; border-radius: 5px; margin: 20px 0; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); transition: 1.5s cubic-bezier(0.17, 0.67, 0.83, 0.67); }
 
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .animate { animation: slideUp 0.6s forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate { animation: fadeIn 0.5s forwards; }
     </style>
 </head>
 <body>
 
 <nav class="navbar">
-    <div style="font-weight: 900; font-size: 20px; color: var(--primary);">المستشار <span style="color:#fff">Analytics</span></div>
-    <a href="home.html" class="btn-back"><i class="fas fa-chevron-right"></i> العودة للمنصة</a>
+    <div style="font-weight: 900; font-size: 20px; color: var(--primary);"><i class="fas fa-chart-line"></i> لوحة أداء <span id="studentNameTop" style="color:#fff">المستشار</span></div>
+    <a href="home.html" class="btn-back"><i class="fas fa-arrow-right"></i> العودة للمنصة</a>
 </nav>
 
 <div class="container">
     <div class="stats-grid">
         <div class="stat-card animate">
-            <i class="fas fa-graduation-cap"></i>
-            <span class="stat-label">إجمالي الاختبارات</span>
+            <i class="fas fa-clipboard-list"></i>
+            <span class="stat-label">الاختبارات المنجزة</span>
             <span class="stat-val" id="totalExams">0</span>
         </div>
         <div class="stat-card animate" style="animation-delay: 0.1s">
-            <i class="fas fa-star"></i>
-            <span class="stat-label">المعدل العام</span>
+            <i class="fas fa-bullseye"></i>
+            <span class="stat-label">متوسط الدقة العام</span>
             <span class="stat-val rank-excellent" id="avgScore">0%</span>
         </div>
         <div class="stat-card animate" style="animation-delay: 0.2s">
-            <i class="fas fa-award"></i>
-            <span class="stat-label">التقدير الحالي</span>
+            <i class="fas fa-medal"></i>
+            <span class="stat-label">المستوى الحالي</span>
             <span class="stat-val" id="studentRank">--</span>
         </div>
         <div class="stat-card animate" style="animation-delay: 0.3s">
-            <i class="fas fa-times-circle"></i>
-            <span class="stat-label">أسئلة تحتاج مراجعة</span>
+            <i class="fas fa-exclamation-triangle"></i>
+            <span class="stat-label">أخطاء تحتاج معالجة</span>
             <span class="stat-val" id="wrongAnswersCount" style="color:var(--danger)">0</span>
         </div>
     </div>
 
-    <div class="error-analysis animate" style="animation-delay: 0.4s">
-        <h3 style="margin:0">تحليل كفاءة الإجابات</h3>
+    <div class="stat-card animate" style="animation-delay: 0.4s; margin-bottom: 40px;">
+        <h3 style="margin:0"><i class="fas fa-tasks" style="opacity: 1; font-size: 20px; position: static; color: var(--primary);"></i> كفاءة التحصيل الدراسي</h3>
         <div class="progress-box">
             <div id="accuracyBar" class="progress-fill" style="width: 0%"></div>
         </div>
-        <p style="color:#94a3b8; font-size: 14px;" id="accuracyText">لقد أجبت على 0% من الأسئلة بشكل صحيح عبر جميع الاختبارات.</p>
+        <p style="color:#94a3b8; font-size: 14px;" id="accuracyText">جاري تحليل بياناتك من السحابة...</p>
     </div>
 
-    <h3 class="animate" style="margin: 30px 0 15px 0; animation-delay: 0.5s">سجل أداء الاختبارات</h3>
+    <h3 class="section-title animate" style="animation-delay: 0.5s"><i class="fas fa-history" style="color: var(--info)"></i> سجل أداء الامتحانات</h3>
     <div class="table-container animate" style="animation-delay: 0.6s">
         <table>
             <thead>
                 <tr>
-                    <th>اسم الاختبار</th>
+                    <th>الامتحان</th>
                     <th>التاريخ</th>
                     <th>الدرجة</th>
                     <th>النسبة</th>
@@ -102,8 +105,14 @@
                 </tr>
             </thead>
             <tbody id="resultsTableBody">
-                </tbody>
+                <tr><td colspan="5" style="text-align:center; padding:20px;">جاري جلب البيانات...</td></tr>
+            </tbody>
         </table>
+    </div>
+
+    <h3 class="section-title animate" style="animation-delay: 0.7s; color: var(--danger)"><i class="fas fa- Graduation-cap"></i> بنك الأخطاء (تعلم من أخطائك)</h3>
+    <div id="errorsBank" class="animate" style="animation-delay: 0.8s">
+        <p style="color:#94a3b8">سيتم عرض الأسئلة التي أخطأت فيها هنا مع التصحيح.</p>
     </div>
 </div>
 
@@ -118,78 +127,113 @@
     const db = firebase.firestore();
 
     const userEmail = localStorage.getItem("userEmail") || "test@test.com";
+    const userName = localStorage.getItem("userName") || "طالب مستجد";
+    document.getElementById('studentNameTop').innerText = userName;
 
     async function fetchPerformance() {
-        const snap = await db.collection("results")
-            .where("studentEmail", "==", userEmail)
-            .orderBy("submittedAt", "desc")
-            .get();
+        try {
+            const snap = await db.collection("results")
+                .where("studentEmail", "==", userEmail)
+                .orderBy("submittedAt", "desc")
+                .get();
 
-        if(snap.empty) {
-            document.getElementById('resultsTableBody').innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px;">لم يتم العثور على سجلات سابقة.</td></tr>';
-            return;
-        }
-
-        let totalScore = 0;
-        let totalPossible = 0;
-        let wrongAnswers = 0;
-        let count = 0;
-
-        const tableBody = document.getElementById('resultsTableBody');
-        tableBody.innerHTML = "";
-
-        snap.forEach(doc => {
-            const res = doc.data();
-            count++;
-            
-            // حسابات الأسئلة الخاطئة من داخل مصفوفة التحليل
-            if(res.analysis) {
-                res.analysis.forEach(a => {
-                    if(!a.isCorrect) wrongAnswers++;
-                    totalPossible += 1; // نفترض نقطة لكل سؤال لو مش متحدد
-                    if(a.isCorrect) totalScore += 1;
-                });
+            if(snap.empty) {
+                document.getElementById('resultsTableBody').innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px;">لا توجد بيانات مسجلة لهذا الحساب حتى الآن.</td></tr>';
+                return;
             }
 
-            // حساب النسبة المئوية للامتحان الواحد
-            const examPercent = ((res.score / (res.analysis ? res.analysis.length : 1)) * 100).toFixed(1);
-            const date = res.submittedAt ? res.submittedAt.toDate().toLocaleDateString('ar-EG') : '---';
+            let totalPointsObtained = 0;
+            let totalPointsPossible = 0;
+            let wrongQuestionsList = [];
+            let examCount = 0;
 
-            tableBody.innerHTML += `
-                <tr>
-                    <td><strong>${res.examTitle || 'اختبار عام'}</strong></td>
-                    <td style="color:#94a3b8">${date}</td>
-                    <td>${res.score}</td>
-                    <td>${examPercent}%</td>
-                    <td><span class="badge ${examPercent >= 50 ? 'badge-success' : 'badge-danger'}">${examPercent >= 50 ? 'ناجح' : 'راسب'}</span></td>
-                </tr>
-            `;
-        });
+            const tableBody = document.getElementById('resultsTableBody');
+            tableBody.innerHTML = "";
 
-        // تحديث الإحصائيات العلوية
-        const finalAvg = ((totalScore / totalPossible) * 100).toFixed(1);
-        document.getElementById('totalExams').innerText = count;
-        document.getElementById('avgScore').innerText = finalAvg + "%";
-        document.getElementById('wrongAnswersCount').innerText = wrongAnswers;
-        
-        // شريط الكفاءة
-        document.getElementById('accuracyBar').style.width = finalAvg + "%";
-        document.getElementById('accuracyText').innerText = `أداؤك العام مستقر عند ${finalAvg}% مع وجود ${wrongAnswers} خطأ مسجل في قاعدة بياناتنا.`;
+            snap.forEach(doc => {
+                const res = doc.data();
+                examCount++;
+                
+                let examMCQTotal = res.totalMCQPoints || 0;
+                let examMCQScore = res.score || 0;
 
-        // التقدير
-        let rank = "مقبول";
-        let rankClass = "rank-fail";
-        if(finalAvg >= 90) { rank = "ممتاز 🏆"; rankClass = "rank-excellent"; }
-        else if(finalAvg >= 80) { rank = "جيد جداً ⭐"; rankClass = "rank-excellent"; }
-        else if(finalAvg >= 65) { rank = "جيد 👍"; rankClass = "rank-good"; }
-        
-        const rankEl = document.getElementById('studentRank');
-        rankEl.innerText = rank;
-        rankEl.className = "stat-val " + rankClass;
+                // تحديث الإجمالي العام للنسبة
+                totalPointsObtained += examMCQScore;
+                totalPointsPossible += examMCQTotal;
+
+                // رصد الأخطاء من التحليل
+                if(res.analysis) {
+                    res.analysis.forEach(q => {
+                        if(q.isCorrect === false) {
+                            wrongQuestionsList.push({
+                                question: q.question,
+                                studentAns: q.studentAns,
+                                correctAns: q.correctAns,
+                                examTitle: res.examTitle
+                            });
+                        }
+                    });
+                }
+
+                const percent = examMCQTotal > 0 ? ((examMCQScore / examMCQTotal) * 100).toFixed(1) : "0";
+                const date = res.submittedAt ? res.submittedAt.toDate().toLocaleDateString('ar-EG') : 'غير متوفر';
+
+                tableBody.innerHTML += `
+                    <tr>
+                        <td><strong>${res.examTitle || 'اختبار'}</strong></td>
+                        <td style="color:#94a3b8">${date}</td>
+                        <td style="font-weight:bold">${examMCQScore} / ${examMCQTotal}</td>
+                        <td>${percent}%</td>
+                        <td><span class="badge ${percent >= 50 ? 'badge-success' : 'badge-danger'}">${percent >= 50 ? 'ناجح' : 'يحتاج تحسين'}</span></td>
+                    </tr>
+                `;
+            });
+
+            // حساب المتوسط العام
+            const finalAvg = totalPointsPossible > 0 ? ((totalPointsObtained / totalPointsPossible) * 100).toFixed(1) : 0;
+            
+            // تحديث البطاقات
+            document.getElementById('totalExams').innerText = examCount;
+            document.getElementById('avgScore').innerText = finalAvg + "%";
+            document.getElementById('wrongAnswersCount').innerText = wrongQuestionsList.length;
+            document.getElementById('accuracyBar').style.width = finalAvg + "%";
+            document.getElementById('accuracyText').innerText = `أداؤك العام في الأسئلة الاختيارية هو ${finalAvg}%. تم رصد ${wrongQuestionsList.length} خطأ، راجعهم بالأسفل لتجنبهم مستقبلاً.`;
+
+            // تحديد التقدير
+            let rank = "مبتدئ";
+            let rankClass = "rank-fail";
+            if(finalAvg >= 90) { rank = "بروفيسور 🏆"; rankClass = "rank-excellent"; }
+            else if(finalAvg >= 75) { rank = "متمكن ⭐"; rankClass = "rank-excellent"; }
+            else if(finalAvg >= 50) { rank = "مجتهد 👍"; rankClass = "rank-good"; }
+            
+            const rankEl = document.getElementById('studentRank');
+            rankEl.innerText = rank;
+            rankEl.className = "stat-val " + rankClass;
+
+            // ملء بنك الأخطاء
+            const errorsBank = document.getElementById('errorsBank');
+            if(wrongQuestionsList.length > 0) {
+                errorsBank.innerHTML = "";
+                wrongQuestionsList.slice(0, 10).forEach(w => { // عرض آخر 10 أخطاء
+                    errorsBank.innerHTML += `
+                        <div class="error-item">
+                            <span class="error-q">${w.question} <small style="color:var(--info)">(${w.examTitle})</small></span>
+                            <span class="error-ans"><i class="fas fa-times"></i> إجابتك: ${w.studentAns}</span>
+                            <span class="correct-ans"><i class="fas fa-check"></i> التصحيح: ${w.correctAns}</span>
+                        </div>
+                    `;
+                });
+            } else {
+                errorsBank.innerHTML = '<p style="color:var(--accent)">مذهل! لا توجد أخطاء مسجلة، استمر في هذا الأداء.</p>';
+            }
+
+        } catch (error) {
+            console.error("Error fetching data:", error);
+            document.getElementById('resultsTableBody').innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--danger)">فشل تحميل البيانات. تأكد من اتصالك بالإنترنت.</td></tr>';
+        }
     }
 
     fetchPerformance();
 </script>
-
 </body>
 </html>
