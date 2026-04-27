@@ -2,67 +2,92 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>المحاضرات | منصة المستشار</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>المحاضرات  | منصة المستشار</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        :root { --primary: #6366f1; --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; }
-        body { font-family: sans-serif; background: var(--bg); color: white; margin: 0; padding: 15px; }
+        :root { --primary: #6366f1; --bg: #0f172a; --card: #1e293b; }
         
-        .back-btn { background: var(--card); color: white; border: 1px solid var(--primary); padding: 8px 15px; border-radius: 10px; cursor: pointer; margin-bottom: 15px; }
+        /* منع النسخ وتحديد النص في الصفحة كاملة */
+        * {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+        }
 
-        /* حاوية الفيديو مع الحماية */
-        .video-wrapper {
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: white; margin: 0; padding: 15px; overflow-x: hidden; }
+        
+        .back-btn { background: var(--card); color: white; border: 1px solid var(--primary); padding: 8px 15px; border-radius: 10px; cursor: pointer; margin-bottom: 15px; transition: 0.3s; }
+        .back-btn:hover { background: var(--primary); }
+
+        /* حاوية الفيديو المحصنة */
+        .video-container {
             position: relative;
             width: 100%;
-            max-width: 800px;
-            margin: 0 auto 25px;
+            max-width: 900px;
+            margin: 0 auto 30px;
             aspect-ratio: 16 / 9;
             background: #000;
-            border-radius: 15px;
-            border: 3px solid var(--primary);
+            border-radius: 20px;
+            border: 4px solid #334155;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
             overflow: hidden;
-            display: none; /* تظهر عند اختيار فيديو */
+            display: none;
         }
 
-        #playerFrame { width: 100%; height: 100%; border: none; }
+        /* طبقة شفافة فوق الفيديو لمنع التفاعل المباشر أو استخراج الرابط */
+        .video-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 10;
+            background: rgba(0,0,0,0); /* شفافة */
+        }
 
-        /* العلامة المائية المتحركة */
+        #player iframe { width: 100%; height: 100%; border: none; pointer-events: auto; }
+
+        /* العلامة المائية المتحركة القوية */
         #watermark {
             position: absolute;
-            top: 10%;
-            left: 10%;
-            color: rgba(255, 255, 255, 0.3); /* شفافة جداً */
-            font-size: 12px;
+            z-index: 9999;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 14px;
             font-weight: bold;
-            pointer-events: none; /* عشان ميعطلش التاتش على الفيديو */
-            z-index: 999;
+            pointer-events: none;
             white-space: nowrap;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-            transition: all 2s linear; /* حركة ناعمة */
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+            transition: all 1.5s ease-in-out;
+            background: rgba(0,0,0,0.1);
+            padding: 5px 10px;
+            border-radius: 5px;
         }
 
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
-        .card { background: var(--card); padding: 20px; border-radius: 15px; text-align: center; cursor: pointer; border: 1px solid #334155; transition: 0.3s; }
-        .card:hover { transform: scale(1.05); border-color: var(--primary); }
-        .card i { font-size: 30px; color: var(--primary); margin-bottom: 10px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
+        .card { background: var(--card); padding: 25px; border-radius: 18px; text-align: center; cursor: pointer; border: 1px solid #334155; transition: 0.4s; }
+        .card:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: 0 10px 20px rgba(99,102,241,0.2); }
+        .card i { font-size: 40px; color: var(--primary); margin-bottom: 15px; }
+
+        /* حماية ضد الطباعة */
+        @media print { body { display: none !important; } }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;"> <button class="back-btn" onclick="location.href='home.html'"><i class="fas fa-chevron-right"></i> العودة للرئيسية</button>
 
-    <button class="back-btn" onclick="location.href='home.html'">⬅️ العودة للرئيسية</button>
+    <h2 style="text-align:center; margin-bottom: 30px;">🎥 أكاديمية المستشار | المحاضرات</h2>
 
-    <h3 style="text-align:center;">🎥 محاضراتك التعليمية</h3>
-
-    <div id="videoArea" class="video-wrapper">
-        <div id="watermark"></div> <div id="player" style="width:100%; height:100%;"></div>
+    <div id="videoArea" class="video-container">
+        <div id="watermark">جاري التحقق..</div>
+        <div class="video-overlay" id="overlay"></div>
+        <div id="player" style="width:100%; height:100%;"></div>
     </div>
 
     <div id="lessonsGrid" class="grid">
-        <p>جاري تحميل المحاضرات...</p>
+        <p style="text-align:center; width: 100%;">جاري تأمين الاتصال بالسحابة...</p>
     </div>
 
 <script>
@@ -74,21 +99,47 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // جلب اسم الطالب للعلامة المائية
-    const studentName = localStorage.getItem("userName") || "حساب غير مسجل";
+    // إعدادات العلامة المائية
+    const studentName = localStorage.getItem("userName") || "USER_UNAUTHORIZED";
+    const studentEmail = localStorage.getItem("userEmail") || "ID_PROTECTED";
     const watermark = document.getElementById('watermark');
-    watermark.innerText = studentName;
+    
+    // العلامة المائية تعرض الاسم والإيميل لزيادة الحماية
+    watermark.innerText = `${studentName} - ${studentEmail}`;
 
-    // وظيفة تحريك العلامة المائية بشكل عشوائي
     function moveWatermark() {
-        const x = Math.random() * 80; // نسبة مئوية من العرض
-        const y = Math.random() * 80; // نسبة مئوية من الطول
+        const x = Math.random() * 70; 
+        const y = Math.random() * 85; 
         watermark.style.top = y + "%";
         watermark.style.left = x + "%";
+        // تغيير الشفافية بشكل عشوائي لجعلها أصعب في الإزالة
+        watermark.style.opacity = (Math.random() * 0.4) + 0.2;
     }
-    setInterval(moveWatermark, 4000); // تتحرك كل 4 ثواني
+    setInterval(moveWatermark, 3000);
 
-    // جلب الفيديوهات
+    // حماية ضد الـ Screenshots و الـ Screen Recording في بعض المتصفحات
+    // منع اختصارات الكيبورد
+    document.addEventListener('keydown', function(e) {
+        if (
+            e.key === "F12" || 
+            (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J" || e.key === "C")) || 
+            (e.ctrlKey && (e.key === "U" || e.key === "S" || e.key === "P"))
+        ) {
+            e.preventDefault();
+            alert("عذراً.. هذه الخاصية معطلة لحماية حقوق الملكية");
+            return false;
+        }
+    });
+
+    // كاشف أدوات المطور (إيقاف الفيديو إذا تم فتح الـ Console)
+    let devtools = function() {};
+    devtools.toString = function() {
+        document.body.innerHTML = "<h1 style='color:white; text-align:center; margin-top:20%'>تم اكتشاف محاولة اختراق.. تم إغلاق الجلسة لأمان المحتوى.</h1>";
+        return "!";
+    }
+    console.log("%c", devtools);
+
+    // تحميل المحاضرات
     db.collection("lessons").orderBy("createdAt", "desc").onSnapshot(snap => {
         const grid = document.getElementById('lessonsGrid');
         grid.innerHTML = "";
@@ -97,18 +148,25 @@
             const lesson = doc.data();
             const card = document.createElement('div');
             card.className = 'card';
-            card.innerHTML = `<div style="font-size:30px;">🎬</div><div style="font-size:13px; font-weight:bold; margin-top:10px;">${lesson.title}</div>`;
+            card.innerHTML = `<i class="fas fa-play-circle"></i><div style="font-weight:bold;">${lesson.title}</div>`;
             
             card.onclick = function() {
                 document.getElementById('videoArea').style.display = "block";
                 const player = document.getElementById('player');
                 
-                // تنظيف وحقن كود الفيديو (iframe)
+                // تنظيف الكود وحقن الـ iframe
                 player.innerHTML = lesson.url; 
                 
-                // التأكد أن الـ iframe يملأ المساحة المحمية
                 const iframe = player.querySelector('iframe');
                 if(iframe) {
+                    // إضافة بارامترات حماية إضافية لليوتيوب لمنع الروابط المقترحة والتحكم
+                    let src = iframe.getAttribute('src');
+                    if(src.includes('?')) {
+                        src += "&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3";
+                    } else {
+                        src += "?modestbranding=1&rel=0&showinfo=0&iv_load_policy=3";
+                    }
+                    iframe.setAttribute('src', src);
                     iframe.style.width = "100%";
                     iframe.style.height = "100%";
                 }
@@ -117,6 +175,13 @@
             };
             grid.appendChild(card);
         });
+    });
+
+    // إخفاء الـ Overlay مؤقتاً عند النقر لتشغيل الفيديو ثم إعادته (اختياري)
+    const overlay = document.getElementById('overlay');
+    overlay.addEventListener('dblclick', function() {
+        this.style.pointerEvents = 'none';
+        setTimeout(() => { this.style.pointerEvents = 'auto'; }, 500);
     });
 </script>
 
