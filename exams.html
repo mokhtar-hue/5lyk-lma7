@@ -6,57 +6,66 @@
     <title>منصة المستشار | بوابة الامتحانات</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         :root { --primary: #6366f1; --bg: #0f172a; --card: #1e293b; --accent: #22c55e; --danger: #ef4444; --info: #3b82f6; }
         body { font-family: 'Cairo', sans-serif; background: var(--bg); color: #f1f5f9; margin: 0; overflow-x: hidden; }
         
-        /* شاشة تسجيل الدخول */
-        #loginOverlay { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        .login-card { background: var(--card); padding: 40px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; border: 1px solid #334155; }
-        .login-input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: white; outline: none; box-sizing: border-box;}
+        /* شريط التحميل العلوي */
+        .progress-bar { height: 6px; background: var(--primary); position: fixed; top: 0; left: 0; transition: 0.4s; z-index: 2000; }
 
         .navbar { display: flex; justify-content: space-between; padding: 12px 5%; background: var(--card); align-items: center; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid #334155; }
         .nav-right { display: flex; gap: 10px; }
         .btn { padding: 10px 18px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; font-family: 'Cairo'; transition: 0.3s; display: flex; align-items: center; gap: 8px; font-size: 14px; text-decoration: none; }
         .btn-home { background: #475569; color: white; }
         .btn-dash { background: rgba(99,102,241,0.2); color: var(--primary); border: 1px solid var(--primary); }
+        
         .container { max-width: 900px; margin: 30px auto; padding: 0 20px; }
-        .exam-item { background: var(--card); padding: 20px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #334155; margin-bottom: 15px; }
+        
+        /* كروت الامتحانات */
+        .exam-item { background: var(--card); padding: 20px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #334155; margin-bottom: 15px; transition: 0.3s; }
         .exam-item.locked { border-right: 5px solid var(--accent); opacity: 0.9; background: #162033; }
+        
+        /* منطقة الأسئلة */
         #quizArea, #reviewArea { display: none; background: var(--card); padding: 30px; border-radius: 25px; border: 1px solid #334155; animation: fadeIn 0.5s; }
         .q-text { font-size: 20px; font-weight: 700; margin-bottom: 20px; color: #fff; line-height: 1.6; }
+        
         .opt-btn { background: rgba(255,255,255,0.03); border: 2px solid #334155; padding: 15px; border-radius: 15px; cursor: pointer; transition: 0.2s; text-align: right; color: #cbd5e1; margin-bottom: 10px; width: 100%; font-family: 'Cairo'; font-size: 16px; }
         .opt-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        
         .essay-input { width: 100%; height: 150px; background: rgba(0,0,0,0.2); border: 2px solid #334155; color: white; border-radius: 15px; padding: 15px; font-family: 'Cairo'; font-size: 16px; resize: vertical; box-sizing: border-box; outline: none; }
+        
+        /* كروت المراجعة بعد الحل */
         .rev-card { background: rgba(255,255,255,0.02); padding: 20px; border-radius: 15px; margin-bottom: 15px; border-right: 4px solid #334155; }
         .rev-correct { border-right-color: var(--accent); background: rgba(34, 197, 94, 0.05); }
         .rev-wrong { border-right-color: var(--danger); background: rgba(239, 68, 68, 0.05); }
         .rev-essay { border-right-color: var(--info); background: rgba(59, 130, 246, 0.05); }
         .ans-label { font-size: 14px; font-weight: bold; display: block; margin-top: 10px; }
-        .progress-bar { height: 6px; background: var(--primary); position: fixed; top: 0; left: 0; transition: 0.4s; z-index: 2000; }
+
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* شاشة التحميل اللطيفة */
+        #pageLoader { position: fixed; inset: 0; background: var(--bg); z-index: 5000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .spinner { width: 40px; height: 40px; border: 4px solid rgba(99,102,241,0.2); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-<div id="loginOverlay" style="display: none;">
-    <div class="login-card">
-        <h2>مرحباً بك في المنصة 🎓</h2>
-        <p>الرجاء إدخال بياناتك للمتابعة</p>
-        <input type="text" id="loginName" class="login-input" placeholder="اسمك الثلاثي">
-        <input type="email" id="loginEmail" class="login-input" placeholder="البريد الإلكتروني أو كود الطالب">
-        <button class="btn" style="width:100%; background:var(--primary); color:white; justify-content:center; margin-top:10px;" onclick="doLogin()">دخول للمنصة</button>
-    </div>
+<div id="pageLoader">
+    <div class="spinner"></div>
+    <p style="margin-top: 15px; color: var(--primary);">جاري تحضير الامتحانات...</p>
 </div>
 
 <div class="progress-bar" id="progressBar" style="width: 0%"></div>
 
 <nav class="navbar">
     <div class="nav-right">
-        <button onclick="logout()" class="btn btn-home" style="background:#ef444415; color:#ef4444;"><i class="fas fa-sign-out-alt"></i> خروج</button>
-        <a href="student-dash.html" class="btn btn-dash"><i class="fas fa-chart-pie"></i> نتائجي</a>
+        <a href="home.html" class="btn btn-home"><i class="fas fa-home"></i> الرئيسية</a>
+        <a href="student-dash.html" class="btn btn-dash"><i class="fas fa-chart-pie"></i> تحليلاتي</a>
     </div>
     <div id="timerDisplay" style="font-weight:900; color:#fbbf24; font-size: 18px;">00:00</div>
 </nav>
@@ -64,8 +73,8 @@
 <div class="container">
     <div id="dashboard">
         <h2 style="margin-bottom: 5px;">بوابة الاختبارات الرقمية 🎓</h2>
-        <p style="color: #94a3b8; margin-bottom: 25px;">مرحباً يا <span id="studentNameLabel">...</span>، بالتوفيق في اختباراتك اليوم.</p>
-        <div id="examsList">جاري تحميل الاختبارات المتاحة لك...</div>
+        <p style="color: #94a3b8; margin-bottom: 25px;">مرحباً يا <span id="studentNameLabel" style="color: var(--primary); font-weight: 900;">...</span>، بالتوفيق في اختباراتك اليوم.</p>
+        <div id="examsList">جاري البحث عن اختبارات نشطة...</div>
     </div>
 
     <div id="quizArea">
@@ -86,7 +95,7 @@
         <div style="text-align:center; margin-bottom:30px;">
             <h2 id="resultTitle">انتهى الاختبار بنجاح ✅</h2>
             <div id="scoreCircle" style="font-size:45px; font-weight:900; color:var(--accent)">0/0</div>
-            <p id="saveStatus" style="color: var(--accent); font-weight: bold;"></p>
+            <p style="color: #94a3b8;">تم حفظ النتيجة في سجلك الأكاديمي.</p>
         </div>
         <div id="reviewList"></div>
         <button class="btn btn-dash" style="width:100%; margin-top:20px; justify-content:center;" onclick="location.reload()">العودة للقائمة</button>
@@ -94,7 +103,7 @@
 </div>
 
 <script>
-    // --- تهيئة Firebase ---
+    // --- إعدادات Firebase ---
     const firebaseConfig = { 
         apiKey: "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws", 
         authDomain: "zomaapp-744fc.firebaseapp.com", 
@@ -103,38 +112,25 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // --- نظام إدارة الطالب ---
-    let userEmail = localStorage.getItem("userEmail");
-    let userName = localStorage.getItem("userName");
+    // --- نظام التحقق الأوتوماتيكي ---
+    const userEmail = localStorage.getItem("userEmail");
+    const userName = localStorage.getItem("userName");
 
-    function checkAuth() {
-        if (!userEmail) {
-            document.getElementById('loginOverlay').style.display = 'flex';
-        } else {
-            document.getElementById('loginOverlay').style.display = 'none';
-            document.getElementById('studentNameLabel').innerText = userName;
-            loadExams();
-        }
-    }
-
-    function doLogin() {
-        const name = document.getElementById('loginName').value.trim();
-        const email = document.getElementById('loginEmail').value.trim().toLowerCase();
-        if (name.length < 3 || email.length < 5) {
-            alert("يرجى إدخال بيانات صحيحة");
+    async function checkAuth() {
+        if (!userEmail || !userName) {
+            // إذا لم يجد بيانات، يحوله لصفحة تسجيل الدخول
+            window.location.href = "index.html"; 
             return;
         }
-        localStorage.setItem("userEmail", email);
-        localStorage.setItem("userName", name);
-        location.reload();
+        
+        document.getElementById('studentNameLabel').innerText = userName;
+        await loadExams();
+        
+        // إخفاء اللودر
+        document.getElementById('pageLoader').style.display = 'none';
     }
 
-    function logout() {
-        localStorage.clear();
-        location.reload();
-    }
-
-    // --- منطق الامتحانات ---
+    // --- منطق الاختبارات ---
     let questions = [];
     let currentIdx = 0;
     let studentAnswers = [];
@@ -145,15 +141,12 @@
     async function loadExams() {
         const list = document.getElementById('examsList');
         try {
-            // 1. جلب كل الامتحانات
             const examsSnap = await db.collection("quizzes").orderBy("createdAt", "desc").get();
-            
-            // 2. جلب نتائج "هذا الطالب فقط" للتأكد من ما حله وما لم يحله
             const resultsSnap = await db.collection("results").where("studentEmail", "==", userEmail).get();
             const takenIds = resultsSnap.docs.map(d => d.data().quizId);
 
             list.innerHTML = "";
-            if(examsSnap.empty) { list.innerHTML = "لا توجد اختبارات مضافة حالياً."; return; }
+            if(examsSnap.empty) { list.innerHTML = "<p style='color:#94a3b8'>لا توجد اختبارات متاحة حالياً.</p>"; return; }
 
             examsSnap.forEach(doc => {
                 const q = doc.data();
@@ -165,14 +158,13 @@
                             <small style="color:#94a3b8">${q.questions.length} سؤال • ${q.duration} دقيقة</small>
                         </div>
                         ${isTaken ? 
-                            `<button class="btn" style="background:#0f172a; color:var(--accent); border:1px solid var(--accent)" onclick="viewOldResult('${doc.id}')"><i class="fas fa-eye"></i> عرض النتيجة</button>` : 
-                            `<button class="btn" style="background:var(--primary); color:white" onclick="startExam('${doc.id}')">ابدأ الآن</button>`
+                            `<button class="btn" style="background:#0f172a; color:var(--accent); border:1px solid var(--accent)" onclick="viewOldResult('${doc.id}')"><i class="fas fa-eye"></i> النتيجة</button>` : 
+                            `<button class="btn" style="background:var(--primary); color:white" onclick="startExam('${doc.id}')">بدء الآن</button>`
                         }
                     </div>`;
             });
         } catch (e) {
-            list.innerHTML = "خطأ في الاتصال بالقاعدة.";
-            console.error(e);
+            list.innerHTML = "فشل الاتصال بالخادم.";
         }
     }
 
@@ -273,7 +265,7 @@
             await db.collection("results").add(finalResult);
             showReviewPanel(score, totalMCQ, analysis);
         } catch (e) {
-            alert("حدث خطأ في الشبكة، سيتم المحاولة مرة أخرى.");
+            alert("حدث خطأ أثناء الحفظ، يرجى المحاولة مرة أخرى.");
         }
     }
 
@@ -304,8 +296,9 @@
         }
     }
 
-    // بدء التشغيل
-    checkAuth();
+    // التشغيل عند تحميل الصفحة
+    window.onload = checkAuth;
 </script>
 </body>
 </html>
+
