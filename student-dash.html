@@ -3,82 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة إنجازاتي | منصة المستشار</title>
+    <title>لوحة القيادة | المستشار</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <style>
-        :root { --primary: #6366f1; --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; }
+        :root { --primary: #818cf8; --secondary: #c084fc; --bg: #030712; --card: #111827; --text: #f9fafb; }
         body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
         
-        .container { max-width: 1000px; margin: auto; }
+        .grid-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; max-width: 1300px; margin: auto; }
         
-        .header-box { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .back-btn { background: var(--card); color: white; border: 1px solid var(--primary); padding: 8px 20px; border-radius: 12px; cursor: pointer; text-decoration: none; font-size: 14px; }
+        /* البطاقات العلوية */
+        .stat-card { 
+            background: var(--card); padding: 25px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.05);
+            transition: 0.3s; position: relative; overflow: hidden;
+        }
+        .stat-card::after { content: ""; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--primary); }
+        .stat-card h3 { font-size: 32px; margin: 10px 0; font-weight: 900; }
+        .stat-card p { color: #9ca3af; font-size: 14px; margin: 0; }
 
-        /* كروت الإحصائيات */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
-        .stat-card { background: var(--card); padding: 20px; border-radius: 20px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
-        .stat-card i { font-size: 24px; color: var(--primary); margin-bottom: 10px; }
-        .stat-card h3 { margin: 5px 0; font-size: 28px; font-weight: 800; }
-        .stat-card p { margin: 0; color: #94a3b8; font-size: 13px; }
+        /* منطقة الرسوم البيانية */
+        .chart-box { 
+            background: var(--card); padding: 25px; border-radius: 24px; grid-column: span 2; 
+            border: 1px solid rgba(255,255,255,0.05); min-height: 300px;
+        }
 
-        /* جدول الدرجات */
-        .results-table-container { background: var(--card); border-radius: 25px; overflow: hidden; border: 1px solid #334155; }
-        table { width: 100%; border-collapse: collapse; text-align: right; }
-        th { background: rgba(99, 102, 241, 0.1); padding: 15px; color: var(--primary); font-weight: 800; font-size: 14px; }
-        td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; }
-        tr:last-child td { border: none; }
+        /* جدول النتائج الأخير */
+        .recent-results { background: var(--card); padding: 25px; border-radius: 24px; grid-column: span 4; border: 1px solid rgba(255,255,255,0.05); }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th { text-align: right; color: var(--primary); padding: 12px; font-size: 13px; border-bottom: 2px solid #1f2937; }
+        td { padding: 15px; border-bottom: 1px solid #1f2937; font-size: 14px; }
         
-        .badge { padding: 5px 12px; border-radius: 8px; font-size: 11px; font-weight: bold; }
-        .badge-success { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
-        .badge-pending { background: rgba(251, 191, 36, 0.1); color: #fbbf24; }
+        .badge-pro { background: linear-gradient(45deg, var(--primary), var(--secondary)); padding: 4px 12px; border-radius: 8px; font-size: 11px; }
 
-        .no-data { text-align: center; padding: 50px; color: #94a3b8; }
+        @media (max-width: 900px) { .grid-container { grid-template-columns: 1fr; } .chart-box { grid-column: span 1; } .recent-results { grid-column: span 1; } }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header-box">
-        <h2>لوحة درجاتي 📊</h2>
-        <a href="home.html" class="back-btn"><i class="fas fa-arrow-right"></i> العودة للرئيسية</a>
+<div class="grid-container">
+    <div style="grid-column: span 4; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h1 style="margin:0">مرحباً يا <span id="studentName" style="color: var(--primary);">بطل</span> 🔥</h1>
+            <p style="color:#9ca3af">إليك ملخص أدائك الأكاديمي الحالي</p>
+        </div>
+        <button onclick="location.reload()" style="background:none; border:1px solid #374151; color:white; padding:10px 20px; border-radius:12px; cursor:pointer"><i class="fas fa-sync"></i> تحديث البيانات</button>
     </div>
 
-    <div class="stats-grid">
-        <div class="stat-card">
-            <i class="fas fa-file-alt"></i>
-            <h3 id="totalExams">0</h3>
-            <p>اختبارات تم دخولها</p>
-        </div>
-        <div class="stat-card">
-            <i class="fas fa-percentage"></i>
-            <h3 id="avgScore">0%</h3>
-            <p>متوسط التقييم</p>
-        </div>
-        <div class="stat-card">
-            <i class="fas fa-trophy"></i>
-            <h3 id="highestScore">0</h3>
-            <p>أعلى درجة</p>
-        </div>
+    <div class="stat-card">
+        <p>إجمالي الاختبارات</p>
+        <h3 id="totalExams">0</h3>
+    </div>
+    <div class="stat-card">
+        <p>متوسط الدرجات</p>
+        <h3 id="avgScore">0%</h3>
+    </div>
+    <div class="stat-card">
+        <p>الترتيب الحالي</p>
+        <h3 id="rank">#1</h3>
+    </div>
+    <div class="stat-card" style="background: linear-gradient(135deg, #1e1b4b, #111827);">
+        <p>النقاط المجموعة</p>
+        <h3 id="totalPoints" style="color: #fbbf24;">0</h3>
     </div>
 
-    <div class="results-table-container">
+    <div class="chart-box">
+        <p style="margin-top:0; font-weight:bold">📈 تحليل التقدم الزمني</p>
+        <canvas id="lineChart"></canvas>
+    </div>
+    <div class="chart-box">
+        <p style="margin-top:0; font-weight:bold">🎯 توزيع مهارات المادة</p>
+        <canvas id="radarChart"></canvas>
+    </div>
+
+    <div class="recent-results">
+        <p style="margin-top:0; font-weight:bold">📋 أحدث النتائج التفصيلية</p>
         <table>
             <thead>
                 <tr>
                     <th>اسم الاختبار</th>
                     <th>التاريخ</th>
                     <th>الدرجة</th>
-                    <th>الحالة</th>
+                    <th>النسبة</th>
+                    <th>الوسام</th>
                 </tr>
             </thead>
-            <tbody id="resultsTable">
-                </tbody>
+            <tbody id="tableBody"></tbody>
         </table>
-        <div id="loader" class="no-data">جاري جلب نتائجك من السحابة...</div>
     </div>
 </div>
 
@@ -92,62 +106,79 @@
     const db = firebase.firestore();
 
     const userEmail = localStorage.getItem("userEmail");
+    document.getElementById('studentName').innerText = localStorage.getItem("userName") || "حازم";
 
-    if(!userEmail) {
-        alert("برجاء تسجيل الدخول أولاً");
-        window.location.href = "index.html";
-    }
+    async function fetchDashboardData() {
+        const snap = await db.collection("results")
+            .where("studentEmail", "==", userEmail)
+            .orderBy("submittedAt", "asc").get();
 
-    // جلب النتائج الخاصة بالطالب فقط بناءً على الإيميل
-    db.collection("results")
-      .where("studentEmail", "==", userEmail)
-      .orderBy("submittedAt", "desc")
-      .onSnapshot(snap => {
-        const table = document.getElementById('resultsTable');
-        const loader = document.getElementById('loader');
-        table.innerHTML = "";
-        
-        if(snap.empty) {
-            loader.innerHTML = "لم تقم بدخول أي اختبارات بعد. ابدأ الآن!";
-            return;
-        }
-        loader.style.display = 'none';
-
-        let total = 0;
-        let count = 0;
-        let max = 0;
+        let scores = [];
+        let labels = [];
+        let totalPercent = 0;
+        let totalPoints = 0;
+        const table = document.getElementById('tableBody');
 
         snap.forEach(doc => {
-            const data = doc.data();
-            const date = data.submittedAt ? data.submittedAt.toDate().toLocaleDateString('ar-EG') : '---';
-            
-            // حساب الإحصائيات
-            count++;
-            let percent = (data.score / data.total) * 100;
-            total += percent;
-            if(data.score > max) max = data.score;
-
-            // تحديد لون الحالة
-            const statusBadge = data.status === 'تم التصحيح' 
-                ? `<span class="badge badge-success">تم التصحيح</span>`
-                : `<span class="badge badge-pending">قيد المراجعة</span>`;
+            const d = doc.data();
+            const p = (d.score / d.total) * 100;
+            scores.push(p.toFixed(1));
+            labels.push(d.examTitle);
+            totalPercent += p;
+            totalPoints += d.score;
 
             table.innerHTML += `
                 <tr>
-                    <td><b>${data.examTitle}</b></td>
-                    <td>${date}</td>
-                    <td dir="ltr"><b>${data.score} / ${data.total}</b></td>
-                    <td>${statusBadge}</td>
-                </tr>
-            `;
+                    <td><b>${d.examTitle}</b></td>
+                    <td>${d.submittedAt.toDate().toLocaleDateString('ar-EG')}</td>
+                    <td>${d.score} / ${d.total}</td>
+                    <td>%${p.toFixed(0)}</td>
+                    <td><span class="badge-pro">${p > 90 ? '💎 ماسي' : '⭐ ذهبي'}</span></td>
+                </tr>`;
         });
 
-        // تحديث كروت الإحصائيات
-        document.getElementById('totalExams').innerText = count;
-        document.getElementById('avgScore').innerText = Math.round(total / count) + "%";
-        document.getElementById('highestScore').innerText = max;
-    });
-</script>
+        document.getElementById('totalExams').innerText = snap.size;
+        document.getElementById('avgScore').innerText = snap.size ? (totalPercent / snap.size).toFixed(0) + "%" : "0%";
+        document.getElementById('totalPoints').innerText = totalPoints;
 
+        renderCharts(labels, scores);
+    }
+
+    function renderCharts(labels, scores) {
+        // Line Chart
+        new Chart(document.getElementById('lineChart'), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'مستواك',
+                    data: scores,
+                    borderColor: '#818cf8',
+                    backgroundColor: 'rgba(129, 140, 248, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { display: false } } }
+        });
+
+        // Radar Chart (Example Data)
+        new Chart(document.getElementById('radarChart'), {
+            type: 'radar',
+            data: {
+                labels: ['سرعة', 'دقة', 'تركيز', 'مقالي', 'اختياري'],
+                datasets: [{
+                    label: 'المهارات',
+                    data: [80, 90, 70, 85, 95],
+                    backgroundColor: 'rgba(192, 132, 252, 0.2)',
+                    borderColor: '#c084fc'
+                }]
+            },
+            options: { plugins: { legend: { display: false } } }
+        });
+    }
+
+    fetchDashboardData();
+</script>
 </body>
 </html>
