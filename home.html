@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الرئيسية | منصة المستشار التعليمية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #6366f1;
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f1f5f9;
+            --accent: #4f46e5;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        /* الهيدر والترحيب */
+        header {
+            background: linear-gradient(135deg, var(--card), var(--bg));
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 1px solid #334155;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .user-welcome {
+            font-size: 26px;
+            font-weight: 900;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .sub-text {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        /* شبكة الأقسام */
+        .container {
+            max-width: 1100px;
+            margin: -30px auto 40px;
+            padding: 0 20px;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .menu-card {
+            background: var(--card);
+            padding: 30px;
+            border-radius: 25px;
+            text-align: center;
+            border: 1px solid #334155;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .menu-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .icon-wrapper {
+            width: 70px;
+            height: 70px;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-size: 30px;
+            color: var(--primary);
+            transition: 0.3s;
+        }
+
+        .menu-card:hover .icon-wrapper {
+            background: var(--primary);
+            color: white;
+            transform: rotate(-10deg);
+        }
+
+        .menu-card h3 {
+            margin: 0 0 10px;
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .menu-card p {
+            font-size: 13px;
+            color: #94a3b8;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        /* ألوان مخصصة لكل قسم */
+        .video-card:hover { border-color: #ef4444; }
+        .video-card:hover .icon-wrapper { background: #ef4444; }
+        
+        .exam-card:hover { border-color: #22c55e; }
+        .exam-card:hover .icon-wrapper { background: #22c55e; }
+
+        /* زر تسجيل الخروج */
+        .logout-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid #ef4444;
+            padding: 8px 15px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-family: 'Cairo';
+            font-weight: 700;
+            transition: 0.3s;
+            z-index: 100;
+        }
+
+        .logout-btn:hover {
+            background: #ef4444;
+            color: white;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 600px) {
+            .main-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <button class="logout-btn" onclick="logout()">تسجيل خروج</button>
+
+    <header>
+        <div class="user-welcome" id="welcomeMsg">أهلاً بك يا بطل</div>
+        <div class="sub-text">مستعد لرحلة تعلم جديدة اليوم؟</div>
+    </header>
+
+    <div class="container">
+        <div class="main-grid">
+            
+            <a href="lessons.html" class="menu-card video-card">
+                <div class="icon-wrapper"><i class="fas fa-play-circle"></i></div>
+                <h3>المحاضرات المرئية</h3>
+                <p>شرح تفصيلي للمنهج مع المستشار حازم سالم</p>
+            </a>
+
+            <a href="homework.html" class="menu-card">
+                <div class="icon-wrapper"><i class="fas fa-file-signature"></i></div>
+                <h3>الواجبات والمهام</h3>
+                <p>حل الواجبات ورفعها للمراجعة والتقييم</p>
+            </a>
+
+            <a href="exams.html" class="menu-card exam-card">
+                <div class="icon-wrapper"><i class="fas fa-stopwatch"></i></div>
+                <h3>بنك الاختبارات</h3>
+                <p>اختبر مستواك في كل فصل واحصل على نتيجتك فوراً</p>
+            </a>
+
+            <a href="https://wa.me/201060234399" target="_blank" class="menu-card">
+                <div class="icon-wrapper"><i class="fab fa-whatsapp"></i></div>
+                <h3>تواصل مع المستشار</h3>
+                <p>استفسارات مباشرة ودعم فني على مدار الساعة</p>
+            </a>
+
+        </div>
+    </div>
+
+    <script>
+        // استلام الاسم المخزن من صفحة اللوجين
+        const savedName = localStorage.getItem("userName") || "يا بطل";
+        document.getElementById('welcomeMsg').innerText = `أهلاً بك، ${savedName} 🎓`;
+
+        function logout() {
+            localStorage.removeItem("userName");
+            window.location.href = "index.html";
+        }
+    </script>
+</body>
+</html>
