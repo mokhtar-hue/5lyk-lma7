@@ -3,37 +3,302 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الرئيسية | منصة خليـــك لمــاح المستشـــار
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <title>نظام الوصول الذكي | المستشار حازم سالم</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <style>
         :root {
-            --primary: #6366f1;
-            --primary-light: #818cf8;
-            --bg: #0f172a;
-            --card: #1e293b;
-            --text-main: #f1f5f9;
-            --text-dim: #94a3b8;
+            --primary: #6366f1; --bg: #f8fafc; --card: #ffffff;
+            --text: #1e293b; --input: #f1f5f9; --accent: #4f46e5;
         }
-
+        [data-theme="dark"] {
+            --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --input: #334155;
+        }
         body {
-            font-family: 'Cairo', sans-serif;
-            background-color: var(--bg);
-            color: var(--text-main);
-            margin: 0;
-            overflow-x: hidden;
+            font-family: 'Cairo', sans-serif; background-color: var(--bg);
+            color: var(--text); margin: 0; display: flex; justify-content: center;
+            align-items: center; min-height: 100vh; overflow: hidden; transition: 0.5s;
         }
+        #loader {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+            display: none; justify-content: center; align-items: center;
+            z-index: 9999; backdrop-filter: blur(8px);
+        }
+        .spinner {
+            width: 60px; height: 60px; border: 5px solid #fff;
+            border-bottom-color: var(--primary); border-radius: 50%;
+            animation: rotate 1s linear infinite;
+        }
+        .status-screen {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.5);
+            background: var(--card); padding: 40px; border-radius: 35px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2); text-align: center;
+            z-index: 10000; display: none; opacity: 0; transition: 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            min-width: 320px; max-width: 90%;
+        }
+        .status-screen.active { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        .login-card {
+            background: var(--card); padding: 40px; border-radius: 35px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 100%; max-width: 400px;
+            text-align: center; animation: slideUp 0.8s ease;
+        }
+        .welcome-text { font-size: 28px; font-weight: 800; color: var(--primary); margin-bottom: 10px; }
+        .input-group { margin-bottom: 20px; text-align: right; }
+        .input-group label { display: block; margin-bottom: 8px; font-weight: 600; margin-right: 5px; }
+        .field-container { display: flex; gap: 10px; align-items: center; }
+        input {
+            flex: 1; padding: 14px 18px; border-radius: 15px; border: 2px solid transparent;
+            background: var(--input); color: var(--text); font-family: 'Cairo';
+            font-size: 16px; outline: none; transition: 0.3s;
+        }
+        input:focus { border-color: var(--primary); background: var(--card); box-shadow: 0 0 15px rgba(99, 102, 241, 0.2); }
+        .eye-btn {
+            background: var(--input); border: none; padding: 12px;
+            border-radius: 15px; cursor: pointer; font-size: 20px;
+        }
+        .login-btn {
+            width: 100%; padding: 16px; border: none; border-radius: 18px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white; font-weight: 800; font-size: 18px; cursor: pointer;
+            transition: 0.4s; margin-top: 10px;
+        }
+        .gear-btn {
+            position: fixed; bottom: 25px; left: 25px; width: 55px; height: 55px;
+            background: var(--primary); color: white; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer; font-size: 26px; box-shadow: 0 0 20px var(--primary);
+            animation: rotateGear 4s linear infinite, glow 2s ease-in-out infinite;
+            border: none; z-index: 5000;
+        }
+        .modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            display: none; justify-content: center; align-items: center;
+            z-index: 9000; backdrop-filter: blur(4px);
+        }
+        .modal-box { background: var(--card); padding: 30px; border-radius: 25px; width: 320px; text-align: center; }
+        .phone-copy {
+            background: var(--input); padding: 15px; border-radius: 15px;
+            margin: 20px 0; font-weight: 800; cursor: pointer;
+            display: flex; justify-content: center; align-items: center; gap: 12px;
+            border: 2px dashed var(--primary);
+        }
+        #toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: #333; color: #fff; padding: 12px 25px; border-radius: 50px;
+            display: none; z-index: 11000; font-weight: 600; text-align: center;
+        }
+        .wisdom-text { font-size: 14px; color: var(--primary); margin-top: 15px; font-style: italic; opacity: 0; transition: 1s; }
+        
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes rotateGear { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes glow { 0%, 100% { box-shadow: 0 0 10px var(--primary); } 50% { box-shadow: 0 0 25px var(--primary); } }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .fade-in-char { display: inline-block; opacity: 0; filter: blur(5px); animation: charAppear 0.5s forwards; }
+        @keyframes charAppear { to { opacity: 1; filter: blur(0); } }
+        
+        .theme-btn { position: absolute; top: 25px; right: 25px; background: var(--card); border: 1px solid var(--input); padding: 10px; border-radius: 50%; cursor: pointer; font-size: 20px; }
+        
+        .ban-msg-box { background: #fef2f2; color: #991b1b; padding: 15px; border-radius: 20px; font-weight: 700; border: 2px solid #fecaca; margin-top: 10px; font-size: 14px; line-height: 1.6; }
+    </style>
+</head>
+<body data-theme="dark">
 
-        /* نافبار علوي */
-        .top-nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 30px;
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(10px);
-            position: sticky;
+    <button class="theme-btn" onclick="toggleTheme()">☀️</button>
+    <div id="loader"><div class="spinner"></div></div>
+    
+    <div id="statusScreen" class="status-screen">
+        <div id="statusIcon" style="font-size: 70px; margin-bottom: 10px;"></div>
+        <div id="statusContent"></div>
+        <div id="wisdomBox" class="wisdom-text"></div>
+        <button id="closeStatusBtn" class="login-btn" style="display:none; margin-top:20px; background:#6366f1;" onclick="resetToLogin()">رجوع لتسجيل الدخول</button>
+    </div>
+
+    <div class="login-card" id="loginCard">
+        <div class="welcome-text" id="greeting">صباح الخير</div>
+        <p style="color: #94a3b8; margin-bottom: 30px; font-weight: 600;">سجل دخولك للمتابعة</p>
+        
+        <div class="input-group">
+            <label>اسم المستخدم (Email)</label>
+            <div class="field-container"><input type="text" id="email" placeholder="example@mail.com" dir="ltr"></div>
+        </div>
+        
+        <div class="input-group">
+            <label>كلمة المرور (Password)</label>
+            <div class="field-container">
+                <input type="password" id="pass" placeholder="••••••••" dir="ltr">
+                <button class="eye-btn" onclick="togglePass()">👁️</button>
+            </div>
+        </div>
+        
+        <button class="login-btn" onclick="handleLogin()">دخول النظام</button>
+    </div>
+
+    <button class="gear-btn" onclick="openSupport()">⚙️</button>
+
+    <div class="modal" id="supportModal">
+        <div class="modal-box">
+            <h3 style="margin:0">تواصل مع الدعم 📱</h3>
+            <div class="phone-copy" onclick="copyPhone()">
+                <span>📞</span><span id="phoneNum">01060234399</span>
+            </div>
+            <button class="login-btn" style="background: #94a3b8; padding: 10px;" onclick="closeSupport()">إغلاق</button>
+        </div>
+    </div>
+
+    <div id="toast">تم النسخ ✅</div>
+
+<script>
+    const firebaseConfig = { 
+        apiKey: "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws", 
+        authDomain: "zomaapp-744fc.firebaseapp.com", 
+        projectId: "zomaapp-744fc" 
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const wisdoms = [
+        "النجاح ليس محطة، بل هو رحلة مستمرة.",
+        "كن أنت التغيير الذي تريد أن تراه في العالم.",
+        "البطل لا يستسلم أبداً، بل يجد طريقاً آخر.",
+        "العمل الجاد يتفوق على الموهبة دائماً.",
+        "اجعل اليوم هو البداية لحلمك الكبير."
+    ];
+
+    const hour = new Date().getHours();
+    document.getElementById('greeting').innerText = (hour < 12) ? "صباح الخير يا بطل ☀️" : "مساء الخير يا بطل 🌙";
+
+    function togglePass() {
+        const p = document.getElementById('pass');
+        p.type = p.type === 'password' ? 'text' : 'password';
+    }
+
+    function resetToLogin() {
+        const screen = document.getElementById('statusScreen');
+        const loginCard = document.getElementById('loginCard');
+        screen.classList.remove('active');
+        setTimeout(() => {
+            screen.style.display = 'none';
+            loginCard.style.display = 'block';
+            loginCard.style.animation = 'slideUp 0.5s ease';
+            document.getElementById('email').value = "";
+            document.getElementById('pass').value = "";
+            document.getElementById('closeStatusBtn').style.display = 'none';
+        }, 400);
+    }
+
+    async function handleLogin() {
+        const inputEmail = document.getElementById('email').value.trim();
+        const inputPass = document.getElementById('pass').value.trim();
+        if(!inputEmail || !inputPass) {
+            alert("يرجى إدخال البيانات كاملة!");
+            return;
+        }
+        document.getElementById('loader').style.display = 'flex';
+        try {
+            const snapshot = await db.collection("users").where("email", "==", inputEmail).get();
+            if (snapshot.empty) {
+                document.getElementById('loader').style.display = 'none';
+                alert("هذا الحساب غير موجود بالنظام ❌");
+                return;
+            }
+            let userData = snapshot.docs[0].data();
+            if (userData.password !== inputPass) {
+                document.getElementById('loader').style.display = 'none';
+                alert("كلمة المرور خاطئة! حاول مرة أخرى ❌");
+                return;
+            }
+            if (userData.status !== "active") {
+                document.getElementById('loader').style.display = 'none';
+                const reason = userData.lockReason || "عذراً، حسابك معطل حالياً. يرجى مراجعة الإدارة.";
+                showBanned(reason);
+                return;
+            }
+            
+            // نجاح الدخول - تخزين البيانات محلياً
+            const userName = userData.name || "يا بطل";
+            localStorage.setItem("userName", userName);
+            
+            document.getElementById('loader').style.display = 'none';
+            showSuccess(userName);
+            
+            // الانتقال لصفحة الرئيسية بعد 3 ثواني
+            setTimeout(() => { 
+                window.location.href = "home.html"; 
+            }, 3000);
+
+        } catch (error) {
+            document.getElementById('loader').style.display = 'none';
+            alert("حدث خطأ في الاتصال.. تأكد من الإنترنت ⚠️");
+        }
+    }
+
+    function showSuccess(name) {
+        document.getElementById('loginCard').style.display = 'none';
+        const screen = document.getElementById('statusScreen');
+        const icon = document.getElementById('statusIcon');
+        const content = document.getElementById('statusContent');
+        const wisdomBox = document.getElementById('wisdomBox');
+        icon.innerHTML = "🏆"; icon.style.color = "#22c55e";
+        content.innerHTML = `
+            <h2 style="margin:0">تم تسجيل الدخول بنجاح</h2>
+            <div id="nameArea" style="font-size:24px; font-weight:800; margin-top:10px; color:var(--primary);"></div>
+        `;
+        screen.style.display = 'block';
+        setTimeout(() => screen.classList.add('active'), 50);
+        const nameArea = document.getElementById('nameArea');
+        let i = 0;
+        const nameChars = name.split('');
+        const timer = setInterval(() => {
+            if (i < nameChars.length) {
+                const span = document.createElement('span');
+                span.innerText = nameChars[i];
+                span.className = 'fade-in-char';
+                nameArea.appendChild(span);
+                i++;
+            } else {
+                clearInterval(timer);
+                wisdomBox.innerText = `💡 ${wisdoms[Math.floor(Math.random()*wisdoms.length)]}`;
+                wisdomBox.style.opacity = "1";
+            }
+        }, 100);
+    }
+
+    function showBanned(msg) {
+        document.getElementById('loginCard').style.display = 'none';
+        const screen = document.getElementById('statusScreen');
+        const icon = document.getElementById('statusIcon');
+        const content = document.getElementById('statusContent');
+        const closeBtn = document.getElementById('closeStatusBtn');
+        icon.innerHTML = "🚫"; icon.style.color = "#ef4444";
+        content.innerHTML = `
+            <h2 style="color:#ef4444; margin-bottom:10px;">عذراً، الوصول مرفوض</h2>
+            <p style="font-weight:600; color:#64748b; margin-bottom:15px;">تم إيقاف صلاحية الدخول لهذا الحساب</p>
+            <div class="ban-msg-box">${msg}</div>
+        `;
+        closeBtn.style.display = 'block';
+        screen.style.display = 'block';
+        setTimeout(() => screen.classList.add('active'), 50);
+    }
+
+    function openSupport() { document.getElementById('supportModal').style.display = 'flex'; }
+    function closeSupport() { document.getElementById('supportModal').style.display = 'none'; }
+    function copyPhone() {
+        const num = document.getElementById('phoneNum').innerText;
+        navigator.clipboard.writeText(num);
+        const t = document.getElementById('toast');
+        t.style.display = 'block';
+        setTimeout(() => t.style.display = 'none', 2000);
+    }
+    function toggleTheme() {
+        const b = document.body;
+        const isDark = b.getAttribute('data-theme') === 'dark';
+        b.setAttribute('data-theme', isDark ? 'light' : 'dark');
+        document.querySelector('.theme-btn').innerText = isDark ? "🌙" : "☀️";
+    }
+</script>
+</body>
+</html>
             top: 0;
             z-index: 1000;
             border-bottom: 1px solid rgba(255,255,255,0.05);
