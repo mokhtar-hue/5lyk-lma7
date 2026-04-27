@@ -213,16 +213,21 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // جلب بيانات المستخدم
-        const name = localStorage.getItem("userName") || "يا بطل";
-        const email = localStorage.getItem("userEmail") || "طالب مسجل"; 
-        
-        // تعديل الترحيب المطلوب
-        document.getElementById('userNameTop').innerText = name;
-        document.getElementById('sideName').innerText = name;
-        document.getElementById('sideEmail').innerText = email;
+        // جلب بيانات المستخدم من الذاكرة المحلية
+        const storedName = localStorage.getItem("userName");
+        const storedEmail = localStorage.getItem("userEmail");
 
-        // جلب التنبيهات
+        // التحقق: إذا لم يكن هناك اسم مسجل، يتم التوجيه لصفحة الدخول
+        if (!storedName) {
+            window.location.href = "index.html";
+        } else {
+            // عرض اسم الطالب الحقيقي بدلاً من "يا بطل"
+            document.getElementById('userNameTop').innerText = storedName;
+            document.getElementById('sideName').innerText = storedName;
+            document.getElementById('sideEmail').innerText = storedEmail || "طالب غير مسجل بريدياً";
+        }
+
+        // جلب التنبيهات من Firebase
         let currentAnnouncementId = null;
         async function fetchAnnouncements() {
             try {
