@@ -13,7 +13,7 @@
     <style>
         :root { --primary: #6366f1; --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; }
         
-        * { -webkit-user-select: none; user-select: none; outline: none; }
+        * { -webkit-user-select: none; user-select: none; outline: none; -webkit-touch-callout: none; }
         
         body { font-family: 'Cairo', sans-serif; background: var(--bg); color: white; margin: 0; padding: 15px; }
         
@@ -32,26 +32,23 @@
             overflow: hidden;
             display: none; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            transition: filter 0.3s ease;
         }
 
         #watermark {
             position: absolute;
             z-index: 9999;
-            color: rgba(255, 255, 255, 0.2);
-            font-size: 14px;
+            color: rgba(255, 255, 255, 0.15); /* شفافية مناسبة */
+            font-size: 13px;
             font-weight: bold;
-            pointer-events: none;
+            pointer-events: none; /* لا يتفاعل مع اللمس */
             white-space: nowrap;
             transition: all 0.8s ease-in-out;
-            background: rgba(0,0,0,0.1);
-            padding: 4px;
-            border-radius: 4px;
+            padding: 5px;
         }
 
-        /* حماية تعتيم فقط */
+        /* حماية التعتيم عند الخروج من التاب */
         .security-lock {
-            filter: blur(50px) brightness(0.3) !important;
+            filter: blur(60px) brightness(0.2) !important;
             pointer-events: none !important;
         }
 
@@ -60,6 +57,7 @@
         .card:hover { border-color: var(--primary); background: #243147; transform: translateY(-5px); }
         .card i { font-size: 35px; color: var(--primary); margin-bottom: 10px; }
 
+        /* منع الطباعة */
         @media print { body { display: none !important; } }
     </style>
 </head>
@@ -67,7 +65,7 @@
 
     <button class="back-btn" onclick="location.href='home.html'"><i class="fas fa-chevron-right"></i> العودة للرئيسية</button>
 
-    <h3 style="text-align:center; margin-bottom: 20px;">🎥 محاضراتك التعليمية المباشرة</h3>
+    <h3 style="text-align:center; margin-bottom: 20px;">🎥 محاضراتك المؤمنة | المستشار</h3>
 
     <div id="videoArea" class="video-wrapper">
         <div id="watermark">...</div>
@@ -89,17 +87,17 @@
     const db = firebase.firestore();
 
     // 2. Watermark Logic
-    const studentName = localStorage.getItem("userName") || "طالب مستشار";
-    const studentPhone = localStorage.getItem("userPhone") || "مستخدم المنصة";
+    const studentName = localStorage.getItem("userName") || "طالب مستجد";
+    const studentPhone = localStorage.getItem("userPhone") || "00000000";
     const watermark = document.getElementById('watermark');
-    watermark.innerText = `${studentName} | ${studentPhone}`;
+    watermark.innerText = `${studentName} - ${studentPhone}`;
 
     setInterval(() => {
-        const x = Math.random() * 75;
-        const y = Math.random() * 85;
+        const x = Math.random() * 70;
+        const y = Math.random() * 80;
         watermark.style.top = y + "%";
         watermark.style.left = x + "%";
-    }, 3000);
+    }, 4000);
 
     // 3. Security (Blur Only)
     function setSecurity(isLocked) {
@@ -111,7 +109,7 @@
         }
     }
 
-    // منع الاختصارات
+    // منع اختصارات الكيبورد
     document.addEventListener('keydown', function(e) {
         const forbidden = ["printscreen", "f12", "u", "s", "p", "i", "j", "c"];
         if (forbidden.includes(e.key.toLowerCase()) && (e.ctrlKey || e.metaKey || e.key === "PrintScreen")) {
@@ -119,14 +117,14 @@
         }
     });
 
-    // التعتيم عند الخروج والعودة
+    // مراقبة نشاط الصفحة
     window.addEventListener('blur', () => setSecurity(true));
     window.addEventListener('focus', () => setSecurity(false));
     document.addEventListener('visibilitychange', () => {
         setSecurity(document.visibilityState === 'hidden');
     });
 
-    // 4. Fetch Lessons
+    // 4. جلب المحاضرات
     db.collection("lessons").orderBy("createdAt", "desc").onSnapshot(snap => {
         const grid = document.getElementById('lessonsGrid');
         grid.innerHTML = "";
@@ -142,22 +140,28 @@
                 const player = document.getElementById('player');
                 videoArea.style.display = "block";
                 
-                // حقن كود الفيديو
+                // تنظيف وحقن الفيديو
                 player.innerHTML = lesson.url; 
                 
                 const iframe = player.querySelector('iframe');
                 if(iframe) {
                     iframe.style.width = "100%";
                     iframe.style.height = "100%";
-                    // تعديل الـ Sandbox: شلنا القيود اللي كانت بتسبب "خروج" أو تعارض
-                    // دلوقتي الـ iframe هيشتغل بس هيمنع فتح نوافذ جديدة تخرج الطالب
+                    
+                    // تفعيل ملء الشاشة ومنع المشاركة الخارجية
+                    iframe.setAttribute('allowfullscreen', 'true');
+                    iframe.setAttribute('webkitallowfullscreen', 'true');
+                    iframe.setAttribute('mozallowfullscreen', 'true');
+                    
+                    // Sandbox مشدد: يمنع النوافذ المنبثقة (المشاركة) ويسمح فقط بالتشغيل الداخلي وملء الشاشة
                     iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-presentation');
                     
-                    // منع ظهور شاشة "شاهد على يوتيوب" قدر الإمكان
+                    // منع أيقونات يوتيوب والمشاركة داخل الرابط
                     let src = iframe.getAttribute('src');
                     if(src && src.includes('youtube.com')) {
-                        const separator = src.includes('?') ? '&' : '?';
-                        iframe.setAttribute('src', src + separator + "modestbranding=1&rel=0&iv_load_policy=3&showinfo=0");
+                        const cleanSrc = src.split('?')[0];
+                        // إضافة بارامترات منع المشاركة والعلامة التجارية
+                        iframe.setAttribute('src', `${cleanSrc}?modestbranding=1&rel=0&iv_load_policy=3&showinfo=0&disablekb=1`);
                     }
                 }
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -166,7 +170,14 @@
         });
     });
 
+    // منع سحب العناصر أو الصور
     document.addEventListener('dragstart', (e) => e.preventDefault());
+    // منع الضغط المطول على الموبايل لمنع نسخ اللينك
+    window.oncontextmenu = function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        return false;
+    };
 </script>
 
 </body>
