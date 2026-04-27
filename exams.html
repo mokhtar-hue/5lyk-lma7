@@ -3,67 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة الاختبارات الذكية | المستشار</title>
+    <title>منصة المستشار | بوابة الطالب</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --primary: #6366f1; --bg: #0f172a; --card: #1e293b; --accent: #22c55e; }
+        :root { --primary: #6366f1; --bg: #0f172a; --card: #1e293b; --accent: #22c55e; --danger: #ef4444; }
         body { font-family: 'Cairo', sans-serif; background: var(--bg); color: #f1f5f9; margin: 0; overflow-x: hidden; }
         
-        /* شريط التقدم */
-        .progress-container { position: fixed; top: 0; left: 0; width: 100%; height: 6px; background: #334155; z-index: 1000; }
+        /* شريط التقدم العلوي */
+        .progress-container { position: fixed; top: 0; left: 0; width: 100%; height: 5px; background: #334155; z-index: 2000; }
         #progressBar { height: 100%; background: var(--primary); width: 0%; transition: 0.3s; box-shadow: 0 0 10px var(--primary); }
 
-        /* الهيدر المطور */
-        .navbar { display: flex; justify-content: space-between; padding: 15px 5%; background: var(--card); align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); position: sticky; top: 0; z-index: 999; }
-        .nav-right { display: flex; gap: 15px; align-items: center; }
-        
-        /* زر الداشبورد */
-        .home-btn { background: rgba(255,255,255,0.05); border: 1px solid #334155; color: white; padding: 8px 15px; border-radius: 12px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 8px; font-size: 14px; }
-        .home-btn:hover { background: var(--primary); border-color: var(--primary); }
+        /* الهيدر */
+        .navbar { display: flex; justify-content: space-between; padding: 15px 5%; background: var(--card); align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); position: sticky; top: 0; z-index: 1000; }
+        .nav-right { display: flex; gap: 10px; align-items: center; }
+        .user-chip { background: rgba(99,102,241,0.1); padding: 8px 15px; border-radius: 15px; border: 1px solid var(--primary); font-size: 14px; font-weight: bold; }
+        .timer-box { font-size: 20px; font-weight: 900; color: #fbbf24; }
 
-        .user-chip { background: rgba(99,102,241,0.1); padding: 8px 15px; border-radius: 20px; border: 1px solid var(--primary); font-size: 14px; }
-        .timer-box { font-size: 20px; font-weight: 900; color: #fbbf24; display: flex; align-items: center; gap: 10px; }
+        .container { max-width: 900px; margin: 30px auto; padding: 0 20px; }
 
-        .container { max-width: 900px; margin: 40px auto; padding: 0 20px; }
-
-        /* كرت الامتحان */
-        .quiz-card { background: var(--card); padding: 40px; border-radius: 30px; border: 1px solid #334155; position: relative; display: none; }
-        .question-header { display: flex; justify-content: space-between; margin-bottom: 25px; align-items: center; }
-        .q-text { font-size: 22px; font-weight: 700; line-height: 1.6; margin-bottom: 20px; }
-        
-        .essay-input { 
-            width: 100%; background: rgba(255,255,255,0.05); border: 2px solid #334155; 
-            border-radius: 15px; padding: 15px; color: white; font-family: 'Cairo'; 
-            font-size: 16px; resize: vertical; min-height: 150px; outline: none;
+        /* لوحة التحكم (الداشبورد) */
+        #dashboard { display: block; animation: fadeIn 0.4s ease; }
+        .welcome-section { margin-bottom: 30px; }
+        .exam-grid { display: grid; gap: 15px; }
+        .exam-item { 
+            background: var(--card); padding: 20px; border-radius: 20px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            border: 1px solid #334155; transition: 0.3s;
         }
-        .essay-input:focus { border-color: var(--primary); }
+        .exam-item:hover { transform: translateY(-5px); border-color: var(--primary); }
 
-        .options-grid { display: grid; gap: 15px; margin-top: 25px; }
+        /* منطقة الاختبار */
+        #quizArea { display: none; background: var(--card); padding: 30px; border-radius: 25px; border: 1px solid #334155; animation: slideIn 0.4s ease; }
+        .q-header { display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: bold; color: #94a3b8; }
+        .q-text { font-size: 22px; font-weight: 700; margin-bottom: 25px; line-height: 1.5; }
+        
+        .options-grid { display: grid; gap: 12px; }
         .opt-btn { 
-            background: rgba(255,255,255,0.03); border: 2px solid #334155; padding: 18px; 
-            border-radius: 15px; cursor: pointer; transition: 0.2s; text-align: right; color: #cbd5e1; font-size: 16px;
+            background: rgba(255,255,255,0.03); border: 2px solid #334155; padding: 15px; 
+            border-radius: 15px; cursor: pointer; transition: 0.2s; text-align: right; color: #cbd5e1;
         }
         .opt-btn:hover { background: rgba(99,102,241,0.1); border-color: var(--primary); }
-        .opt-btn.active { background: var(--primary); border-color: var(--primary); color: white; transform: scale(1.02); }
+        .opt-btn.active { background: var(--primary); border-color: var(--primary); color: white; }
 
-        .footer-nav { display: flex; justify-content: space-between; margin-top: 30px; }
-        .btn { padding: 12px 30px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        .btn-next { background: var(--primary); color: white; }
-        .btn-finish { background: var(--accent); color: white; display: none; }
-
-        /* تصميم الداشبورد */
-        #dashboard { display: block; animation: fadeIn 0.5s ease; }
-        .exam-item { 
-            background: var(--card); padding: 25px; border-radius: 20px; margin-bottom: 15px; 
-            display: flex; justify-content: space-between; align-items: center; border: 1px solid #334155;
-            transition: 0.3s;
+        .essay-input { 
+            width: 100%; background: rgba(0,0,0,0.2); border: 2px solid #334155; border-radius: 15px; 
+            padding: 15px; color: white; font-family: 'Cairo'; min-height: 150px; outline: none; box-sizing: border-box;
         }
-        .exam-item:hover { transform: translateX(-10px); border-color: var(--primary); }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* الأزرار */
+        .btn { padding: 12px 25px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; font-family: 'Cairo'; transition: 0.3s; display: flex; align-items: center; gap: 8px; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-outline { background: transparent; border: 1px solid #334155; color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-success { background: var(--accent); color: white; }
+
+        .footer-nav { display: flex; justify-content: space-between; margin-top: 30px; border-top: 1px solid #334155; padding-top: 20px; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
 <body>
@@ -72,42 +72,46 @@
 
 <nav class="navbar">
     <div class="nav-right">
-        <button class="home-btn" onclick="goHome()">
-            <i class="fas fa-home"></i> الرئيسية
+        <button class="btn btn-outline" id="backToDash" onclick="goHome()">
+            <i class="fas fa-th-large"></i> الرئيسية
         </button>
-        <div class="user-chip" id="userBadge">
-            <i class="fas fa-user-graduate"></i> جاري التعرف عليك..
-        </div>
+        <div class="user-chip" id="userBadge"><i class="fas fa-user"></i> جاري التحميل..</div>
     </div>
-    <div class="timer-box" id="timerDisplay"><i class="fas fa-clock"></i> 00:00</div>
+    <div class="timer-box" id="timerDisplay">00:00</div>
 </nav>
 
 <div class="container">
     <div id="dashboard">
-        <h2 style="margin-bottom: 5px;">أهلاً بك يا بطل 🚀</h2>
-        <p style="color: #94a3b8; margin-bottom: 30px;">اختر اختباراً لتبدأ التحدي أو راجع مستواك.</p>
-        <div id="examsGrid">
-            </div>
+        <div class="welcome-section">
+            <h1 style="margin:0;">أهلاً بك يا بطل 🚀</h1>
+            <p style="color: #94a3b8;">مستعد لاختبار جديد اليوم؟</p>
+        </div>
+        <div class="exam-grid" id="examsList">جاري البحث عن اختبارات...</div>
     </div>
 
-    <div id="quizArea" class="quiz-card">
-        <div class="question-header">
-            <span id="qCounter" class="user-chip" style="background: var(--primary); color: white;">السؤال 1</span>
-            <span id="qPoints" style="color: var(--accent); font-weight: bold;">+5 درجات</span>
+    <div id="quizArea">
+        <div class="q-header">
+            <span id="qCountDisplay">السؤال 1 من 0</span>
+            <span id="qPointsDisplay" style="color:var(--accent)">+0 درجة</span>
         </div>
         <div class="q-text" id="qBody">جاري تحميل السؤال...</div>
         
-        <div id="answerArea"></div>
+        <div id="answersContainer"></div>
 
         <div class="footer-nav">
-            <button class="btn" style="background:#475569; color:white" onclick="prevQ()">السابق</button>
-            <button class="btn btn-next" id="nextBtn" onclick="nextQ()">التالي</button>
-            <button class="btn btn-finish" id="finishBtn" onclick="submitExam()">إنهاء وتسجيل الاختبار</button>
+            <div style="display:flex; gap:10px;">
+                <button class="btn btn-outline" onclick="prevQ()"><i class="fas fa-arrow-right"></i> السابق</button>
+                <button class="btn btn-primary" id="nextBtn" onclick="nextQ()">التالي <i class="fas fa-arrow-left"></i></button>
+            </div>
+            <button class="btn btn-success" id="finishBtn" onclick="confirmSubmit()" style="display:none;">
+                <i class="fas fa-check-double"></i> إنهاء وتسجيل
+            </button>
         </div>
     </div>
 </div>
 
 <script>
+    // الإعدادات
     const firebaseConfig = { 
         apiKey: "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws", 
         authDomain: "zomaapp-744fc.firebaseapp.com", 
@@ -116,8 +120,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // جلب بيانات المستخدم من الذاكرة المحلية
-    const userEmail = localStorage.getItem("userEmail") || "test@test.com";
+    const userEmail = localStorage.getItem("userEmail") || "hazem@test.com";
     const userName = localStorage.getItem("userName") || "حازم سالم";
     document.getElementById('userBadge').innerHTML = `<i class="fas fa-user-check"></i> ${userName}`;
 
@@ -125,44 +128,43 @@
     let questions = [];
     let currentIdx = 0;
     let studentAnswers = [];
-    let timeLeft = 0;
     let timerInterval;
+    let timeLeft = 0;
 
-    // 1. تحميل الاختبارات للداشبورد
-    async function loadAvailableExams() {
+    // 1. جلب الاختبارات
+    async function loadExams() {
         const snap = await db.collection("quizzes").orderBy("createdAt", "desc").get();
-        const grid = document.getElementById('examsGrid');
-        grid.innerHTML = "";
+        const list = document.getElementById('examsList');
+        list.innerHTML = "";
         
         if(snap.empty) {
-            grid.innerHTML = "<p style='text-align:center; color:#64748b;'>لا توجد اختبارات متاحة حالياً.</p>";
+            list.innerHTML = "<p>لا يوجد اختبارات منشورة حالياً.</p>";
             return;
         }
 
         snap.forEach(doc => {
-            const data = doc.data();
-            grid.innerHTML += `
+            const q = doc.data();
+            list.innerHTML += `
                 <div class="exam-item">
                     <div>
-                        <h4 style="margin:0">${data.title}</h4>
-                        <small style="color:#94a3b8">${data.questions.length} سؤال • ${data.duration} دقيقة</small>
+                        <h3 style="margin:0">${q.title}</h3>
+                        <small style="color:#94a3b8">${q.questions.length} سؤال • ${q.duration} دقيقة</small>
                     </div>
-                    <button class="btn btn-next" onclick="startExam('${doc.id}')">ابدأ التحدي</button>
+                    <button class="btn btn-primary" onclick="startExam('${doc.id}')">ابدأ الآن</button>
                 </div>`;
         });
     }
-    loadAvailableExams();
+    loadExams();
 
-    // 2. البدء في امتحان معين
+    // 2. بدء الاختبار
     async function startExam(id) {
         const doc = await db.collection("quizzes").doc(id).get();
-        currentQuiz = doc.data();
-        currentQuiz.id = id;
+        currentQuiz = { ...doc.data(), id: doc.id };
         questions = currentQuiz.questions;
         studentAnswers = new Array(questions.length).fill("");
         currentIdx = 0;
         timeLeft = currentQuiz.duration * 60;
-        
+
         document.getElementById('dashboard').style.display = 'none';
         document.getElementById('quizArea').style.display = 'block';
         
@@ -170,17 +172,17 @@
         renderQuestion();
     }
 
-    // 3. عرض السؤال الحالي (اختياري أو مقالي)
+    // 3. عرض السؤال
     function renderQuestion() {
         const q = questions[currentIdx];
-        document.getElementById('qCounter').innerText = `السؤال ${currentIdx + 1} من ${questions.length}`;
+        document.getElementById('qCountDisplay').innerText = `سؤال ${currentIdx + 1} من ${questions.length}`;
+        document.getElementById('qPointsDisplay').innerText = `+${q.points} درجة`;
         document.getElementById('qBody').innerText = q.question;
-        document.getElementById('qPoints').innerText = `+${q.points} درجة`;
         
-        const area = document.getElementById('answerArea');
-        area.innerHTML = "";
+        const container = document.getElementById('answersContainer');
+        container.innerHTML = "";
 
-        if (q.options && q.options.length > 0) { // سؤال اختياري
+        if(q.type === 'choice' || (q.options && q.options.length > 0)) {
             const grid = document.createElement('div');
             grid.className = "options-grid";
             q.options.forEach((opt, i) => {
@@ -190,87 +192,111 @@
                 btn.onclick = () => { studentAnswers[currentIdx] = i; renderQuestion(); };
                 grid.appendChild(btn);
             });
-            area.appendChild(grid);
-        } else { // سؤال مقالي
-            const txt = document.createElement('textarea');
-            txt.className = "essay-input";
-            txt.placeholder = "اكتب إجابتك هنا...";
-            txt.value = studentAnswers[currentIdx];
-            txt.oninput = (e) => { studentAnswers[currentIdx] = e.target.value; };
-            area.appendChild(txt);
+            container.appendChild(grid);
+        } else {
+            const area = document.createElement('textarea');
+            area.className = "essay-input";
+            area.placeholder = "اكتب إجابتك بالتفصيل هنا...";
+            area.value = studentAnswers[currentIdx];
+            area.oninput = (e) => { studentAnswers[currentIdx] = e.target.value; };
+            container.appendChild(area);
         }
 
-        // تحديث التقدم
+        // تحديث الأزرار والتقدم
         document.getElementById('progressBar').style.width = ((currentIdx + 1) / questions.length) * 100 + "%";
-        document.getElementById('finishBtn').style.display = (currentIdx === questions.length - 1) ? 'block' : 'none';
-        document.getElementById('nextBtn').style.display = (currentIdx === questions.length - 1) ? 'none' : 'block';
+        const isLast = currentIdx === questions.length - 1;
+        document.getElementById('nextBtn').style.display = isLast ? 'none' : 'flex';
+        document.getElementById('finishBtn').style.display = isLast ? 'flex' : 'none';
     }
 
-    function nextQ() { if(currentIdx < questions.length - 1) { currentIdx++; renderQuestion(); } }
+    function nextQ() { if(currentIdx < questions.length -1) { currentIdx++; renderQuestion(); } }
     function prevQ() { if(currentIdx > 0) { currentIdx--; renderQuestion(); } }
 
+    // 4. التايمر
     function startTimer() {
         clearInterval(timerInterval);
         timerInterval = setInterval(() => {
             timeLeft--;
             const m = Math.floor(timeLeft / 60);
             const s = timeLeft % 60;
-            document.getElementById('timerDisplay').innerHTML = `<i class="fas fa-clock"></i> ${m}:${s < 10 ? '0' : ''}${s}`;
-            if(timeLeft <= 0) { clearInterval(timerInterval); submitExam(); }
+            document.getElementById('timerDisplay').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+            if(timeLeft <= 0) { clearInterval(timerInterval); submitResults(); }
         }, 1000);
     }
 
-    // 4. وظيفة العودة للرئيسية
+    // 5. العودة للرئيسية (زر الرجوع)
     function goHome() {
-        if(document.getElementById('quizArea').style.display === 'block') {
-            if(!confirm("هل أنت متأكد؟ سيتم إلغاء تقدمك في هذا الامتحان ولن يتم حفظ الإجابات.")) return;
-        }
+        const isExamining = document.getElementById('quizArea').style.display === 'block';
+        if(isExamining && !confirm("هل تريد الخروج؟ لن يتم حفظ إجاباتك!")) return;
+        
         clearInterval(timerInterval);
         document.getElementById('quizArea').style.display = 'none';
         document.getElementById('dashboard').style.display = 'block';
-        document.getElementById('timerDisplay').innerHTML = `<i class="fas fa-clock"></i> 00:00`;
         document.getElementById('progressBar').style.width = "0%";
-        loadAvailableExams();
+        loadExams();
     }
 
-    // 5. تسليم الامتحان
-    async function submitExam() {
+    // 6. تسليم النتائج
+    function confirmSubmit() {
+        if(confirm("هل أنت متأكد من تسليم جميع الإجابات؟")) submitResults();
+    }
+
+    async function submitResults() {
         clearInterval(timerInterval);
+        document.getElementById('finishBtn').disabled = true;
+        document.getElementById('finishBtn').innerText = "جاري الحفظ...";
+
         let autoScore = 0;
         let totalPoints = 0;
         let hasEssay = false;
 
-        const processedAnswers = questions.map((q, i) => {
+        const results = questions.map((q, i) => {
             totalPoints += q.points;
-            let isCorrect = false;
-            if (q.options && q.options.length > 0) {
-                if (studentAnswers[i] === q.correctIndex) { autoScore += q.points; isCorrect = true; }
+            let correct = false;
+            if(q.options && q.options.length > 0) {
+                if(studentAnswers[i] === q.correctIndex) {
+                    autoScore += q.points;
+                    correct = true;
+                }
             } else { hasEssay = true; }
 
             return {
                 question: q.question,
                 studentAnswer: studentAnswers[i],
                 points: q.points,
-                isCorrect: isCorrect,
-                type: q.options && q.options.length > 0 ? "choice" : "essay"
+                isCorrect: correct,
+                type: (q.options && q.options.length > 0) ? "choice" : "essay"
             };
         });
 
-        await db.collection("results").add({
-            studentEmail: userEmail,
-            studentName: userName,
-            examTitle: currentQuiz.title,
-            quizId: currentQuiz.id,
-            totalPoints: totalPoints,
-            autoScore: autoScore,
-            finalScore: hasEssay ? null : autoScore,
-            status: hasEssay ? "pending" : "graded",
-            answers: processedAnswers,
-            submittedAt: new Date()
-        });
+        try {
+            await db.collection("results").add({
+                studentName: userName,
+                studentEmail: userEmail,
+                examTitle: currentQuiz.title,
+                quizId: currentQuiz.id,
+                autoScore: autoScore,
+                totalPoints: totalPoints,
+                status: hasEssay ? "pending" : "graded",
+                finalScore: hasEssay ? null : autoScore,
+                answers: results,
+                submittedAt: new Date()
+            });
 
-        alert(hasEssay ? "تم التسليم! بانتظار تصحيح المقالي." : `انتهى الاختبار بنجاح! درجتك: ${autoScore} من ${totalPoints}`);
-        goHome();
+            alert(hasEssay ? "تم استلام إجاباتك! بانتظار تصحيح المعلم للأسئلة المقالية." : `مبروك! انتهيت بنجاح. درجتك: ${autoScore} من ${totalPoints}`);
+            
+            // إعادة تصفير الواجهة والعودة للرئيسية
+            document.getElementById('quizArea').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            document.getElementById('progressBar').style.width = "0%";
+            document.getElementById('finishBtn').disabled = false;
+            document.getElementById('finishBtn').innerHTML = '<i class="fas fa-check-double"></i> إنهاء وتسجيل';
+            loadExams();
+
+        } catch (e) {
+            alert("حدث خطأ أثناء الحفظ: " + e.message);
+            document.getElementById('finishBtn').disabled = false;
+        }
     }
 </script>
 </body>
