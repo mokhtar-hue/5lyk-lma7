@@ -14,22 +14,19 @@
         :root { --primary: #6366f1; --bg: #0b0f1a; --card: #161e2d; --accent: #10b981; --danger: #f43f5e; --warning: #f59e0b; --info: #3b82f6; }
         body { font-family: 'Cairo', sans-serif; background: var(--bg); color: #f1f5f9; margin: 0; padding-bottom: 50px; }
         
-        /* شاشة الدخول */
-        #loginOverlay { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        .login-card { background: var(--card); padding: 40px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; border: 1px solid #2d3748; }
-        .login-input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #2d3748; background: #0b0f1a; color: white; outline: none; box-sizing: border-box;}
-
         .navbar { background: var(--card); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2d3748; position: sticky; top: 0; z-index: 100; }
         .btn-back { text-decoration: none; color: #fff; background: rgba(255,255,255,0.1); padding: 8px 15px; border-radius: 10px; font-size: 14px; transition: 0.3s; display: flex; align-items: center; gap: 8px; border: none; cursor: pointer; }
         
         .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
         
+        /* Stats Grid */
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 40px; }
         .stat-card { background: var(--card); padding: 25px; border-radius: 20px; border: 1px solid #2d3748; position: relative; overflow: hidden; }
         .stat-card i { position: absolute; left: -10px; bottom: -10px; font-size: 70px; opacity: 0.1; color: #fff; }
         .stat-val { font-size: 28px; font-weight: 900; display: block; margin: 10px 0; }
         .stat-label { color: #94a3b8; font-size: 14px; font-weight: bold; }
 
+        /* Tables & Lists */
         .table-container { background: var(--card); border-radius: 20px; border: 1px solid #2d3748; overflow-x: auto; margin-top: 15px; }
         table { width: 100%; border-collapse: collapse; text-align: right; min-width: 600px; }
         th { background: rgba(255,255,255,0.03); padding: 15px; color: #94a3b8; border-bottom: 1px solid #2d3748; }
@@ -48,29 +45,29 @@
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate { animation: fadeIn 0.5s forwards; }
+
+        /* Loading Screen */
+        #loader { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 2000; }
+        .spinner { width: 50px; height: 50px; border: 5px solid rgba(99, 102, 241, 0.2); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-<div id="loginOverlay" style="display: none;">
-    <div class="login-card">
-        <h2>لوحة الطالب التحليلية 📊</h2>
-        <p>الرجاء إدخال بياناتك لاسترجاع تحليلاتك</p>
-        <input type="text" id="loginName" class="login-input" placeholder="اسمك المسجل">
-        <input type="email" id="loginEmail" class="login-input" placeholder="بريدك أو كود الطالب">
-        <button class="btn-back" style="width:100%; background:var(--primary); justify-content:center; margin-top:10px;" onclick="doLogin()">عرض النتائج</button>
-    </div>
+<div id="loader">
+    <div class="spinner"></div>
+    <p style="margin-top: 20px; color: var(--primary);">جاري استرجاع بياناتك...</p>
 </div>
 
 <nav class="navbar">
     <div style="font-weight: 900; font-size: 20px; color: var(--primary);"><i class="fas fa-chart-bar"></i> تحليل أداء: <span id="studentNameTop" style="color:#fff">...</span></div>
     <div style="display: flex; gap: 10px;">
-        <a href="exam-portal.html" class="btn-back"><i class="fas fa-edit"></i> بوابة الاختبارات</a>
+        <a href="home.html" class="btn-back"><i class="fas fa-home"></i> الرئيسية</a>
         <button onclick="logout()" class="btn-back" style="background: var(--danger);"><i class="fas fa-sign-out-alt"></i> خروج</button>
     </div>
 </nav>
 
-<div class="container" id="mainContent">
+<div class="container" id="mainContent" style="opacity: 0;">
     <div class="stats-grid">
         <div class="stat-card animate">
             <i class="fas fa-file-signature"></i>
@@ -99,7 +96,7 @@
         <div class="progress-box">
             <div id="accuracyBar" class="progress-fill"></div>
         </div>
-        <p id="accuracyText" style="color:#94a3b8; font-size: 13px;">جاري حساب التقرير النهائي...</p>
+        <p id="accuracyText" style="color:#94a3b8; font-size: 13px;">جاري تحليل مستواك العلمي...</p>
     </div>
 
     <h3 style="margin-top: 40px;"><i class="fas fa-list-check" style="color:var(--primary)"></i> سجل الدرجات الشخصي</h3>
@@ -111,21 +108,21 @@
                     <th>التاريخ</th>
                     <th>الدرجة</th>
                     <th>النسبة</th>
-                    <th>النتيجة</th>
+                    <th>الحالة</th>
                 </tr>
             </thead>
             <tbody id="resultsTableBody"></tbody>
         </table>
     </div>
 
-    <h3 style="margin-top: 40px; color: var(--danger);"><i class="fas fa-lightbulb"></i> بنك الأخطاء (للمراجعة الذكية)</h3>
+    <h3 style="margin-top: 40px; color: var(--danger);"><i class="fas fa-lightbulb"></i> بنك الأخطاء للتصحيح الذاتي</h3>
     <div id="errorsBank">
-        <p style="color:#94a3b8">جاري البحث عن فجوات التعلم...</p>
+        <p style="color:#94a3b8">جاري البحث عن أخطاء سابقة لمراجعتها...</p>
     </div>
 </div>
 
 <script>
-    // تهيئة Firebase
+    // تهيئة Firebase بنفس بياناتك
     const firebaseConfig = { 
         apiKey: "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws", 
         authDomain: "zomaapp-744fc.firebaseapp.com", 
@@ -134,54 +131,40 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    let userEmail = localStorage.getItem("userEmail");
-    let userName = localStorage.getItem("userName");
+    // جلب البيانات "أوتوماتيكياً" من المتصفح
+    const userEmail = localStorage.getItem("userEmail");
+    const userName = localStorage.getItem("userName");
 
-    // نظام تسجيل الدخول والحماية
-    function checkAuth() {
+    async function initDashboard() {
+        // 1. التأكد من أن الطالب مسجل دخول بالفعل
         if (!userEmail) {
-            document.getElementById('loginOverlay').style.display = 'flex';
-            document.getElementById('mainContent').style.opacity = '0';
-        } else {
-            document.getElementById('loginOverlay').style.display = 'none';
-            document.getElementById('mainContent').style.opacity = '1';
-            document.getElementById('studentNameTop').innerText = userName;
-            loadFullAnalytics();
-        }
-    }
-
-    function doLogin() {
-        const name = document.getElementById('loginName').value.trim();
-        const email = document.getElementById('loginEmail').value.trim().toLowerCase();
-        if (name.length < 3 || email.length < 5) {
-            alert("يرجى إدخال بيانات صحيحة");
+            alert("عذراً، لم نتمكن من التعرف عليك. سيتم توجيهك لصفحة الدخول.");
+            window.location.href = "index.html"; // توجيه لصفحة الدخول لو البيانات مش موجودة
             return;
         }
-        localStorage.setItem("userEmail", email);
-        localStorage.setItem("userName", name);
-        location.reload();
+
+        document.getElementById('studentNameTop').innerText = userName;
+        await loadFullAnalytics();
+        
+        // إخفاء الـ Loader وإظهار المحتوى
+        document.getElementById('loader').style.display = 'none';
+        document.getElementById('mainContent').style.opacity = '1';
     }
 
-    function logout() {
-        localStorage.clear();
-        location.reload();
-    }
-
-    // جلب وتحليل البيانات
     async function loadFullAnalytics() {
         try {
-            // جلب نتائج هذا الطالب فقط من Firebase
+            // جلب النتائج بناءً على الإيميل المخزن تلقائياً
             const snap = await db.collection("results")
                 .where("studentEmail", "==", userEmail)
                 .get();
 
             if(snap.empty) {
-                document.getElementById('resultsTableBody').innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px;">لا يوجد سجل بيانات لهذا المستخدم حتى الآن. ابدأ بالحل أولاً.</td></tr>';
-                document.getElementById('errorsBank').innerHTML = '<p style="color:#94a3b8">سجل الأخطاء فارغ حالياً.</p>';
+                document.getElementById('resultsTableBody').innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px;">لم تخض أي اختبارات بعد. نتائجك ستظهر هنا فور انتهائك من أول امتحان.</td></tr>';
+                document.getElementById('errorsBank').innerHTML = '<p style="color:#94a3b8">لا توجد أخطاء حالياً.</p>';
                 return;
             }
 
-            // ترتيب النتائج من الأحدث للأقدم
+            // ترتيب البيانات (الأحدث أولاً)
             const results = snap.docs.map(doc => doc.data())
                 .sort((a, b) => (b.submittedAt?.seconds || 0) - (a.submittedAt?.seconds || 0));
 
@@ -195,7 +178,7 @@
                 let currentScore = data.score || 0;
                 let currentMax = data.totalMCQPoints || 0;
                 
-                // تحليل الأخطاء والدرجات التراكمية
+                // جمع الأخطاء للمراجعة
                 if(data.analysis) {
                     data.analysis.forEach(q => {
                         if(q.isCorrect === false) {
@@ -211,58 +194,63 @@
                 const date = data.submittedAt ? new Date(data.submittedAt.seconds * 1000).toLocaleDateString('ar-EG') : '---';
 
                 tbody.innerHTML += `
-                    <tr class="animate">
+                    <tr>
                         <td><strong>${data.examTitle}</strong></td>
                         <td style="color:#94a3b8">${date}</td>
                         <td style="font-weight:bold">${currentScore} / ${currentMax}</td>
                         <td style="color:${percent >= 50 ? 'var(--accent)' : 'var(--danger)'}">${percent}%</td>
-                        <td>${percent >= 50 ? '<span class="badge badge-success">ناجح</span>' : '<span class="badge badge-danger">مراجعة</span>'}</td>
+                        <td>${percent >= 50 ? '<span class="badge badge-success">ناجح</span>' : '<span class="badge badge-danger">يحتاج مراجعة</span>'}</td>
                     </tr>
                 `;
             });
 
-            // تحديث البطاقات العلوية
+            // حساب الإحصائيات
             const finalAvg = totalPointsPossible > 0 ? ((totalPointsEarned / totalPointsPossible) * 100).toFixed(1) : 0;
             document.getElementById('totalExams').innerText = results.length;
             document.getElementById('avgScore').innerText = finalAvg + "%";
             document.getElementById('accuracyBar').style.width = finalAvg + "%";
             
-            // حساب التقدير والتحفيز
-            let rank = "مبتدئ";
-            let strength = "الإصرار";
-            if(finalAvg >= 90) { rank = "مستشار عبقري 🏆"; strength = "الدقة العالية"; }
-            else if(finalAvg >= 75) { rank = "متميز ⭐"; strength = "سرعة الاستيعاب"; }
-            else if(finalAvg >= 50) { rank = "مجتهد 👍"; strength = "التحسن المستمر"; }
+            // التقييم الذكي
+            let rank = "مبتدئ"; let strength = "الإصرار";
+            if(finalAvg >= 90) { rank = "مستشار عبقري 🏆"; strength = "الدقة والتركيز"; }
+            else if(finalAvg >= 75) { rank = "متمكن جداً ⭐"; strength = "الفهم السريع"; }
+            else if(finalAvg >= 50) { rank = "في تقدم مستمر 👍"; strength = "المحاولة الجادة"; }
 
             document.getElementById('studentRank').innerText = rank;
             document.getElementById('strengthPoints').innerText = strength;
-            document.getElementById('accuracyText').innerText = `بناءً على ${results.length} اختبارات، أنت تتقن ${finalAvg}% من المهارات المطلوبة.`;
+            document.getElementById('accuracyText').innerText = `بناءً على ${results.length} اختبارات، حققت نسبة إتقان ${finalAvg}% للمهارات المختبرة.`;
 
             // عرض بنك الأخطاء
             const errBank = document.getElementById('errorsBank');
             if(errorItems.length > 0) {
                 errBank.innerHTML = "";
-                // عرض آخر 5 أخطاء لعدم تشتيت الطالب
-                errorItems.slice(0, 5).forEach(err => {
+                errorItems.slice(0, 6).forEach(err => {
                     errBank.innerHTML += `
                         <div class="error-item animate">
                             <span class="error-q">${err.q} <small style="color:var(--info)">(${err.title})</small></span>
-                            <span class="correct-ans"><i class="fas fa-check-circle"></i> الإجابة الصحيحة هي: ${err.correct}</span>
+                            <span class="correct-ans"><i class="fas fa-check-circle"></i> الحل الصحيح: ${err.correct}</span>
                         </div>
                     `;
                 });
             } else {
-                errBank.innerHTML = '<p style="color:var(--accent)">تهانينا! لا توجد أخطاء مسجلة في بنك المراجعة.</p>';
+                errBank.innerHTML = '<p style="color:var(--accent)">عمل رائع! سجلك خالٍ من الأخطاء المتكررة.</p>';
             }
 
         } catch (err) {
-            console.error("Analytics Error:", err);
-            alert("فشل في تحميل البيانات، يرجى التحقق من اتصالك بالإنترنت.");
+            console.error("Firebase Error:", err);
+            document.getElementById('accuracyText').innerText = "حدث خطأ أثناء تحميل بيانات السحابة.";
         }
     }
 
-    // تشغيل نظام التحقق عند فتح الصفحة
-    window.onload = checkAuth;
+    function logout() {
+        if(confirm("هل تريد تسجيل الخروج؟")) {
+            localStorage.clear();
+            window.location.href = "index.html";
+        }
+    }
+
+    // التشغيل التلقائي بمجرد فتح الصفحة
+    window.onload = initDashboard;
 </script>
 </body>
 </html>
