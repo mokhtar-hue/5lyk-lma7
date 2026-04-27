@@ -2,40 +2,85 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>منصة الاختبارات | الطالب</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة الاختبارات الذكية | المستشار</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --primary: #6366f1; --bg: #0f172a; --card: #1e293b; }
-        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: white; padding: 20px; }
-        .header-dash { display: flex; justify-content: space-between; background: var(--card); padding: 15px; border-radius: 15px; margin-bottom: 20px; }
-        .quiz-box { background: var(--card); padding: 30px; border-radius: 25px; border: 2px solid #334155; }
-        .option { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin: 10px 0; cursor: pointer; border: 1px solid transparent; }
-        .option.selected { border-color: var(--primary); background: rgba(99,102,241,0.2); }
-        #timer { font-size: 24px; font-weight: 900; color: #fbbf24; }
-        .btn { background: var(--primary); color: white; border: none; padding: 12px 25px; border-radius: 10px; cursor: pointer; }
+        :root { --primary: #6366f1; --bg: #0f172a; --card: #1e293b; --accent: #22c55e; }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: #f1f5f9; margin: 0; overflow-x: hidden; }
+        
+        /* شريط التقدم العلوي */
+        .progress-container { position: fixed; top: 0; left: 0; width: 100%; height: 6px; background: #334155; z-index: 1000; }
+        #progressBar { height: 100%; background: var(--primary); width: 0%; transition: 0.3s; box-shadow: 0 0 10px var(--primary); }
+
+        .navbar { display: flex; justify-content: space-between; padding: 15px 5%; background: var(--card); align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .user-chip { background: rgba(99,102,241,0.1); padding: 5px 15px; border-radius: 20px; border: 1px solid var(--primary); font-size: 14px; }
+
+        .container { max-width: 900px; margin: 40px auto; padding: 0 20px; }
+
+        /* كرت الامتحان */
+        .quiz-card { background: var(--card); padding: 40px; border-radius: 30px; border: 1px solid #334155; position: relative; display: none; }
+        .question-header { display: flex; justify-content: space-between; margin-bottom: 25px; align-items: center; }
+        .q-text { font-size: 22px; font-weight: 700; line-height: 1.6; }
+        
+        .options-grid { display: grid; gap: 15px; margin-top: 25px; }
+        .opt-btn { 
+            background: rgba(255,255,255,0.03); border: 2px solid #334155; padding: 18px; 
+            border-radius: 15px; cursor: pointer; transition: 0.2s; text-align: right; color: #cbd5e1; font-size: 16px;
+        }
+        .opt-btn:hover { background: rgba(99,102,241,0.1); border-color: var(--primary); }
+        .opt-btn.active { background: var(--primary); border-color: var(--primary); color: white; transform: scale(1.02); }
+
+        .timer-box { font-size: 24px; font-weight: 900; color: #fbbf24; display: flex; align-items: center; gap: 10px; }
+        
+        .footer-nav { display: flex; justify-content: space-between; margin-top: 30px; }
+        .btn { padding: 12px 30px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-next { background: var(--primary); color: white; }
+        .btn-finish { background: var(--accent); color: white; display: none; }
+
+        /* واجهة لوحة الإنجازات المدمجة */
+        #dashboard { display: block; }
+        .exam-item { 
+            background: var(--card); padding: 20px; border-radius: 20px; margin-bottom: 15px; 
+            display: flex; justify-content: space-between; align-items: center; border: 1px solid #334155;
+        }
     </style>
 </head>
 <body>
 
-<div class="header-dash">
-    <div>مرحباً: <b id="stdName">..</b></div>
-    <div id="timer">00:00</div>
-    <button class="btn" onclick="location.href='student-dash.html'">لوحة درجاتي 📊</button>
-</div>
+<div class="progress-container"><div id="progressBar"></div></div>
 
-<div id="quizArea" class="quiz-box">
-    <h2 id="qTitle">اختر الامتحان من القائمة</h2>
-    <div id="examList"></div>
-    <div id="questionView" style="display:none;">
-        <h3 id="qText"></h3>
-        <div id="options"></div>
-        <div style="display:flex; justify-content: space-between; margin-top:20px;">
-            <button class="btn" id="prevBtn" onclick="changeQ(-1)">السابق</button>
-            <button class="btn" id="nextBtn" onclick="changeQ(1)">التالي</button>
+<nav class="navbar">
+    <div class="timer-box" id="timerDisplay"><i class="fas fa-clock"></i> 00:00</div>
+    <div class="user-chip" id="userBadge"><i class="fas fa-user-graduate"></i> جاري التعرف عليك..</div>
+</nav>
+
+<div class="container">
+    <div id="dashboard">
+        <h2 style="margin-bottom: 5px;">أهلاً بك يا بطل 🚀</h2>
+        <p style="color: #94a3b8; margin-bottom: 30px;">اختر اختباراً لتبدأ التحدي أو راجع نتائجك السابقة.</p>
+        
+        <div id="examsGrid">
+            </div>
+    </div>
+
+    <div id="quizArea" class="quiz-card">
+        <div class="question-header">
+            <span class="badge" id="qCounter">السؤال 1 من 10</span>
+            <span id="qPoints" style="color: var(--accent);">+5 درجات</span>
         </div>
-        <button class="btn" style="width:100%; margin-top:20px; background:#22c55e;" onclick="finishExam()">تسجيل وإرسال الإجابات 🏁</button>
+        <div class="q-text" id="qBody">جاري تحميل السؤال...</div>
+        
+        <div class="options-grid" id="optionsArea"></div>
+
+        <div class="footer-nav">
+            <button class="btn" style="background:#475569; color:white" onclick="prevQ()">السابق</button>
+            <button class="btn btn-next" id="nextBtn" onclick="nextQ()">التالي</button>
+            <button class="btn btn-finish" id="finishBtn" onclick="submitExam()">تسجيل الإجابات وإنهاء الاختبار</button>
+        </div>
     </div>
 </div>
 
@@ -48,100 +93,136 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    const studentName = localStorage.getItem("userName") || "طالب";
-    const studentEmail = localStorage.getItem("userEmail");
-    document.getElementById('stdName').innerText = studentName;
+    // 1. التعرف التلقائي على الطالب
+    const userEmail = localStorage.getItem("userEmail");
+    const userName = localStorage.getItem("userName") || "طالب مستجد";
 
-    let currentExam = null;
+    if(!userEmail) {
+        alert("لم يتم العثور على بياناتك، سيتم توجيهك لتسجيل الدخول.");
+        window.location.href = "login.html";
+    } else {
+        document.getElementById('userBadge').innerHTML = `<i class="fas fa-user-check"></i> ${userName}`;
+        loadAvailableExams();
+    }
+
+    let currentQuiz = null;
+    let questions = [];
     let currentIdx = 0;
-    let userAnswers = [];
+    let answers = [];
     let timeLeft = 0;
     let timerInterval;
 
-    // جلب الامتحانات المتاحة
-    db.collection("quizzes").onSnapshot(snap => {
-        const list = document.getElementById('examList');
-        list.innerHTML = "";
+    // 2. تحميل الامتحانات المتاحة
+    async function loadAvailableExams() {
+        const snap = await db.collection("quizzes").orderBy("createdAt", "desc").get();
+        const grid = document.getElementById('examsGrid');
+        grid.innerHTML = "";
+        
         snap.forEach(doc => {
-            const ex = doc.data();
-            list.innerHTML += `<button class="btn" style="margin:5px" onclick="loadExam('${doc.id}')">${ex.title}</button>`;
+            const data = doc.data();
+            grid.innerHTML += `
+                <div class="exam-item">
+                    <div>
+                        <h4 style="margin:0">${data.title}</h4>
+                        <small style="color:#94a3b8">${data.questions.length} سؤال • ${data.duration} دقيقة</small>
+                    </div>
+                    <button class="btn btn-next" onclick="startExam('${doc.id}')">ابدأ الآن</button>
+                </div>`;
         });
-    });
-
-    async function loadExam(id) {
-        const doc = await db.collection("quizzes").doc(id).get();
-        currentExam = {id: doc.id, ...doc.data()};
-        
-        document.getElementById('examList').style.display = 'none';
-        document.getElementById('questionView').style.display = 'block';
-        document.getElementById('qTitle').innerText = currentExam.title;
-        
-        userAnswers = new Array(currentExam.questions.length).fill(null);
-        timeLeft = currentExam.duration * 60;
-        startTimer();
-        showQuestion();
     }
 
-    function showQuestion() {
-        const q = currentExam.questions[currentIdx];
-        document.getElementById('qText').innerText = `سؤال ${currentIdx+1}: ${q.question}`;
-        const optsDiv = document.getElementById('options');
-        optsDiv.innerHTML = "";
+    // 3. بدء الامتحان
+    async function startExam(id) {
+        const doc = await db.collection("quizzes").doc(id).get();
+        currentQuiz = doc.data();
+        questions = currentQuiz.questions;
+        answers = new Array(questions.length).fill(null);
+        timeLeft = currentQuiz.duration * 60;
+        
+        document.getElementById('dashboard').style.display = 'none';
+        document.getElementById('quizArea').style.display = 'block';
+        
+        startTimer();
+        renderQuestion();
+    }
+
+    function renderQuestion() {
+        const q = questions[currentIdx];
+        document.getElementById('qCounter').innerText = `سؤال ${currentIdx + 1} من ${questions.length}`;
+        document.getElementById('qBody').innerText = q.question;
+        document.getElementById('qPoints').innerText = `+${q.points} درجة`;
+        
+        const area = document.getElementById('optionsArea');
+        area.innerHTML = "";
         
         q.options.forEach((opt, i) => {
-            const d = document.createElement('div');
-            d.className = `option ${userAnswers[currentIdx] === i ? 'selected' : ''}`;
-            d.innerText = `${String.fromCharCode(97 + i).toUpperCase()}) ${opt}`;
-            d.onclick = () => { userAnswers[currentIdx] = i; showQuestion(); };
-            optsDiv.appendChild(d);
+            const btn = document.createElement('div');
+            btn.className = `opt-btn ${answers[currentIdx] === i ? 'active' : ''}`;
+            btn.innerText = opt;
+            btn.onclick = () => {
+                answers[currentIdx] = i;
+                renderQuestion();
+            };
+            area.appendChild(btn);
         });
+
+        // تحديث شريط التقدم
+        document.getElementById('progressBar').style.width = ((currentIdx + 1) / questions.length) * 100 + "%";
+        
+        // تبديل الأزرار في آخر سؤال
+        if(currentIdx === questions.length - 1) {
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('finishBtn').style.display = 'block';
+        } else {
+            document.getElementById('nextBtn').style.display = 'block';
+            document.getElementById('finishBtn').style.display = 'none';
+        }
     }
 
-    function changeQ(dir) {
-        currentIdx += dir;
-        if(currentIdx < 0) currentIdx = 0;
-        if(currentIdx >= currentExam.questions.length) currentIdx = currentExam.questions.length -1;
-        showQuestion();
-    }
+    function nextQ() { if(currentIdx < questions.length - 1) { currentIdx++; renderQuestion(); } }
+    function prevQ() { if(currentIdx > 0) { currentIdx--; renderQuestion(); } }
 
     function startTimer() {
         timerInterval = setInterval(() => {
             timeLeft--;
-            let mins = Math.floor(timeLeft / 60);
-            let secs = timeLeft % 60;
-            document.getElementById('timer').innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-            if(timeLeft <= 0) finishExam();
+            const m = Math.floor(timeLeft / 60);
+            const s = timeLeft % 60;
+            document.getElementById('timerDisplay').innerHTML = `<i class="fas fa-clock"></i> ${m}:${s < 10 ? '0' : ''}${s}`;
+            if(timeLeft <= 0) submitExam();
         }, 1000);
     }
 
-    async function finishExam() {
-        if(userAnswers.includes(null) && timeLeft > 0) {
-            if(!confirm("لم تحل جميع الأسئلة، هل تريد التسليم؟")) return;
+    async function submitExam() {
+        if(answers.includes(null) && timeLeft > 0) {
+            if(!confirm("لسه فيه أسئلة ما اتحلتش، متأكد إنك عاوز تسلم؟")) return;
         }
 
         clearInterval(timerInterval);
         let score = 0;
-        let totalPoints = 0;
+        let total = 0;
 
-        currentExam.questions.forEach((q, i) => {
-            totalPoints += q.points;
-            if(userAnswers[i] === q.correctIndex) score += q.points;
+        questions.forEach((q, i) => {
+            total += q.points;
+            if(answers[i] === q.correctIndex) score += q.points;
         });
 
-        const finalData = {
-            studentName: studentName,
-            studentEmail: studentEmail,
-            examTitle: currentExam.title,
+        await db.collection("results").add({
+            studentEmail: userEmail,
+            studentName: userName,
+            examTitle: currentQuiz.title,
             score: score,
-            total: totalPoints,
-            status: currentExam.showResult === 'yes' ? 'تم التصحيح' : 'قيد المراجعة',
+            total: total,
             submittedAt: new Date()
-        };
+        });
 
-        await db.collection("results").add(finalData);
-        alert(currentExam.showResult === 'yes' ? `انتهى الامتحان! درجتك: ${score}/${totalPoints}` : "تم استلام إجاباتك بنجاح، انتظر ظهور الدرجة.");
-        location.href = "home.html";
+        alert(`تم التسليم بنجاح! درجتك: ${score} من ${total}`);
+        location.reload(); // هيرجعه تلقائياً للوحة الإنجازات
     }
+
+    // منع الخروج بالخطأ
+    window.onbeforeunload = function() {
+        if(currentQuiz) return "هل أنت متأكد من مغادرة الامتحان؟ سيتم فقدان تقدمك!";
+    };
 </script>
 </body>
 </html>
