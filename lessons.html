@@ -3,89 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>المحاضرات المؤمنة | منصة المستشار</title>
+    <title>المحاضرات | منصة المستشار</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        :root { --primary: #6366f1; --bg: #0f172a; --card: #1e293b; }
+        :root { --primary: #6366f1; --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; }
+        * { -webkit-user-select: none; user-select: none; }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: white; margin: 0; padding: 15px; }
         
-        * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+        .back-btn { background: var(--card); color: white; border: 1px solid var(--primary); padding: 8px 15px; border-radius: 10px; cursor: pointer; margin-bottom: 15px; }
 
-        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: white; margin: 0; padding: 15px; overflow-x: hidden; }
-        
-        .back-btn { background: var(--card); color: white; border: 1px solid var(--primary); padding: 8px 15px; border-radius: 10px; cursor: pointer; margin-bottom: 15px; transition: 0.3s; }
-
-        /* الحاوية المحصنة */
-        .video-container {
+        /* حاوية الفيديو */
+        .video-wrapper {
             position: relative;
             width: 100%;
-            max-width: 900px;
-            margin: 0 auto 30px;
+            max-width: 850px;
+            margin: 0 auto 25px;
             aspect-ratio: 16 / 9;
             background: #000;
-            border-radius: 20px;
-            border: 4px solid #334155;
+            border-radius: 15px;
+            border: 3px solid var(--primary);
             overflow: hidden;
-            display: none;
+            display: none; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        /* طبقة حماية تمنع النقر على أطراف الفيديو (لوجو يوتيوب والروابط) */
-        .video-protection-layer {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 100;
-            cursor: default;
-            /* تسمح فقط بالنقرات في المنتصف للتشغيل */
-            clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%, 15% 15%, 15% 85%, 85% 85%, 85% 15%, 15% 15%);
-            background: rgba(0,0,0,0.01);
-        }
+        #playerFrame { width: 100%; height: 100%; border: none; }
 
-        #player iframe { width: 100%; height: 100%; border: none; }
-
-        /* العلامة المائية */
+        /* العلامة المائية المتحركة */
         #watermark {
             position: absolute;
-            z-index: 9999;
-            color: rgba(255, 255, 255, 0.3);
-            font-size: 13px;
+            z-index: 999;
+            color: rgba(255, 255, 255, 0.25);
+            font-size: 12px;
             font-weight: bold;
             pointer-events: none;
             white-space: nowrap;
-            background: rgba(0,0,0,0.2);
-            padding: 4px 8px;
-            border-radius: 4px;
-            transition: all 0.8s ease-in-out;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            transition: all 1.5s linear;
+            background: rgba(0,0,0,0.1);
+            padding: 3px 7px;
+            border-radius: 5px;
         }
 
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
-        .card { background: var(--card); padding: 25px; border-radius: 18px; text-align: center; cursor: pointer; border: 1px solid #334155; transition: 0.4s; }
-        .card:hover { border-color: var(--primary); transform: translateY(-5px); }
-        .card i { font-size: 40px; color: var(--primary); margin-bottom: 15px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
+        .card { background: var(--card); padding: 20px; border-radius: 15px; text-align: center; cursor: pointer; border: 1px solid #334155; transition: 0.3s; }
+        .card:hover { transform: scale(1.03); border-color: var(--primary); }
+        .card i { font-size: 35px; color: var(--primary); margin-bottom: 10px; }
 
         @media print { body { display: none !important; } }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
-    <button class="back-btn" onclick="location.href='home.html'"><i class="fas fa-arrow-right"></i> العودة للرئيسية</button>
+    <button class="back-btn" onclick="location.href='home.html'"><i class="fas fa-chevron-right"></i> العودة للرئيسية</button>
 
-    <h2 style="text-align:center; margin-bottom: 25px;">🎥 محاضراتي التعليمية</h2>
+    <h3 style="text-align:center; margin-bottom: 20px;">🎥 محاضراتك التعليمية</h3>
 
-    <div id="videoArea" class="video-container">
+    <div id="videoArea" class="video-wrapper">
         <div id="watermark">...</div>
-        <div class="video-protection-layer"></div>
-        <div id="player"></div>
+        <div id="player" style="width:100%; height:100%;"></div>
     </div>
 
     <div id="lessonsGrid" class="grid">
-        <p style="text-align:center; width: 100%;">جاري تأمين الاتصال بالسحابة...</p>
+        <p style="text-align:center; width:100%">جاري تحميل المحاضرات من السحابة...</p>
     </div>
 
 <script>
+    // Firebase Config
     const firebaseConfig = { 
         apiKey: "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws", 
         authDomain: "zomaapp-744fc.firebaseapp.com", 
@@ -94,91 +82,90 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    const studentName = localStorage.getItem("userName") || "طالب غير مسجل";
-    const studentEmail = localStorage.getItem("userEmail") || "Unregistered";
+    // إعدادات المستخدم والواترمارك
+    const studentName = localStorage.getItem("userName") || "طالب مستجد";
+    const studentEmail = localStorage.getItem("userEmail") || "Unknown";
     const watermark = document.getElementById('watermark');
     watermark.innerText = `${studentName} | ${studentEmail}`;
 
-    // تحريك العلامة المائية بشكل عشوائي ومستمر
     function moveWatermark() {
-        const x = Math.random() * 80; 
-        const y = Math.random() * 90; 
+        const x = Math.random() * 80;
+        const y = Math.random() * 85;
         watermark.style.top = y + "%";
         watermark.style.left = x + "%";
     }
-    setInterval(moveWatermark, 2500);
+    setInterval(moveWatermark, 3000);
 
-    // وظيفة العقاب (إعادة تسجيل الدخول)
+    // وظيفة العقاب والطرد
     function punishUser() {
-        alert("⚠️ تنبيه أمني: تم رصد محاولة التقاط شاشة أو تسجيل فيديو. لا تحاول سرقة المحتوى لضمان استمرار حسابك.");
-        localStorage.removeItem("isLoggedIn"); // نفترض أن هذا متغير الدخول
-        location.href = "login.html"; // توجيه لصفحة تسجيل الدخول
+        alert("⚠️ تم رصد محاولة تصوير شاشة! سيتم تسجيل خروجك فوراً لحماية المحتوى.");
+        localStorage.removeItem("isLoggedIn"); // تغيير الحالة لغير مسجل
+        location.href = 'login.html'; 
     }
 
-    // رصد محاولات لقطة الشاشة والتسجيل
+    // مراقبة اختصارات التصوير
     document.addEventListener('keydown', function(e) {
-        // منع PrintScreen و Win+Shift+S و اختصارات التفتيش
-        if (e.key === "PrintScreen" || e.keyCode === 44) {
-            punishUser();
-        }
         if (
-            e.key === "F12" || 
-            (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "C" || e.key === "J")) ||
-            (e.ctrlKey && e.key === "u") ||
-            (e.metaKey && e.shiftKey && e.key === "s") // Mac screenshot
+            e.key === "PrintScreen" || 
+            e.keyCode === 44 || 
+            (e.ctrlKey && e.key === "p") ||
+            (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "S" || e.key === "C")) ||
+            (e.metaKey && e.shiftKey && e.key === "s") // Mac Shortcut
         ) {
             e.preventDefault();
             punishUser();
         }
     });
 
-    // رصد خسارة التركيز (Blur) اللي بتحصل غالباً لما برنامج تسجيل يفتح
-    window.addEventListener('blur', function() {
-        // اختياري: يمكنك وضع لوجيك هنا لو عاوز تفرمله لو خرج بره التاب
-    });
-
-    // تحميل المحاضرات من Firebase
+    // جلب الفيديوهات من Firestore
     db.collection("lessons").orderBy("createdAt", "desc").onSnapshot(snap => {
         const grid = document.getElementById('lessonsGrid');
         grid.innerHTML = "";
         
+        if (snap.empty) {
+            grid.innerHTML = "<p style='text-align:center; width:100%'>لا توجد دروس مرفوعة حالياً.</p>";
+            return;
+        }
+
         snap.forEach(doc => {
             const lesson = doc.data();
             const card = document.createElement('div');
             card.className = 'card';
-            card.innerHTML = `<i class="fas fa-play"></i><div style="font-weight:bold; margin-top:10px;">${lesson.title}</div>`;
+            card.innerHTML = `<i class="fas fa-play-circle"></i><div style="font-size:14px; font-weight:bold; margin-top:10px;">${lesson.title}</div>`;
             
             card.onclick = function() {
-                document.getElementById('videoArea').style.display = "block";
+                const videoArea = document.getElementById('videoArea');
                 const player = document.getElementById('player');
                 
-                // تنظيف الرابط وإضافة بارامترات الحماية القصوى
-                let videoUrl = lesson.url; 
-                // نعدل الـ iframe لإخفاء كل ما يخص يوتيوب
-                if(videoUrl.includes('youtube.com/embed/')) {
-                    const separator = videoUrl.includes('?') ? '&' : '?';
-                    videoUrl = videoUrl.replace('src="', 'src="' + videoUrl); // تصحيح لو الرابط جاي كامل
-                    // إضافة بارامترات المنع: disablekb (تعطيل الكيبورد)، rel=0 (عدم عرض فيديوهات أخرى)، modestbranding (إخفاء اللوجو)
-                    videoUrl = videoUrl.replace('"', separator + 'rel=0&modestbranding=1&showinfo=0&controls=1&disablekb=1&iv_load_policy=3"');
-                }
-
-                player.innerHTML = videoUrl; 
+                videoArea.style.display = "block";
+                
+                // حقن الفيديو مع نظام منع الخروج Sandbox
+                // الرابط المسجل في الفايرستور يجب أن يكون iframe كامل أو رابط Embed
+                player.innerHTML = lesson.url; 
+                
                 const iframe = player.querySelector('iframe');
                 if(iframe) {
                     iframe.style.width = "100%";
                     iframe.style.height = "100%";
-                    // منع إرسال بيانات الخروج
-                    iframe.setAttribute('sandbox', 'allow-forms allow-scripts allow-same-origin');
+                    // أهم سطر لمنع الطالب من الضغط على "مشاهدة على يوتيوب" والهروب
+                    iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-presentation');
+                    
+                    // تحسين رابط اليوتيوب لإخفاء الاقتراحات
+                    let src = iframe.getAttribute('src');
+                    if(src && src.includes('youtube.com')) {
+                        const joiner = src.includes('?') ? '&' : '?';
+                        iframe.setAttribute('src', src + joiner + 'rel=0&modestbranding=1&iv_load_policy=3');
+                    }
                 }
                 
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             };
             grid.appendChild(card);
         });
+    }, error => {
+        console.error("Firebase Error: ", error);
+        document.getElementById('lessonsGrid').innerHTML = "<p style='color:red'>فشل الاتصال بقاعدة البيانات.</p>";
     });
-
-    // تعطيل كليك يمين نهائياً
-    document.addEventListener('contextmenu', event => event.preventDefault());
 </script>
 
 </body>
