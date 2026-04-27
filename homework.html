@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>واجباتي | منصة المستشار</title>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #6366f1; --bg: #0f172a; --card: #1e293b; }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: white; padding: 20px; }
+        .back-btn { background: var(--card); color: white; border: 1px solid var(--primary); padding: 8px 15px; border-radius: 10px; cursor: pointer; margin-bottom: 20px; }
+        .hw-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
+        .hw-card { background: var(--card); padding: 20px; border-radius: 20px; border: 1px solid #334155; text-align: center; }
+        .download-btn { display: inline-block; background: var(--primary); color: white; text-decoration: none; padding: 10px 20px; border-radius: 12px; margin-top: 15px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <button class="back-btn" onclick="location.href='home.html'">⬅️ العودة للرئيسية</button>
+    <h2 style="text-align: center;">📝 الواجبات والمذكرات المطلوب حلها</h2>
+
+    <div id="studentHwList" class="hw-grid">
+        <p style="text-align: center; width: 100%;">جاري تحميل الواجبات الجديدة...</p>
+    </div>
+
+<script>
+    const firebaseConfig = { 
+        apiKey: "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws", 
+        authDomain: "zomaapp-744fc.firebaseapp.com", 
+        projectId: "zomaapp-744fc" 
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    db.collection("homeworks").orderBy("createdAt", "desc").onSnapshot(snap => {
+        const grid = document.getElementById('studentHwList');
+        grid.innerHTML = "";
+        
+        if(snap.empty) {
+            grid.innerHTML = "<p>لا توجد واجبات مضافة حالياً.</p>";
+            return;
+        }
+
+        snap.forEach(doc => {
+            const data = doc.data();
+            grid.innerHTML += `
+                <div class="hw-card">
+                    <div style="font-size: 40px; margin-bottom: 10px;">📄</div>
+                    <h3 style="margin: 0;">${data.title}</h3>
+                    <p style="color: #94a3b8; font-size: 13px;">تأكد من الحل بدقة قبل المحاضرة القادمة</p>
+                    <a href="${data.link}" target="_blank" class="download-btn">فتح الواجب / تحميل</a>
+                </div>`;
+        });
+    });
+</script>
+</body>
+</html>
