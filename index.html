@@ -16,6 +16,7 @@
             --card: #1e293b;
             --text: #f1f5f9;
             --input: #334155;
+            --success: #10b981;
         }
 
         body {
@@ -30,7 +31,7 @@
             overflow: hidden;
         }
 
-        /* اسمك في أعلى الشاشة */
+        /* اسم المنصة في الأعلى */
         .top-brand {
             position: absolute;
             top: 20px;
@@ -106,15 +107,33 @@
         }
         .login-btn:hover { transform: scale(1.03); box-shadow: 0 15px 30px rgba(217, 70, 239, 0.5); }
 
-        /* الشاشة الناجحة */
+        /* شاشة النجاح المبهجة */
         .status-screen {
-            position: fixed; inset: 0; background: var(--bg);
+            position: fixed; inset: 0; background: radial-gradient(circle at center, #1e1b4b, #0f172a);
             display: none; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 1000; opacity: 0; transition: 0.5s;
+            z-index: 1000; opacity: 0; transition: 0.5s; text-align: center;
         }
         .status-screen.active { opacity: 1; display: flex; }
 
-        #nameArea { font-size: 40px; font-weight: 900; color: var(--gold); margin-top: 20px; min-height: 60px; }
+        .success-icon {
+            font-size: 80px; margin-bottom: 10px;
+            animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .joyful-greeting {
+            font-size: clamp(24px, 5vw, 40px);
+            font-weight: 900;
+            color: var(--gold);
+            margin-top: 10px;
+            min-height: 60px;
+            text-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+        }
+
+        .wisdom-box {
+            margin-top: 30px; font-size: 20px; color: var(--accent); font-weight: 700;
+            max-width: 80%; text-align: center; opacity: 0;
+            animation: fadeInUP 1s ease 1.5s forwards;
+        }
 
         .gear-btn {
             position: fixed; bottom: 25px; left: 25px; width: 60px; height: 60px;
@@ -124,18 +143,16 @@
             cursor: pointer; font-size: 28px; box-shadow: 0 0 20px rgba(0,0,0,0.5);
         }
 
-        @keyframes rotate { to { transform: rotate(360deg); } }
-        @keyframes bounceIn {
-            0% { opacity: 0; transform: scale(0.3); }
-            50% { opacity: 1; transform: scale(1.05); }
-            70% { transform: scale(0.9); }
-            100% { transform: scale(1); }
-        }
-        
-        .char { display: inline-block; animation: slideInChar 0.5s forwards; opacity: 0; transform: translateY(20px); }
-        @keyframes slideInChar { to { opacity: 1; transform: translateY(0); } }
+        /* رسالة الحظر */
+        .ban-box { background: rgba(69, 10, 10, 0.8); border: 2px solid #ef4444; padding: 20px; border-radius: 20px; color: #fecaca; margin-top: 20px; font-weight: bold; }
 
-        .ban-box { background: #450a0a; border: 2px solid #ef4444; padding: 20px; border-radius: 20px; color: #fecaca; margin-top: 20px; }
+        @keyframes rotate { to { transform: rotate(360deg); } }
+        @keyframes bounceIn { 0% { opacity: 0; transform: scale(0.3); } 50% { opacity: 1; transform: scale(1.05); } 70% { transform: scale(0.9); } 100% { transform: scale(1); } }
+        @keyframes popIn { 0% { transform: scale(0); } 80% { transform: scale(1.2); } 100% { transform: scale(1); } }
+        @keyframes fadeInUP { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
+        
+        .char { display: inline-block; animation: slideInChar 0.4s forwards; opacity: 0; transform: translateY(15px); }
+        @keyframes slideInChar { to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -148,11 +165,11 @@
     <div id="loader"><div class="spinner"></div></div>
     
     <div id="statusScreen" class="status-screen">
-        <div id="statusIcon" style="font-size: 100px;"></div>
-        <div id="statusTitle" style="font-size: 24px; font-weight: 700;"></div>
-        <div id="nameArea"></div>
-        <div id="wisdomBox" style="margin-top: 30px; font-size: 18px; color: var(--accent); max-width: 80%; text-align: center;"></div>
-        <button id="backBtn" class="login-btn" style="width: 200px; display: none;" onclick="location.reload()">↩️ عودة</button>
+        <div id="statusIcon" class="success-icon"></div>
+        <div id="statusTitle" style="font-size: 24px; font-weight: 700; color: #f1f5f9;"></div>
+        <div id="nameArea" class="joyful-greeting"></div>
+        <div id="wisdomBox" class="wisdom-box"></div>
+        <button id="backBtn" class="login-btn" style="width: 200px; display: none; margin-top: 30px;" onclick="location.reload()">↩️ حاول مرة أخرى</button>
     </div>
 
     <div class="login-card" id="loginCard">
@@ -172,12 +189,13 @@
             </div>
         </div>
         
-        <button class="login-btn" onclick="handleLogin()">🚀 انطلاق نحو الحصة</button>
+        <button class="login-btn" onclick="handleLogin()">🚀 انطلاق نحو المنصة</button>
     </div>
 
-    <button class="gear-btn" onclick="alert('📞 تواصل مع الدعم: 01060234399')">⚙️</button>
+    <button class="gear-btn" onclick="alert('📞 تواصل مع الدعم الفني: 01060234399')">⚙️</button>
 
 <script>
+    // إعدادات Firebase
     const firebaseConfig = { 
         apiKey: "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws", 
         authDomain: "zomaapp-744fc.firebaseapp.com", 
@@ -187,13 +205,13 @@
     const db = firebase.firestore();
 
     const wisdoms = [
-        "💪 العباقرة لا يولدون، بل يصنعون بالعمل الشاق!",
-        "🏆 المستشار حازم سالم يثق في قدرتك على التميز.",
-        "🔥 لا شيء مستحيل عندما تكون العزيمة قوية.",
-        "🚀 انطلق نحو حلمك، نحن خلفك دائماً."
+        "🎉 جهز كشكولك، الحصة هتبدأ يا بطل!",
+        "💪 خطوة جديدة نحو حلمك الكبير.",
+        "🏆 نحن نثق في قدرتك على التميز والتفوق.",
+        "🚀 انطلق بقوة، المستقبل بانتظارك."
     ];
 
-    // تحية ذكية
+    // تحية متغيرة حسب الوقت
     const hr = new Date().getHours();
     document.getElementById('greet').innerText = hr < 12 ? "🌅 صباح التفوق" : "🌃 مساء الهمة";
 
@@ -206,26 +224,34 @@
         const mail = document.getElementById('email').value.trim();
         const psw = document.getElementById('pass').value.trim();
         
-        if(!mail || !psw) { alert("أدخل بياناتك يا دكتور! 🩺"); return; }
+        if(!mail || !psw) { alert("أدخل بياناتك كاملة يا دكتور! 🩺"); return; }
 
         document.getElementById('loader').style.display = 'flex';
 
         try {
             const snap = await db.collection("users").where("email", "==", mail).get();
             
-            if (snap.empty) throw new Error("الإيميل ده مش عندنا! 🧐");
+            if (snap.empty) throw new Error("هذا الإيميل غير مسجل لدينا! 🧐");
 
             let uData = snap.docs[0].data();
-            if (uData.password !== psw) throw new Error("كلمة السر غلط يا بطل! ❌");
+            if (uData.password !== psw) throw new Error("كلمة المرور غير صحيحة يا بطل! ❌");
 
             if (uData.status !== "active") {
-                showFailure(uData.lockReason || "الحساب محظور!");
+                showFailure(uData.lockReason || "عذراً، هذا الحساب موقوف من الإدارة.");
                 return;
             }
 
-            // نجاح الدخول
+            // *** هنا كان الخطأ: تم إضافة سطور الحفظ في الذاكرة ***
+            localStorage.setItem("userName", uData.name || "طالب مميز");
+            localStorage.setItem("userEmail", uData.email || mail);
+
+            // تشغيل شاشة النجاح المبهجة
             showSuccess(uData.name || "يا بطل");
-            setTimeout(() => { window.location.href = "home.html"; }, 4000);
+            
+            // التوجيه للصفحة الرئيسية بعد 3.5 ثوانٍ
+            setTimeout(() => { 
+                window.location.replace("home.html"); 
+            }, 3500);
 
         } catch (e) {
             document.getElementById('loader').style.display = 'none';
@@ -239,16 +265,19 @@
         const screen = document.getElementById('statusScreen');
         screen.classList.add('active');
 
-        document.getElementById('statusIcon').innerText = "👑";
-        document.getElementById('statusTitle').innerText = "تم تأكيد الهوية بنجاح";
+        document.getElementById('statusIcon').innerText = "✨";
+        document.getElementById('statusTitle').innerText = "تم تسجيل الدخول بنجاح";
         
-        // أنيميشن الكتابة المظبوط
+        // تجهيز الجملة المبهجة
+        const fullGreeting = "مرحباً بك يا " + name + " 🌟";
         const nameArea = document.getElementById('nameArea');
         let i = 0;
+        
+        // أنيميشن الكتابة المظبوط للجملة كاملة
         const interval = setInterval(() => {
-            if (i < name.length) {
+            if (i < fullGreeting.length) {
                 const s = document.createElement('span');
-                s.innerText = name[i];
+                s.innerText = fullGreeting[i] === " " ? "\u00A0" : fullGreeting[i]; // حفظ المسافات
                 s.className = 'char';
                 nameArea.appendChild(s);
                 i++;
@@ -256,7 +285,7 @@
                 clearInterval(interval);
                 document.getElementById('wisdomBox').innerText = wisdoms[Math.floor(Math.random()*wisdoms.length)];
             }
-        }, 150);
+        }, 80); // سرعة الكتابة
     }
 
     function showFailure(msg) {
@@ -265,8 +294,8 @@
         const screen = document.getElementById('statusScreen');
         screen.classList.add('active');
 
-        document.getElementById('statusIcon').innerText = "🚫";
-        document.getElementById('statusTitle').innerHTML = `<div class="ban-box">عذراً.. الدخول مرفوض!<br><small>${msg}</small></div>`;
+        document.getElementById('statusIcon').innerText = "🛑";
+        document.getElementById('statusTitle').innerHTML = `<div class="ban-box">دخول مرفوض!<br><small style="font-weight:normal; margin-top:10px; display:block;">${msg}</small></div>`;
         document.getElementById('backBtn').style.display = 'block';
     }
 </script>
