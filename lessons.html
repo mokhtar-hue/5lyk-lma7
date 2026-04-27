@@ -53,7 +53,6 @@
         .card:hover { transform: scale(1.03); border-color: var(--primary); }
         .card i { font-size: 35px; color: var(--primary); margin-bottom: 10px; }
 
-        /* حماية الطباعة وتصوير الشاشة ببرامج معينة */
         @media print { body { display: none !important; } }
     </style>
 </head>
@@ -73,6 +72,7 @@
     </div>
 
 <script>
+    // إعدادات Firebase
     const firebaseConfig = { 
         apiKey: "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws", 
         authDomain: "zomaapp-744fc.firebaseapp.com", 
@@ -81,12 +81,13 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
+    // إعدادات الطالب والواترمارك
     const studentName = localStorage.getItem("userName") || "طالب مستجد";
     const studentEmail = localStorage.getItem("userEmail") || "ID_Protected";
     const watermark = document.getElementById('watermark');
     watermark.innerText = `${studentName} | ${studentEmail}`;
 
-    // تحريك العلامة المائية بشكل عشوائي "سريع" لتشتيت محاولات التسجيل
+    // تحريك العلامة المائية
     function moveWatermark() {
         const x = Math.random() * 75;
         const y = Math.random() * 80;
@@ -95,41 +96,41 @@
     }
     setInterval(moveWatermark, 2000);
 
-    // دالة الطرد والعقاب
-    function securityBlock() {
-        alert("⚠️ محاولة غير مصرح بها! التقاط الشاشة أو التسجيل ممنوع تماماً. تم تسجيل خروجك لحماية حقوق المستشار.");
-        localStorage.removeItem("isLoggedIn");
-        location.href = 'login.html';
+    // دالة الطرد وإعادة تسجيل الدخول
+    function securityRedirect() {
+        alert("⚠️ تنبيه أمني: تصوير الشاشة أو التسجيل ممنوع تماماً! سيتم توجيهك لصفحة الدخول لإعادة التحقق من هويتك.");
+        // مسح بيانات الدخول المؤقتة لإجباره على كتابة بياناته في index
+        localStorage.removeItem("isLoggedIn"); 
+        location.href = 'index.html'; // التوجه لصفحة البداية
     }
 
-    // 1. منع اختصارات لوحة المفاتيح (Screenshot, PrintScreen, Inspect)
+    // 1. مراقبة الكيبورد (Screenshots & Tools)
     document.addEventListener('keydown', function(e) {
         if (
             e.key === "PrintScreen" || e.keyCode === 44 || 
-            (e.ctrlKey && e.key === "p") || // الطباعة
-            (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "S" || e.key === "C" || e.key === "J")) || // التفتيش
-            (e.ctrlKey && e.key === "u") || // رؤية المصدر
-            (e.metaKey && e.shiftKey && e.key === "s") // ماك
+            (e.ctrlKey && e.key === "p") || // Print
+            (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "S" || e.key === "C" || e.key === "J")) || // DevTools
+            (e.ctrlKey && e.key === "u") || // View Source
+            (e.metaKey && e.shiftKey && e.key === "s") // Mac Screenshot
         ) {
             e.preventDefault();
-            securityBlock();
+            securityRedirect();
         }
     });
 
-    // 2. مراقبة أدوات المطور (فتح الـ Console)
-    let devtools = function() {};
-    devtools.toString = function() {
-        securityBlock();
+    // 2. كشف فتح أدوات المطور عن طريق الـ Console
+    let checkDev = function() {};
+    checkDev.toString = function() {
+        securityRedirect();
         return "!!!";
     }
-    console.log("%c", devtools);
+    console.log("%c", checkDev);
 
-    // 3. مراقبة التركيز (لو الطالب فتح برنامج خارجي زي OBS أو Camtasia)
+    // 3. مراقبة التركيز (عند بدء تسجيل الشاشة خارجياً غالباً ما يفقد المتصفح التركيز)
     window.addEventListener('blur', function() {
-        // إيقاف الفيديو مؤقتاً أو التنبيه عند الخروج من التاب
         const iframe = document.querySelector('iframe');
         if(iframe) {
-            iframe.style.opacity = "0.1"; // تعتيم الفيديو عند محاولة التسجيل الخارجي
+            iframe.style.opacity = "0"; // إخفاء الفيديو تماماً عند الخروج من التاب
         }
     });
     window.addEventListener('focus', function() {
@@ -137,7 +138,7 @@
         if(iframe) { iframe.style.opacity = "1"; }
     });
 
-    // جلب الفيديوهات
+    // جلب المحاضرات
     db.collection("lessons").orderBy("createdAt", "desc").onSnapshot(snap => {
         const grid = document.getElementById('lessonsGrid');
         grid.innerHTML = "";
@@ -151,13 +152,15 @@
             card.onclick = function() {
                 document.getElementById('videoArea').style.display = "block";
                 const player = document.getElementById('player');
+                
+                // حقن الفيديو
                 player.innerHTML = lesson.url; 
                 
                 const iframe = player.querySelector('iframe');
                 if(iframe) {
                     iframe.style.width = "100%";
                     iframe.style.height = "100%";
-                    // نظام Sandbox لمنع الانتقال لليوتيوب
+                    // منع الهروب لليوتيوب
                     iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
                 }
                 window.scrollTo({ top: 0, behavior: 'smooth' });
