@@ -8,16 +8,23 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
         :root { --primary: #6366f1; --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; }
         
         /* منع تحديد النصوص نهائياً */
-        * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+        * { 
+            -webkit-user-select: none; 
+            user-select: none; 
+            -webkit-touch-callout: none; 
+            outline: none;
+        }
         
-        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: white; margin: 0; padding: 15px; }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: white; margin: 0; padding: 15px; overflow-x: hidden; }
         
-        .back-btn { background: var(--card); color: white; border: 1px solid var(--primary); padding: 8px 15px; border-radius: 10px; cursor: pointer; margin-bottom: 15px; }
+        .back-btn { background: var(--card); color: white; border: 1px solid var(--primary); padding: 8px 15px; border-radius: 10px; cursor: pointer; margin-bottom: 15px; transition: 0.3s; }
+        .back-btn:hover { background: var(--primary); }
 
         .video-wrapper {
             position: relative;
@@ -35,32 +42,35 @@
 
         #watermark {
             position: absolute;
-            z-index: 999;
-            color: rgba(255, 255, 255, 0.25);
-            font-size: 12px;
+            z-index: 9999;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 14px;
             font-weight: bold;
             pointer-events: none;
             white-space: nowrap;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-            transition: all 1.2s linear;
-            background: rgba(0,0,0,0.1);
-            padding: 3px 7px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            transition: all 0.8s ease-in-out;
+            background: rgba(0,0,0,0.2);
+            padding: 4px 8px;
             border-radius: 5px;
         }
 
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
         .card { background: var(--card); padding: 20px; border-radius: 15px; text-align: center; cursor: pointer; border: 1px solid #334155; transition: 0.3s; }
-        .card:hover { transform: scale(1.03); border-color: var(--primary); }
+        .card:hover { transform: scale(1.03); border-color: var(--primary); background: #243147; }
         .card i { font-size: 35px; color: var(--primary); margin-bottom: 10px; }
 
-        @media print { body { display: none !important; } }
+        /* حماية إضافية: إخفاء المحتوى تماماً عند الطباعة */
+        @media print {
+            body { display: none !important; }
+        }
     </style>
 </head>
-<body oncontextmenu="return false;">
+<body oncontextmenu="return false;" onselectstart="return false;">
 
     <button class="back-btn" onclick="location.href='home.html'"><i class="fas fa-chevron-right"></i> العودة للرئيسية</button>
 
-    <h3 style="text-align:center; margin-bottom: 20px;">🎥 محاضراتك التعليمية (محمي)</h3>
+    <h3 style="text-align:center; margin-bottom: 20px;">🎥 محاضراتك التعليمية (محمي ضد التسجيل)</h3>
 
     <div id="videoArea" class="video-wrapper">
         <div id="watermark">...</div>
@@ -72,7 +82,7 @@
     </div>
 
 <script>
-    // إعدادات Firebase
+    // 1. إعدادات Firebase
     const firebaseConfig = { 
         apiKey: "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws", 
         authDomain: "zomaapp-744fc.firebaseapp.com", 
@@ -81,93 +91,129 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // إعدادات الطالب والواترمارك
-    const studentName = localStorage.getItem("userName") || "طالب مستجد";
-    const studentEmail = localStorage.getItem("userEmail") || "ID_Protected";
+    // 2. إعدادات العلامة المائية المتحركة
+    const studentName = localStorage.getItem("userName") || "طالب مستشار";
+    const studentPhone = localStorage.getItem("userPhone") || "ID_SECRET";
     const watermark = document.getElementById('watermark');
-    watermark.innerText = `${studentName} | ${studentEmail}`;
+    watermark.innerText = `${studentName} | ${studentPhone}`;
 
-    // تحريك العلامة المائية
     function moveWatermark() {
-        const x = Math.random() * 75;
-        const y = Math.random() * 80;
+        const x = Math.random() * 70;
+        const y = Math.random() * 85;
         watermark.style.top = y + "%";
         watermark.style.left = x + "%";
     }
-    setInterval(moveWatermark, 2000);
+    setInterval(moveWatermark, 3000);
 
-    // دالة الطرد وإعادة تسجيل الدخول
-    function securityRedirect() {
-        alert("⚠️ تنبيه أمني: تصوير الشاشة أو التسجيل ممنوع تماماً! سيتم توجيهك لصفحة الدخول لإعادة التحقق من هويتك.");
-        // مسح بيانات الدخول المؤقتة لإجباره على كتابة بياناته في index
-        localStorage.removeItem("isLoggedIn"); 
-        location.href = 'index.html'; // التوجه لصفحة البداية
+    // 3. دالة الطرد الأمني (Logout & Redirect)
+    function securityLogout(reason) {
+        // إخفاء المحتوى فوراً لمنع أي لقطة ناجحة
+        document.body.style.display = "none";
+        
+        alert("⚠️ أمن المنصة: " + reason + "!\nسيتم تسجيل خروجك فوراً لحماية المحتوى.");
+        
+        // مسح بيانات الجلسة
+        localStorage.removeItem("isLoggedIn");
+        // التوجه لصفحة تسجيل الدخول
+        window.location.replace('index.html');
     }
 
-    // 1. مراقبة الكيبورد (Screenshots & Tools)
+    // 4. نظام المراقبة النشط (Security Observer)
+
+    // أ- مراقبة مفاتيح الكيبورد (تصوير الشاشة، برامج التسجيل، أدوات المطور)
     document.addEventListener('keydown', function(e) {
-        if (
-            e.key === "PrintScreen" || e.keyCode === 44 || 
-            (e.ctrlKey && e.key === "p") || // Print
-            (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "S" || e.key === "C" || e.key === "J")) || // DevTools
-            (e.ctrlKey && e.key === "u") || // View Source
-            (e.metaKey && e.shiftKey && e.key === "s") // Mac Screenshot
-        ) {
+        const forbiddenKeys = [
+            "PrintScreen", "F12", 
+            (e.ctrlKey && e.shiftKey && e.key === 'I'),
+            (e.ctrlKey && e.shiftKey && e.key === 'J'),
+            (e.ctrlKey && e.shiftKey && e.key === 'C'),
+            (e.ctrlKey && e.key === 'u'),
+            (e.ctrlKey && e.key === 'p'),
+            (e.ctrlKey && e.key === 's'),
+            (e.metaKey && e.shiftKey && e.key === 's'), // Mac Screenshot
+            (e.metaKey && e.shiftKey && e.key === '4')  // Mac Screenshot area
+        ];
+
+        if (forbiddenKeys.some(key => key === true || e.key === key)) {
             e.preventDefault();
-            securityRedirect();
+            securityLogout("تم رصد محاولة تصوير أو فتح أدوات محظورة");
         }
     });
 
-    // 2. كشف فتح أدوات المطور عن طريق الـ Console
-    let checkDev = function() {};
-    checkDev.toString = function() {
-        securityRedirect();
-        return "!!!";
-    }
-    console.log("%c", checkDev);
-
-    // 3. مراقبة التركيز (عند بدء تسجيل الشاشة خارجياً غالباً ما يفقد المتصفح التركيز)
+    // ب- مراقبة حالة النافذة (الخروج من الصفحة أو فتح برامج تسجيل فوقها)
     window.addEventListener('blur', function() {
-        const iframe = document.querySelector('iframe');
-        if(iframe) {
-            iframe.style.opacity = "0"; // إخفاء الفيديو تماماً عند الخروج من التاب
+        // إذا فقدت الصفحة التركيز، غالباً المستخدم فتح برنامج خارجي أو أداة تصوير
+        const videoWrapper = document.getElementById('videoArea');
+        if (videoWrapper.style.display === "block") {
+             securityLogout("تم رصد نشاط خارجي أثناء تشغيل الفيديو");
         }
     });
-    window.addEventListener('focus', function() {
-        const iframe = document.querySelector('iframe');
-        if(iframe) { iframe.style.opacity = "1"; }
+
+    // ج- مراقبة تغيير وضوح الصفحة (تبديل التابات)
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'hidden') {
+            const videoWrapper = document.getElementById('videoArea');
+            if (videoWrapper.style.display === "block") {
+                securityLogout("ممنوع مغادرة الصفحة أثناء المشاهدة");
+            }
+        }
     });
 
-    // جلب المحاضرات
+    // د- مراقبة أدوات المطور (كشف الـ Console)
+    setInterval(function() {
+        const devtools = /./;
+        devtools.toString = function() {
+            securityLogout("محاولة اختراق النظام البرمجي");
+        };
+        console.log("%c", devtools);
+    }, 2000);
+
+
+    // 5. جلب المحاضرات وعرضها
     db.collection("lessons").orderBy("createdAt", "desc").onSnapshot(snap => {
         const grid = document.getElementById('lessonsGrid');
         grid.innerHTML = "";
         
+        if (snap.empty) {
+            grid.innerHTML = "<p style='text-align:center; width:100%'>لا توجد محاضرات متاحة حالياً.</p>";
+            return;
+        }
+
         snap.forEach(doc => {
             const lesson = doc.data();
             const card = document.createElement('div');
             card.className = 'card';
-            card.innerHTML = `<i class="fas fa-play-circle"></i><div style="font-size:14px; font-weight:bold; margin-top:10px;">${lesson.title}</div>`;
+            card.innerHTML = `
+                <i class="fas fa-play-circle"></i>
+                <div style="font-size:14px; font-weight:bold; margin-top:10px;">${lesson.title}</div>
+            `;
             
             card.onclick = function() {
-                document.getElementById('videoArea').style.display = "block";
+                const videoArea = document.getElementById('videoArea');
                 const player = document.getElementById('player');
                 
-                // حقن الفيديو
+                videoArea.style.display = "block";
+                
+                // تنظيف المشغل قبل الحقن
+                player.innerHTML = ""; 
                 player.innerHTML = lesson.url; 
                 
                 const iframe = player.querySelector('iframe');
                 if(iframe) {
                     iframe.style.width = "100%";
                     iframe.style.height = "100%";
-                    // منع الهروب لليوتيوب
-                    iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+                    // وضع الحماية (Sandbox) لمنع الروابط الخارجية داخل اليوتيوب
+                    iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms');
                 }
+                
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             };
             grid.appendChild(card);
         });
     });
+
+    // منع السحب والإفلات للصور أو الفيديو
+    document.addEventListener('dragstart', (e) => e.preventDefault());
 </script>
 
 </body>
