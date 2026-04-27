@@ -188,7 +188,6 @@
     </div>
 
     <script>
-        // تكوين Firebase (تأكد من صحتها)
         const firebaseConfig = { 
             apiKey: "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws", 
             authDomain: "zomaapp-744fc.firebaseapp.com", 
@@ -197,28 +196,34 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // --- نظام التحقق من المستخدم ومنع التكرار ---
+        // --- نظام التحقق الذكي ---
         function initUser() {
-            const name = localStorage.getItem("userName");
-            const email = localStorage.getItem("userEmail");
+            // البحث عن الاسم والإيميل بأكثر من مفتاح لضمان التقاط البيانات مهما كان اسمها في صفحة الدخول
+            let name = localStorage.getItem("userName") || localStorage.getItem("name") || localStorage.getItem("studentName");
+            let email = localStorage.getItem("userEmail") || localStorage.getItem("email");
 
-            // إذا لم يتم العثور على الاسم أو الإيميل، يتم التوجيه لصفحة تسجيل الدخول
-            if (!name || name === "null" || name === "undefined") {
-                console.log("No user found, redirecting...");
-                window.location.replace("index.html"); // استخدام replace لمنع الرجوع للخلف
+            // لن يتم التوجيه إلا إذا كانت البيانات مفقودة بالكامل
+            if (!name && !email) {
+                console.log("لا توجد أي بيانات مسجلة، جاري التوجيه للدخول...");
+                window.location.replace("index.html");
                 return;
             }
 
-            // تحديث الواجهة بالبيانات الحقيقية
+            // لو في إيميل بس مفيش اسم مسجل
+            if (!name || name === "null" || name.trim() === "") {
+                name = "طالب مميز";
+            }
+
+            // تحديث الواجهة
             document.getElementById('userNameTop').innerText = name;
             document.getElementById('sideName').innerText = name;
-            document.getElementById('sideEmail').innerText = email || "طالب منصة المستشار";
+            document.getElementById('sideEmail').innerText = email || "بدون بريد إلكتروني";
         }
 
-        // تشغيل التحقق فوراً
+        // تشغيل التحقق
         initUser();
 
-        // جلب التنبيهات من Firebase
+        // جلب التنبيهات
         let currentAnnouncementId = null;
         async function fetchAnnouncements() {
             try {
@@ -232,7 +237,7 @@
                         document.getElementById("announcementBanner").style.display = "flex";
                     }
                 }
-            } catch (error) { console.error("Error fetching announcements:", error); }
+            } catch (error) { console.error(error); }
         }
         
         function dismissAnnouncement() {
@@ -250,8 +255,8 @@
         }
 
         function logout() {
-            if(confirm("هل تريد تسجيل الخروج؟")) {
-                localStorage.clear();
+            if(confirm("هل أنت متأكد من تسجيل الخروج؟")) {
+                localStorage.clear(); // مسح الذاكرة بالكامل
                 window.location.replace("index.html");
             }
         }
