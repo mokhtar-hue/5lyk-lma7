@@ -3,202 +3,303 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الرئيسية | منصة المستشار التعليمية</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <title>الرئيسية | منصة خليـــك لمــاح مع المستـشــار</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
         :root {
             --primary: #6366f1;
+            --primary-light: #818cf8;
             --bg: #0f172a;
             --card: #1e293b;
-            --text: #f1f5f9;
-            --accent: #4f46e5;
+            --text-main: #f1f5f9;
+            --text-dim: #94a3b8;
         }
 
         body {
             font-family: 'Cairo', sans-serif;
             background-color: var(--bg);
-            color: var(--text);
+            color: var(--text-main);
             margin: 0;
-            padding: 0;
-            min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        /* الهيدر والترحيب */
-        header {
-            background: linear-gradient(135deg, var(--card), var(--bg));
-            padding: 40px 20px;
-            text-align: center;
-            border-bottom: 1px solid #334155;
-            animation: fadeIn 0.8s ease;
+        /* نافبار علوي */
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
         }
 
-        .user-welcome {
-            font-size: 26px;
+        .welcome-box h2 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .welcome-box span {
+            color: var(--primary-light);
             font-weight: 900;
-            color: var(--primary);
+        }
+
+        .menu-toggle {
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--primary-light);
+            background: rgba(99, 102, 241, 0.1);
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            transition: 0.3s;
+        }
+
+        /* القائمة الجانبية (Sidebar) */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 280px;
+            height: 100%;
+            background: var(--card);
+            z-index: 2000;
+            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar.active { right: 0; }
+
+        .sidebar-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 35px;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .sidebar-info h4 { margin: 0; font-size: 18px; }
+        .sidebar-info p { margin: 5px 0 0; color: var(--text-dim); font-size: 12px; }
+
+        .sidebar-menu { list-style: none; padding: 0; margin-top: 20px; }
+        .sidebar-menu li {
+            padding: 15px;
             margin-bottom: 10px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: 0.3s;
+            color: var(--text-main);
+            text-decoration: none;
+        }
+        .sidebar-menu li:hover { background: rgba(99, 102, 241, 0.1); color: var(--primary-light); }
+        .sidebar-menu li.logout { color: #ef4444; margin-top: auto; }
+        .sidebar-menu li.logout:hover { background: rgba(239, 68, 68, 0.1); }
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            display: none;
+            z-index: 1500;
+            backdrop-filter: blur(4px);
         }
 
-        .sub-text {
-            color: #94a3b8;
-            font-size: 14px;
+        /* محتوى الصفحة */
+        .hero {
+            padding: 60px 20px;
+            text-align: center;
+            background: radial-gradient(circle at top right, rgba(99, 102, 241, 0.15), transparent);
         }
 
-        /* شبكة الأقسام */
-        .container {
-            max-width: 1100px;
-            margin: -30px auto 40px;
-            padding: 0 20px;
-        }
+        .hero h1 { font-size: 32px; font-weight: 900; margin-bottom: 10px; }
+        .hero p { color: var(--text-dim); font-size: 16px; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px 50px; }
 
         .main-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
+            gap: 25px;
         }
 
         .menu-card {
             background: var(--card);
-            padding: 30px;
-            border-radius: 25px;
+            border-radius: 30px;
+            padding: 40px 30px;
             text-align: center;
-            border: 1px solid #334155;
-            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            cursor: pointer;
             text-decoration: none;
             color: inherit;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.03));
+            pointer-events: none;
         }
 
         .menu-card:hover {
-            transform: translateY(-10px);
+            transform: translateY(-12px);
             border-color: var(--primary);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
-        .icon-wrapper {
-            width: 70px;
-            height: 70px;
+        .icon-box {
+            width: 80px;
+            height: 80px;
             background: rgba(99, 102, 241, 0.1);
-            border-radius: 20px;
+            border-radius: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 20px;
-            font-size: 30px;
+            margin: 0 auto 25px;
+            font-size: 35px;
             color: var(--primary);
-            transition: 0.3s;
+            transition: 0.4s;
         }
 
-        .menu-card:hover .icon-wrapper {
+        .menu-card:hover .icon-box {
             background: var(--primary);
             color: white;
-            transform: rotate(-10deg);
+            transform: scale(1.1) rotate(5deg);
         }
 
-        .menu-card h3 {
-            margin: 0 0 10px;
-            font-size: 20px;
-            font-weight: 800;
-        }
+        .menu-card h3 { font-size: 22px; font-weight: 800; margin: 0 0 12px; }
+        .menu-card p { color: var(--text-dim); font-size: 14px; margin: 0; line-height: 1.6; }
 
-        .menu-card p {
-            font-size: 13px;
-            color: #94a3b8;
-            margin: 0;
-            line-height: 1.6;
-        }
-
-        /* ألوان مخصصة لكل قسم */
-        .video-card:hover { border-color: #ef4444; }
-        .video-card:hover .icon-wrapper { background: #ef4444; }
+        /* ألوان كروت مخصصة */
+        .card-video:hover { border-color: #f43f5e; }
+        .card-video:hover .icon-box { background: #f43f5e; }
         
-        .exam-card:hover { border-color: #22c55e; }
-        .exam-card:hover .icon-wrapper { background: #22c55e; }
+        .card-files:hover { border-color: #0ea5e9; }
+        .card-files:hover .icon-box { background: #0ea5e9; }
 
-        /* زر تسجيل الخروج */
-        .logout-btn {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
-            border: 1px solid #ef4444;
-            padding: 8px 15px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-family: 'Cairo';
-            font-weight: 700;
-            transition: 0.3s;
-            z-index: 100;
-        }
+        .card-exams:hover { border-color: #10b981; }
+        .card-exams:hover .icon-box { background: #10b981; }
 
-        .logout-btn:hover {
-            background: #ef4444;
-            color: white;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @media (max-width: 600px) {
-            .main-grid { grid-template-columns: 1fr; }
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 26px; }
+            .top-nav { padding: 15px 20px; }
         }
     </style>
 </head>
 <body>
 
-    <button class="logout-btn" onclick="logout()">تسجيل خروج</button>
+    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
-    <header>
-        <div class="user-welcome" id="welcomeMsg">أهلاً بك يا بطل</div>
-        <div class="sub-text">مستعد لرحلة تعلم جديدة اليوم؟</div>
-    </header>
+    <nav class="top-nav">
+        <div class="welcome-box">
+            <h2>مرحباً، <span id="userNameTop">...</span> 🎓</h2>
+        </div>
+        <div class="menu-toggle" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+        </div>
+    </nav>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="user-avatar"><i class="fas fa-user-graduate"></i></div>
+            <div class="sidebar-info">
+                <h4 id="sideName">جاري التحميل...</h4>
+                <p id="sideEmail">... @mail.com</p>
+            </div>
+        </div>
+        <ul class="sidebar-menu">
+            <li onclick="toggleSidebar()"><i class="fas fa-home"></i> الصفحة الرئيسية</li>
+            <a href="https://wa.me/201060234399" style="text-decoration: none;"><li style="width: 100%; box-sizing: border-box;"><i class="fab fa-whatsapp"></i> الدعم الفني</li></a>
+            <li class="logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</li>
+        </ul>
+        <p style="margin-top: auto; font-size: 10px; text-align: center; color: var(--text-dim);">برمجة وتطوير المستشار حازم سالم</p>
+    </div>
+
+    <div class="hero">
+        <h1>منصة  المستشار أنت في أمان</h1>
+        <p>بوابتك نحو التفوق والتميز في الثانوية العامة</p>
+    </div>
 
     <div class="container">
         <div class="main-grid">
             
-            <a href="lessons.html" class="menu-card video-card">
-                <div class="icon-wrapper"><i class="fas fa-play-circle"></i></div>
+            <a href="lessons.html" class="menu-card card-video">
+                <div class="icon-box"><i class="fas fa-video"></i></div>
                 <h3>المحاضرات المرئية</h3>
-                <p>شرح تفصيلي للمنهج مع المستشار حازم سالم</p>
+                <p>شرح تفصيلي للمنهج بأحدث الوسائل.</p>
             </a>
 
-            <a href="homework.html" class="menu-card">
-                <div class="icon-wrapper"><i class="fas fa-file-signature"></i></div>
-                <h3>الواجبات والمهام</h3>
-                <p>حل الواجبات ورفعها للمراجعة والتقييم</p>
+            <a href="homework.html" class="menu-card card-files">
+                <div class="icon-box"><i class="fas fa-file-pdf"></i></div>
+                <h3>المذكرات والملفات</h3>
+                <p>حمل مذكرات الشرح والتدريبات بصيغة PDF بجودة عالية.</p>
             </a>
 
-            <a href="exams.html" class="menu-card exam-card">
-                <div class="icon-wrapper"><i class="fas fa-stopwatch"></i></div>
+            <a href="exams.html" class="menu-card card-exams">
+                <div class="icon-box"><i class="fas fa-star"></i></div>
                 <h3>بنك الاختبارات</h3>
-                <p>اختبر مستواك في كل فصل واحصل على نتيجتك فوراً</p>
+                <p>قيم مستواك باستمرار من خلال اختباراتنا التفاعلية.</p>
             </a>
 
             <a href="https://wa.me/201060234399" target="_blank" class="menu-card">
-                <div class="icon-wrapper"><i class="fab fa-whatsapp"></i></div>
-                <h3>تواصل مع المستشار</h3>
-                <p>استفسارات مباشرة ودعم فني على مدار الساعة</p>
+                <div class="icon-box"><i class="fab fa-whatsapp"></i></div>
+                <h3>اسأل المستشار</h3>
+                <p>خدمة الرد على الاستفسارات العلمية المباشرة للطلاب.</p>
             </a>
 
         </div>
     </div>
 
     <script>
-        // استلام الاسم المخزن من صفحة اللوجين
-        const savedName = localStorage.getItem("userName") || "يا بطل";
-        document.getElementById('welcomeMsg').innerText = `أهلاً بك، ${savedName} 🎓`;
+        // جلب البيانات من localStorage (التي تم تخزينها في صفحة index.html)
+        const name = localStorage.getItem("userName") || "يا بطل";
+        const email = localStorage.getItem("userEmail") || "طالب مسجل"; // تأكد من تخزين الإيميل في اللوجين
+
+        document.getElementById('userNameTop').innerText = name;
+        document.getElementById('sideName').innerText = name;
+        document.getElementById('sideEmail').innerText = email;
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            sidebar.classList.toggle('active');
+            overlay.style.display = sidebar.classList.contains('active') ? 'block' : 'none';
+        }
 
         function logout() {
-            localStorage.removeItem("userName");
-            window.location.href = "index.html";
+            if(confirm("هل تريد تسجيل الخروج؟")) {
+                localStorage.clear();
+                window.location.href = "index.html";
+            }
         }
     </script>
 </body>
