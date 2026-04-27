@@ -81,6 +81,7 @@
         .sidebar.active { right: 0; }
         .sidebar-header { text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .user-avatar { width: 80px; height: 80px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; font-size: 35px; box-shadow: 0 0 20px rgba(99, 102, 241, 0.3); }
+        .sidebar-info { color: white; }
         .sidebar-menu { list-style: none; padding: 0; margin-top: 20px; }
         .sidebar-menu li { padding: 15px; margin-bottom: 10px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 15px; transition: 0.3s; color: var(--text-main); text-decoration: none; }
         .sidebar-menu li:hover { background: rgba(99, 102, 241, 0.1); color: var(--primary-light); }
@@ -196,31 +197,49 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // --- نظام التحقق الذكي ---
+        // --- 1. نظام مراقبة الجلسة الواحدة (المنع من تسجيل دخول مزدوج) ---
+        function checkSingleSession() {
+            const userEmail = localStorage.getItem("userEmail") || localStorage.getItem("email");
+            const myLocalToken = localStorage.getItem("sessionToken");
+
+            if (userEmail && myLocalToken) {
+                // استماع مباشر للتغييرات في مستند المستخدم
+                db.collection("users").where("email", "==", userEmail).onSnapshot((snapshot) => {
+                    snapshot.forEach((doc) => {
+                        const serverToken = doc.data().currentToken;
+                        // إذا الرمز في السيرفر اختلف عن اللي متخزن عندي، اخرج فوراً
+                        if (serverToken && serverToken !== myLocalToken) {
+                            alert("⚠️ تم تسجيل الدخول لحسابك من جهاز آخر. سيتم تسجيل الخروج.");
+                            localStorage.clear();
+                            window.location.replace("index.html");
+                        }
+                    });
+                });
+            }
+        }
+
+        // --- 2. نظام التحقق الذكي من بيانات المستخدم ---
         function initUser() {
-            // البحث عن الاسم والإيميل بأكثر من مفتاح لضمان التقاط البيانات مهما كان اسمها في صفحة الدخول
             let name = localStorage.getItem("userName") || localStorage.getItem("name") || localStorage.getItem("studentName");
             let email = localStorage.getItem("userEmail") || localStorage.getItem("email");
 
-            // لن يتم التوجيه إلا إذا كانت البيانات مفقودة بالكامل
             if (!name && !email) {
-                console.log("لا توجد أي بيانات مسجلة، جاري التوجيه للدخول...");
                 window.location.replace("index.html");
                 return;
             }
 
-            // لو في إيميل بس مفيش اسم مسجل
             if (!name || name === "null" || name.trim() === "") {
                 name = "طالب مميز";
             }
 
-            // تحديث الواجهة
             document.getElementById('userNameTop').innerText = name;
             document.getElementById('sideName').innerText = name;
             document.getElementById('sideEmail').innerText = email || "بدون بريد إلكتروني";
+            
+            // تشغيل فحص الجلسة بمجرد التأكد من وجود مستخدم
+            checkSingleSession();
         }
 
-        // تشغيل التحقق
         initUser();
 
         // جلب التنبيهات
@@ -256,7 +275,7 @@
 
         function logout() {
             if(confirm("هل أنت متأكد من تسجيل الخروج؟")) {
-                localStorage.clear(); // مسح الذاكرة بالكامل
+                localStorage.clear();
                 window.location.replace("index.html");
             }
         }
