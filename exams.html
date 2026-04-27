@@ -12,7 +12,6 @@
         :root { --primary: #6366f1; --bg: #0f172a; --card: #1e293b; --accent: #22c55e; }
         body { font-family: 'Cairo', sans-serif; background: var(--bg); color: #f1f5f9; margin: 0; overflow-x: hidden; }
         
-        /* شريط التقدم العلوي */
         .progress-container { position: fixed; top: 0; left: 0; width: 100%; height: 6px; background: #334155; z-index: 1000; }
         #progressBar { height: 100%; background: var(--primary); width: 0%; transition: 0.3s; box-shadow: 0 0 10px var(--primary); }
 
@@ -21,11 +20,18 @@
 
         .container { max-width: 900px; margin: 40px auto; padding: 0 20px; }
 
-        /* كرت الامتحان */
         .quiz-card { background: var(--card); padding: 40px; border-radius: 30px; border: 1px solid #334155; position: relative; display: none; }
         .question-header { display: flex; justify-content: space-between; margin-bottom: 25px; align-items: center; }
-        .q-text { font-size: 22px; font-weight: 700; line-height: 1.6; }
+        .q-text { font-size: 22px; font-weight: 700; line-height: 1.6; margin-bottom: 20px; }
         
+        /* تصميم مكان الإجابة المقالية */
+        .essay-input { 
+            width: 100%; background: rgba(255,255,255,0.05); border: 2px solid #334155; 
+            border-radius: 15px; padding: 15px; color: white; font-family: 'Cairo'; 
+            font-size: 16px; resize: vertical; min-height: 150px; outline: none;
+        }
+        .essay-input:focus { border-color: var(--primary); }
+
         .options-grid { display: grid; gap: 15px; margin-top: 25px; }
         .opt-btn { 
             background: rgba(255,255,255,0.03); border: 2px solid #334155; padding: 18px; 
@@ -41,7 +47,6 @@
         .btn-next { background: var(--primary); color: white; }
         .btn-finish { background: var(--accent); color: white; display: none; }
 
-        /* واجهة لوحة الإنجازات المدمجة */
         #dashboard { display: block; }
         .exam-item { 
             background: var(--card); padding: 20px; border-radius: 20px; margin-bottom: 15px; 
@@ -62,9 +67,7 @@
     <div id="dashboard">
         <h2 style="margin-bottom: 5px;">أهلاً بك يا بطل 🚀</h2>
         <p style="color: #94a3b8; margin-bottom: 30px;">اختر اختباراً لتبدأ التحدي أو راجع نتائجك السابقة.</p>
-        
-        <div id="examsGrid">
-            </div>
+        <div id="examsGrid"></div>
     </div>
 
     <div id="quizArea" class="quiz-card">
@@ -74,12 +77,12 @@
         </div>
         <div class="q-text" id="qBody">جاري تحميل السؤال...</div>
         
-        <div class="options-grid" id="optionsArea"></div>
+        <div id="answerArea"></div>
 
         <div class="footer-nav">
             <button class="btn" style="background:#475569; color:white" onclick="prevQ()">السابق</button>
             <button class="btn btn-next" id="nextBtn" onclick="nextQ()">التالي</button>
-            <button class="btn btn-finish" id="finishBtn" onclick="submitExam()">تسجيل الإجابات وإنهاء الاختبار</button>
+            <button class="btn btn-finish" id="finishBtn" onclick="submitExam()">إنهاء الاختبار</button>
         </div>
     </div>
 </div>
@@ -93,31 +96,22 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // 1. التعرف التلقائي على الطالب
-    const userEmail = localStorage.getItem("userEmail");
-    const userName = localStorage.getItem("userName") || "طالب مستجد";
+    const userEmail = localStorage.getItem("userEmail") || "test@test.com";
+    const userName = localStorage.getItem("userName") || "حازم سالم";
 
-    if(!userEmail) {
-        alert("لم يتم العثور على بياناتك، سيتم توجيهك لتسجيل الدخول.");
-        window.location.href = "login.html";
-    } else {
-        document.getElementById('userBadge').innerHTML = `<i class="fas fa-user-check"></i> ${userName}`;
-        loadAvailableExams();
-    }
+    document.getElementById('userBadge').innerHTML = `<i class="fas fa-user-check"></i> ${userName}`;
 
     let currentQuiz = null;
     let questions = [];
     let currentIdx = 0;
-    let answers = [];
+    let studentAnswers = []; // هنخزن هنا (رقم الاختيار) أو (نص المقال)
     let timeLeft = 0;
     let timerInterval;
 
-    // 2. تحميل الامتحانات المتاحة
     async function loadAvailableExams() {
         const snap = await db.collection("quizzes").orderBy("createdAt", "desc").get();
         const grid = document.getElementById('examsGrid');
         grid.innerHTML = "";
-        
         snap.forEach(doc => {
             const data = doc.data();
             grid.innerHTML += `
@@ -130,13 +124,14 @@
                 </div>`;
         });
     }
+    loadAvailableExams();
 
-    // 3. بدء الامتحان
     async function startExam(id) {
         const doc = await db.collection("quizzes").doc(id).get();
         currentQuiz = doc.data();
+        currentQuiz.id = id;
         questions = currentQuiz.questions;
-        answers = new Array(questions.length).fill(null);
+        studentAnswers = new Array(questions.length).fill("");
         timeLeft = currentQuiz.duration * 60;
         
         document.getElementById('dashboard').style.display = 'none';
@@ -152,31 +147,38 @@
         document.getElementById('qBody').innerText = q.question;
         document.getElementById('qPoints').innerText = `+${q.points} درجة`;
         
-        const area = document.getElementById('optionsArea');
+        const area = document.getElementById('answerArea');
         area.innerHTML = "";
-        
-        q.options.forEach((opt, i) => {
-            const btn = document.createElement('div');
-            btn.className = `opt-btn ${answers[currentIdx] === i ? 'active' : ''}`;
-            btn.innerText = opt;
-            btn.onclick = () => {
-                answers[currentIdx] = i;
-                renderQuestion();
-            };
-            area.appendChild(btn);
-        });
 
-        // تحديث شريط التقدم
-        document.getElementById('progressBar').style.width = ((currentIdx + 1) / questions.length) * 100 + "%";
-        
-        // تبديل الأزرار في آخر سؤال
-        if(currentIdx === questions.length - 1) {
-            document.getElementById('nextBtn').style.display = 'none';
-            document.getElementById('finishBtn').style.display = 'block';
-        } else {
-            document.getElementById('nextBtn').style.display = 'block';
-            document.getElementById('finishBtn').style.display = 'none';
+        // لو السؤال اختياري
+        if (q.options && q.options.length > 0) {
+            const grid = document.createElement('div');
+            grid.className = "options-grid";
+            q.options.forEach((opt, i) => {
+                const btn = document.createElement('div');
+                btn.className = `opt-btn ${studentAnswers[currentIdx] === i ? 'active' : ''}`;
+                btn.innerText = opt;
+                btn.onclick = () => {
+                    studentAnswers[currentIdx] = i;
+                    renderQuestion();
+                };
+                grid.appendChild(btn);
+            });
+            area.appendChild(grid);
+        } 
+        // لو السؤال مقالي
+        else {
+            const txt = document.createElement('textarea');
+            txt.className = "essay-input";
+            txt.placeholder = "اكتب إجابتك هنا بالتفصيل...";
+            txt.value = studentAnswers[currentIdx];
+            txt.oninput = (e) => { studentAnswers[currentIdx] = e.target.value; };
+            area.appendChild(txt);
         }
+
+        document.getElementById('progressBar').style.width = ((currentIdx + 1) / questions.length) * 100 + "%";
+        document.getElementById('finishBtn').style.display = (currentIdx === questions.length - 1) ? 'block' : 'none';
+        document.getElementById('nextBtn').style.display = (currentIdx === questions.length - 1) ? 'none' : 'block';
     }
 
     function nextQ() { if(currentIdx < questions.length - 1) { currentIdx++; renderQuestion(); } }
@@ -193,36 +195,52 @@
     }
 
     async function submitExam() {
-        if(answers.includes(null) && timeLeft > 0) {
-            if(!confirm("لسه فيه أسئلة ما اتحلتش، متأكد إنك عاوز تسلم؟")) return;
-        }
-
         clearInterval(timerInterval);
-        let score = 0;
-        let total = 0;
+        
+        let autoScore = 0;
+        let totalPoints = 0;
+        let hasEssay = false;
 
-        questions.forEach((q, i) => {
-            total += q.points;
-            if(answers[i] === q.correctIndex) score += q.points;
+        const processedAnswers = questions.map((q, i) => {
+            totalPoints += q.points;
+            let isCorrect = false;
+
+            if (q.options && q.options.length > 0) {
+                if (studentAnswers[i] === q.correctIndex) {
+                    autoScore += q.points;
+                    isCorrect = true;
+                }
+            } else {
+                hasEssay = true; // فيه مقالي محتاج تصحيح يدوي
+            }
+
+            return {
+                question: q.question,
+                studentAnswer: studentAnswers[i],
+                correctAnswer: q.options ? q.options[q.correctIndex] : "مقالي",
+                points: q.points,
+                isCorrect: isCorrect,
+                type: q.options && q.options.length > 0 ? "choice" : "essay"
+            };
         });
 
+        // رفع النتيجة للـ Firebase
         await db.collection("results").add({
             studentEmail: userEmail,
             studentName: userName,
             examTitle: currentQuiz.title,
-            score: score,
-            total: total,
+            quizId: currentQuiz.id,
+            totalPoints: totalPoints,
+            autoScore: autoScore, // الدرجة الأوتوماتيكية (الاختياري)
+            finalScore: hasEssay ? null : autoScore, // لو فيه مقالي الدرجة النهائية مجهولة حالياً
+            status: hasEssay ? "pending" : "graded",
+            answers: processedAnswers,
             submittedAt: new Date()
         });
 
-        alert(`تم التسليم بنجاح! درجتك: ${score} من ${total}`);
-        location.reload(); // هيرجعه تلقائياً للوحة الإنجازات
+        alert(hasEssay ? "تم استلام إجاباتك بنجاح! سيتم مراجعة الأسئلة المقالية ورصد الدرجة قريباً." : `انتهى الاختبار! درجتك: ${autoScore} من ${totalPoints}`);
+        location.reload();
     }
-
-    // منع الخروج بالخطأ
-    window.onbeforeunload = function() {
-        if(currentQuiz) return "هل أنت متأكد من مغادرة الامتحان؟ سيتم فقدان تقدمك!";
-    };
 </script>
 </body>
 </html>
