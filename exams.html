@@ -3,10 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة المستشار | بوابة الامتحانات</title>
+    
+    <title>منصة المستشار | حازم سالم</title>
+
+    <meta name="description" content="منصة المستشار - حازم سالم، بوابة الامتحانات الرقمية للطلاب وإدارة الاختبارات">
+    <meta name="keywords" content="منصة المستشار, حازم سالم, امتحانات, اختبارات, تعليم">
+    
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -47,7 +51,6 @@
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* شاشة التحميل اللطيفة */
         #pageLoader { position: fixed; inset: 0; background: var(--bg); z-index: 5000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .spinner { width: 40px; height: 40px; border: 4px solid rgba(99,102,241,0.2); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -72,8 +75,8 @@
 
 <div class="container">
     <div id="dashboard">
-        <h2 style="margin-bottom: 5px;">بوابة الاختبارات الرقمية 🎓</h2>
-        <p style="color: #94a3b8; margin-bottom: 25px;">مرحباً يا <span id="studentNameLabel" style="color: var(--primary); font-weight: 900;">...</span>، بالتوفيق في اختباراتك اليوم.</p>
+        <h1 style="margin-bottom: 5px; font-size: 28px; color: var(--primary);">منصة المستشار - حازم سالم</h1>
+        <p style="color: #94a3b8; margin-bottom: 25px;">مرحباً يا <span id="studentNameLabel" style="color: #fff; font-weight: 900;">...</span>، بالتوفيق في اختباراتك اليوم.</p>
         <div id="examsList">جاري البحث عن اختبارات نشطة...</div>
     </div>
 
@@ -103,7 +106,7 @@
 </div>
 
 <script>
-    // --- إعدادات Firebase ---
+    // إعدادات Firebase
     const firebaseConfig = { 
         apiKey: "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws", 
         authDomain: "zomaapp-744fc.firebaseapp.com", 
@@ -112,25 +115,19 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // --- نظام التحقق الأوتوماتيكي ---
     const userEmail = localStorage.getItem("userEmail");
     const userName = localStorage.getItem("userName");
 
     async function checkAuth() {
         if (!userEmail || !userName) {
-            // إذا لم يجد بيانات، يحوله لصفحة تسجيل الدخول
             window.location.href = "index.html"; 
             return;
         }
-        
         document.getElementById('studentNameLabel').innerText = userName;
         await loadExams();
-        
-        // إخفاء اللودر
         document.getElementById('pageLoader').style.display = 'none';
     }
 
-    // --- منطق الاختبارات ---
     let questions = [];
     let currentIdx = 0;
     let studentAnswers = [];
@@ -163,9 +160,7 @@
                         }
                     </div>`;
             });
-        } catch (e) {
-            list.innerHTML = "فشل الاتصال بالخادم.";
-        }
+        } catch (e) { list.innerHTML = "فشل الاتصال بالخادم."; }
     }
 
     async function startExam(id) {
@@ -264,9 +259,7 @@
         try {
             await db.collection("results").add(finalResult);
             showReviewPanel(score, totalMCQ, analysis);
-        } catch (e) {
-            alert("حدث خطأ أثناء الحفظ، يرجى المحاولة مرة أخرى.");
-        }
+        } catch (e) { alert("حدث خطأ أثناء الحفظ."); }
     }
 
     function showReviewPanel(score, total, analysis) {
@@ -296,9 +289,7 @@
         }
     }
 
-    // التشغيل عند تحميل الصفحة
     window.onload = checkAuth;
 </script>
 </body>
 </html>
-
