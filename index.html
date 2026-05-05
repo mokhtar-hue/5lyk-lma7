@@ -20,10 +20,9 @@
         body {
             font-family: 'Cairo', sans-serif; background-color: var(--bg);
             color: var(--text); margin: 0; display: flex; justify-content: center;
-            align-items: center; min-height: 100vh; overflow: hidden;
+            align-items: center; min-height: 100vh; overflow-x: hidden;
         }
 
-        /* لوادر التحميل */
         #loader {
             position: fixed; inset: 0; background: rgba(15, 23, 42, 0.95);
             display: none; justify-content: center; align-items: center;
@@ -35,7 +34,6 @@
             animation: rotate 1s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
         }
 
-        /* كارت تسجيل الدخول */
         .login-card {
             background: var(--card); padding: 50px 40px; border-radius: 40px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
@@ -44,21 +42,17 @@
             animation: slideUp 0.8s ease-out;
         }
 
-        /* أنيميشن الميزان */
         .logo-area { margin-bottom: 20px; font-size: 50px; color: var(--accent); animation: balance 2.5s ease-in-out infinite; }
         
-        @keyframes balance {
-            0%, 100% { transform: rotate(-10deg); }
-            50% { transform: rotate(10deg); }
-        }
+        @keyframes balance { 0%, 100% { transform: rotate(-10deg); } 50% { transform: rotate(10deg); } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes rotate { to { transform: rotate(360deg); } }
         
         .welcome-title { font-size: 26px; font-weight: 900; color: #fff; margin-bottom: 5px; }
-        .welcome-sub { color: var(--accent); font-weight: 700; margin-bottom: 30px; font-size: 15px; letter-spacing: 0.5px; }
+        .welcome-sub { color: var(--accent); font-weight: 700; margin-bottom: 30px; font-size: 15px; }
         
         .input-box { margin-bottom: 25px; text-align: right; }
-        .input-box label { display: block; margin-bottom: 10px; font-weight: 700; color: #94a3b8; padding-right: 5px; font-size: 14px; }
+        .input-box label { display: block; margin-bottom: 10px; font-weight: 700; color: #94a3b8; font-size: 14px; }
         
         .field { position: relative; display: flex; align-items: center; }
         .field i { position: absolute; right: 15px; color: var(--accent); font-size: 18px; }
@@ -79,7 +73,7 @@
         .support-btn {
             display: none; width: 100%; padding: 15px; border-radius: 22px;
             background: #128c7e; color: white; text-decoration: none;
-            font-weight: 700; margin-top: 15px; font-size: 15px; transition: 0.3s;
+            font-weight: 700; margin-top: 15px; font-size: 15px; transition: 0.3s; text-align: center;
         }
 
         .error-msg { background: rgba(239, 68, 68, 0.1); color: var(--danger); padding: 12px; border-radius: 12px; font-size: 14px; font-weight: 700; margin-top: 15px; display: none; border: 1px solid var(--danger); }
@@ -89,18 +83,16 @@
 
 <div id="loader"><div class="spinner"></div></div>
 
-<div class="login-card" id="loginBox">
-    <div class="logo-area">
-        <i class="fas fa-balance-scale"></i>
-    </div>
-    <div class="welcome-title" id="greeting">صباح الخير</div>
-    <div class="welcome-sub">المستشار يرحب بك ❤️❤️</div>
+<div class="login-card">
+    <div class="logo-area"><i class="fas fa-balance-scale"></i></div>
+    <div class="welcome-title" id="greeting">مرحباً بك</div>
+    <div class="welcome-sub">منصة المستشار حازم سالم</div>
 
     <div class="input-box">
-        <label>إسم المستخدم (الإيميل)</label>
+        <label>إسم المستخدم</label>
         <div class="field">
             <i class="fas fa-user-circle"></i>
-            <input type="text" id="email" placeholder="example@mail.com" dir="ltr">
+            <input type="email" id="email" placeholder="example@mail.com" dir="ltr">
         </div>
     </div>
 
@@ -112,34 +104,36 @@
         </div>
     </div>
 
-    <button class="login-btn" id="loginBtn" onclick="handleLogin()">دخول المنصة الآن</button>
+    <button class="login-btn" onclick="handleLogin()">دخول المنصة الآن</button>
     
     <div id="errorArea" class="error-msg"></div>
     <a id="supportBtn" href="#" target="_blank" class="support-btn">
-        <i class="fab fa-whatsapp"></i> تواصل مع الدعم الفني للمستشار
+        <i class="fab fa-whatsapp"></i> تواصل مع الدعم الفني
     </a>
 </div>
 
 <script>
+    // تهيئة Firebase
     const firebaseConfig = { 
         apiKey: "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws", 
         authDomain: "zomaapp-744fc.firebaseapp.com", 
         projectId: "zomaapp-744fc" 
     };
-    firebase.initializeApp(firebaseConfig);
+    
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
     const db = firebase.firestore();
 
-    // 1. منطق الاستمرارية: دخول تلقائي إذا كانت الجلسة مخزنة
+    // التحقق من الجلسة السابقة
     window.onload = function() {
-        const savedEmail = localStorage.getItem("userEmail");
-        const savedToken = localStorage.getItem("sessionToken");
-        if(savedEmail && savedToken) {
+        const hr = new Date().getHours();
+        document.getElementById('greeting').innerText = hr < 12 ? "صباح الخير يا بطل ☀️" : "مساء الخير يا بطل 🌙";
+        
+        if(localStorage.getItem("sessionToken")) {
             window.location.href = "home.html";
         }
     };
-
-    const hr = new Date().getHours();
-    document.getElementById('greeting').innerText = hr < 12 ? "صباح الخير يا بطل ☀️" : "مساء الخير يا بطل 🌙";
 
     async function handleLogin() {
         const email = document.getElementById('email').value.trim();
@@ -147,7 +141,7 @@
         const errorArea = document.getElementById('errorArea');
         const supportBtn = document.getElementById('supportBtn');
 
-        if(!email || !pass) return showError("من فضلك أدخل البيانات المطلوبة كاملة");
+        if(!email || !pass) return showError("من فضلك أدخل البيانات المطلوبة");
 
         showLoader(true);
         errorArea.style.display = 'none';
@@ -158,46 +152,38 @@
             
             if(snap.empty) {
                 showLoader(false);
-                return showSupportError("عفواً، هذا المستخدم غير مسجل.", "أهلاً مستشار حازم، واجهت مشكلة (المستخدم غير مسجل): " + email);
+                return showSupportError("هذا الحساب غير مسجل لدينا.", "استفسار من " + email);
             }
 
             const userDoc = snap.docs[0];
             const userData = userDoc.data();
 
-            // فحص كلمة المرور
             if((userData.password || userData.pass) !== pass) {
                 showLoader(false);
-                return showError("كلمة المرور التي أدخلتها غير صحيحة، حاول مجدداً.");
+                return showError("كلمة المرور غير صحيحة.");
             }
 
-            // فحص حالة الحساب
-            if(userData.status === "banned" || userData.status === "inactive") {
+            if(userData.status === "banned") {
                 showLoader(false);
-                const reason = userData.banReason || "حسابك معطل حالياً.";
-                return showSupportError("🚫 " + reason, "أهلاً مستشار حازم، حسابي معطل: " + reason + " (إيميلي: " + email + ")");
+                return showSupportError("حسابك معطل حالياً.", "طلب فك حظر حساب: " + email);
             }
 
-            // --- منطق "الجلسة الأحدث تسيطر" ---
-            // نقوم بتوليد توكن جديد وحفظه في السيرفر.
-            // صفحة الـ Home ستلاحظ التغيير وتخرج أي متصفح قديم يمتلك توكن مختلف.
             const newSessionToken = "sess_" + Math.random().toString(36).substr(2, 9);
-            
             await db.collection("users").doc(userDoc.id).update({
                 lastSessionToken: newSessionToken,
                 lastLogin: firebase.firestore.FieldValue.serverTimestamp()
             });
 
-            // تخزين بيانات الجلسة الحالية
             localStorage.setItem("userEmail", email);
             localStorage.setItem("sessionToken", newSessionToken);
-            localStorage.setItem("userName", userData.name || "طالب المستشار");
-
-            // دخول مباشر
+            
+            // تنبيه: تأكد أن ملف home.html موجود في نفس المستودع على GitHub
             window.location.href = "home.html";
 
         } catch (e) {
+            console.error(e);
             showLoader(false);
-            showError("تعذر الاتصال بالسيرفر، تأكد من اتصالك بالإنترنت.");
+            showError("حدث خطأ في الاتصال بالسيرفر.");
         }
     }
 
