@@ -105,10 +105,10 @@
     <div id="statusIcon" style="font-size: 80px; margin-bottom: 20px;"></div>
     <h2 id="statusTitle" style="font-weight: 900; margin-bottom: 10px;"></h2>
     <p id="statusDesc" style="color: #94a3b8; max-width: 300px; line-height: 1.8;"></p>
-    <button class="login-btn" style="max-width: 200px; margin-top: 25px;" onclick="closeOverlay()">إغلاق</button>
+    <button class="login-btn" style="max-width: 200px; margin-top: 25px;" onclick="closeOverlay()">العودة للدخول</button>
 </div>
 
-<div class="login-card">
+<div class="login-card" id="loginBox">
     <div class="welcome-title" id="greeting">صباح الخير</div>
     <div class="welcome-sub">مرحباً بك في منصة المستشار حازم سالم ⚖️</div>
 
@@ -144,7 +144,8 @@
     const hr = new Date().getHours();
     document.getElementById('greeting').innerText = hr < 12 ? "صباح الخير يا بطل ☀️" : "مساء الخير يا بطل 🌙";
 
-    window.onload = checkExistingSession;
+    // تشغيل المراقبة الحية فور فتح الصفحة
+    window.onload = startRealTimeSessionMonitor;
 
     function togglePass() {
         const p = document.getElementById('pass');
@@ -158,8 +159,33 @@
         }
     }
 
+    // --- المراقبة الحية (تطرد المتصفح الأول فور دخول الثاني) ---
+    function startRealTimeSessionMonitor() {
+        const localToken = localStorage.getItem("sessionToken");
+        const email = localStorage.getItem("userEmail");
+
+        if (localToken && email) {
+            // نستخدم onSnapshot لمراقبة التوكن في الداتابيز في الوقت الفعلي
+            db.collection("users").where("email", "==", email).onSnapshot((snapshot) => {
+                if (!snapshot.empty) {
+                    const cloudToken = snapshot.docs[0].data().lastSessionToken;
+                    
+                    if (cloudToken && cloudToken !== localToken) {
+                        // التوكن في السيرفر لا يطابق توكن هذا المتصفح
+                        // إذن هذا هو (المتصفح الأول القديم) -> نطرده فوراً
+                        localStorage.clear();
+                        document.getElementById('loginBox').style.display = 'none'; // إخفاء كارت الدخول
+                        showStatus("⚠️", "تسجيل خروج إجباري", "تم تسجيل الدخول من جهاز أو متصفح آخر للتو. تم إنهاء جلستك هنا لحماية حسابك.");
+                    } else if (cloudToken === localToken) {
+                        // التوكن سليم (هذا هو المتصفح الثاني الفعال) -> يتم توجيهه للرئيسية
+                        window.location.href = "home.html";
+                    }
+                }
+            });
+        }
+    }
+
     async function handleLogin() {
-        // إزالة toLowerCase() لأن بعض الإيميلات قد تكون مسجلة بحروف كبيرة في الداتا بيز
         const email = document.getElementById('email').value.trim();
         const pass = document.getElementById('pass').value.trim();
 
@@ -168,7 +194,6 @@
         showLoader(true);
 
         try {
-            console.log("جاري البحث عن حساب:", email); // لتتبع المشكلة في الـ Console
             const snap = await db.collection("users").where("email", "==", email).get();
             
             if(snap.empty) {
@@ -178,8 +203,6 @@
 
             const userDoc = snap.docs[0];
             const userData = userDoc.data();
-
-            // دعم حقل كلمة المرور سواء كان اسمه password أو pass في الداتا بيز
             const dbPassword = userData.password || userData.pass;
 
             if(dbPassword !== pass) {
@@ -192,56 +215,31 @@
                 return showStatus("🚫", "حسابك معطل", userData.banReason || "يرجى مراجعة المستشار حازم سالم.");
             }
 
-            // إنشاء توكن فريد للجلسة لمنع الفتح من جهازين
-            const sessionToken = Date.now().toString();
+            // إنشاء توكن جديد (قوي وعشوائي) للمتصفح الثاني الذي يسجل الآن
+            const newSessionToken = Date.now().toString() + Math.random().toString(36).substring(2);
             
-            try {
-                await db.collection("users").doc(userDoc.id).update({
-                    lastSessionToken: sessionToken,
-                    lastLogin: firebase.firestore.FieldValue.serverTimestamp()
-                });
-            } catch (err) {
-                console.warn("تنبيه: تعذر تحديث التوكن في القاعدة، جاري إكمال الدخول...", err);
-            }
+            // رفع التوكن الجديد لقاعدة البيانات (هذه الخطوة هي التي ستطرد المتصفح الأول فوراً)
+            await db.collection("users").doc(userDoc.id).update({
+                lastSessionToken: newSessionToken,
+                lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+            });
 
-            // حفظ البيانات محلياً
+            // حفظ بيانات المتصفح الثاني (الحالي)
             localStorage.setItem("userEmail", email);
             localStorage.setItem("userName", userData.name || "طالب مستشار");
-            localStorage.setItem("sessionToken", sessionToken);
+            localStorage.setItem("sessionToken", newSessionToken);
 
             showLoader(false);
             showStatus("✅", "تم تسجيل الدخول", "جارٍ تحويلك إلى ساحة المستشار...");
             
+            // التوجيه
             setTimeout(() => {
                 window.location.href = "home.html";
-            }, 2000);
+            }, 1500);
 
         } catch (e) {
             showLoader(false);
-            console.error("Firebase Error: ", e);
-            alert("حدث خطأ! يرجى التأكد من اتصال الإنترنت أو إعدادات قاعدة البيانات (Rules).");
-        }
-    }
-
-    async function checkExistingSession() {
-        const localToken = localStorage.getItem("sessionToken");
-        const email = localStorage.getItem("userEmail");
-
-        if(localToken && email) {
-            try {
-                const snap = await db.collection("users").where("email", "==", email).get();
-                if(!snap.empty) {
-                    const cloudToken = snap.docs[0].data().lastSessionToken;
-                    if(localToken !== cloudToken) {
-                        localStorage.clear();
-                        showStatus("⚠️", "تنبيه أمني", "تم تسجيل الدخول من متصفح أو جهاز آخر، تم تسجيل خروجك لحماية حسابك.");
-                    } else {
-                        window.location.href = "home.html";
-                    }
-                }
-            } catch (err) {
-                console.log("لا يوجد اتصال لفحص الجلسة التلقائي.");
-            }
+            alert("حدث خطأ! يرجى التأكد من اتصال الإنترنت.");
         }
     }
 
@@ -254,9 +252,10 @@
     }
 
     function closeOverlay() {
-        document.getElementById('statusOverlay').style.display = 'none';
+        // تفريغ الحقول وإعادة تحميل الصفحة لتعود نظيفة بعد الطرد
         document.getElementById('email').value = '';
         document.getElementById('pass').value = '';
+        window.location.reload();
     }
 
     function showLoader(show) {
