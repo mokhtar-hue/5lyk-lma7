@@ -80,11 +80,11 @@
 <div id="loader"><div class="spinner"></div></div>
 
 <div class="login-card" id="loginBox">
-    <div class="welcome-title" id="greeting">مرحباً بك</div>
+    <div class="welcome-title" id="greeting">صباح الخير</div>
     <div class="welcome-sub">منصة المستشار حازم سالم ⚖️</div>
 
     <div class="input-box">
-        <label>البريد الإلكتروني</label>
+        <label>إسم المستخدم </label>
         <div class="field"><input type="text" id="email" placeholder="example@mail.com" dir="ltr"></div>
     </div>
 
@@ -112,6 +112,15 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
+    // 1. منطق "حفظ الدخول": إذا كان المستخدم مسجل دخوله فعلياً، حوله فوراً للرئيسية
+    window.onload = function() {
+        const savedEmail = localStorage.getItem("userEmail");
+        const savedToken = localStorage.getItem("sessionToken");
+        if(savedEmail && savedToken) {
+            window.location.href = "home.html";
+        }
+    };
+
     const hr = new Date().getHours();
     document.getElementById('greeting').innerText = hr < 12 ? "صباح الخير يا بطل ☀️" : "مساء الخير يا بطل 🌙";
 
@@ -132,7 +141,7 @@
             
             if(snap.empty) {
                 showLoader(false);
-                return showSupportError("هذا الحساب غير مسجل لدينا.", "أهلاً، أحاول الدخول وحسابي غير مسجل (الإيميل: " + email + ")");
+                return showSupportError("عفواً، الحساب غير موجود بالنظام.", "أهلاً مستشار حازم، أحاول الدخول وحسابي غير مسجل (الإيميل: " + email + ")");
             }
 
             const userDoc = snap.docs[0];
@@ -147,27 +156,28 @@
             if(userData.status === "banned" || userData.status === "inactive") {
                 showLoader(false);
                 const reason = userData.banReason || "حسابك معطل حالياً.";
-                return showSupportError(reason, "السلام عليكم ورحمة الله، حسابي معطل لسبب: " + reason + " (إيميلي: " + email + ")");
+                return showSupportError("🚫 " + reason, "السلام عليكم، حسابي معطل لسبب: " + reason + " (إيميلي: " + email + ")");
             }
 
-            // إنشاء توكن الجلسة الجديدة (هذا هو المفتاح الذي سيطرد الآخرين)
-            const newSessionToken = "active_" + Math.random().toString(36).substr(2, 9);
+            // إنشاء توكن جديد (هذا الفعل سيطرد أي جهاز قديم فوراً)
+            const newSessionToken = "sess_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5);
             
             await db.collection("users").doc(userDoc.id).update({
                 lastSessionToken: newSessionToken,
                 lastLogin: firebase.firestore.FieldValue.serverTimestamp()
             });
 
+            // حفظ الدخول محلياً
             localStorage.setItem("userEmail", email);
             localStorage.setItem("sessionToken", newSessionToken);
             localStorage.setItem("userName", userData.name || "طالب المستشار");
 
-            // نجاح الدخول - توجيه فوري
+            // التوجيه للرئيسية
             window.location.href = "home.html";
 
         } catch (e) {
             showLoader(false);
-            showError("حدث خطأ في الاتصال، حاول مرة أخرى.");
+            showError("حدث خطأ في الاتصال، تأكد من الإنترنت.");
         }
     }
 
