@@ -20,6 +20,7 @@
             --text-main: #f1f5f9;
             --text-dim: #94a3b8;
             --accent-success: #10b981;
+            --glass: rgba(30, 41, 59, 0.7);
         }
 
         body {
@@ -30,146 +31,177 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        /* ----- شريط التنبيهات ----- */
+        /* ----- شريط التنبيهات الاحترافي ----- */
         .announcement-banner {
-            background: linear-gradient(45deg, #f59e0b, #ea580c);
+            background: linear-gradient(90deg, #6366f1, #a855f7);
             color: #fff;
-            padding: 12px 20px;
+            padding: 10px 20px;
             display: none;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-            font-weight: 700;
+            font-weight: 600;
+            font-size: 14px;
+            position: relative;
             z-index: 3000;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
+        .announcement-content { display: flex; align-items: center; gap: 10px; }
+        .close-ann { position: absolute; left: 20px; cursor: pointer; opacity: 0.8; }
 
-        /* نافبار علوي */
+        /* نافبار علوي (Glassmorphism) */
         .top-nav {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 15px 30px; background: rgba(30, 41, 59, 0.8);
-            backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding: 15px 5%; background: var(--glass);
+            backdrop-filter: blur(15px); position: sticky; top: 0; z-index: 1000;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
         }
 
-        .welcome-box h2 { margin: 0; font-size: 16px; }
+        .welcome-box h2 { margin: 0; font-size: 16px; font-weight: 600; }
         .welcome-box span { color: var(--primary-light); font-weight: 900; }
 
         .menu-toggle {
-            font-size: 20px; cursor: pointer; color: var(--primary-light);
-            background: rgba(99, 102, 241, 0.1); width: 40px; height: 40px;
+            font-size: 20px; cursor: pointer; color: white;
+            background: var(--primary); width: 40px; height: 40px;
             display: flex; align-items: center; justify-content: center;
-            border-radius: 10px;
+            border-radius: 12px; transition: 0.3s;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
         }
+        .menu-toggle:hover { transform: rotate(90deg); }
 
         /* Sidebar */
         .sidebar {
-            position: fixed; top: 0; right: -300px; width: 280px; height: 100%;
-            background: var(--card); z-index: 2000; transition: 0.4s;
-            padding: 40px 20px; box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+            position: fixed; top: 0; right: -320px; width: 300px; height: 100%;
+            background: var(--card); z-index: 2000; transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 40px 20px; box-shadow: -15px 0 40px rgba(0,0,0,0.6);
         }
         .sidebar.active { right: 0; }
         .sidebar-menu { list-style: none; padding: 0; margin-top: 30px; }
-        .sidebar-menu li { padding: 15px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 15px; color: var(--text-main); transition: 0.3s; }
-        .sidebar-menu li:hover { background: rgba(99, 102, 241, 0.1); color: var(--primary-light); }
+        .sidebar-menu li { 
+            padding: 16px; border-radius: 15px; cursor: pointer; 
+            display: flex; align-items: center; gap: 15px; 
+            color: var(--text-main); transition: 0.3s; margin-bottom: 8px;
+        }
+        .sidebar-menu li:hover { background: rgba(99, 102, 241, 0.15); color: var(--primary-light); transform: translateX(-5px); }
 
-        /* Content */
-        .hero { padding: 50px 20px; text-align: center; }
-        .hero h1 { font-size: 28px; margin-bottom: 10px; }
+        /* Content Section */
+        .hero { padding: 60px 20px; text-align: center; }
+        .hero h1 { font-size: 32px; font-weight: 900; background: linear-gradient(to left, #fff, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { color: var(--text-dim); margin-top: 10px; font-size: 18px; }
         
-        .container { max-width: 1100px; margin: 0 auto; padding: 20px; flex: 1; }
-        .main-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; flex: 1; }
+        .main-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 25px; }
 
         .menu-card {
-            background: var(--card); border-radius: 25px; padding: 30px;
+            background: var(--card); border-radius: 30px; padding: 35px;
             text-align: center; text-decoration: none; color: inherit;
-            border: 1px solid rgba(255,255,255,0.05); transition: 0.3s;
+            border: 1px solid rgba(255,255,255,0.03); transition: 0.4s;
+            position: relative; overflow: hidden;
         }
-        .menu-card:hover { transform: translateY(-10px); border-color: var(--primary); }
-        .icon-box { font-size: 40px; color: var(--primary); margin-bottom: 20px; }
+        .menu-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, var(--primary), transparent); opacity: 0; transition: 0.4s;
+        }
+        .menu-card:hover { transform: translateY(-12px); border-color: var(--primary); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        .menu-card:hover::before { opacity: 0.05; }
 
-        /* Footer */
+        .icon-box { 
+            font-size: 45px; color: var(--primary); margin-bottom: 20px; 
+            transition: 0.4s; position: relative; z-index: 2;
+        }
+        .menu-card:hover .icon-box { transform: scale(1.2) rotate(10deg); color: var(--primary-light); }
+        .menu-card h3 { position: relative; z-index: 2; font-size: 22px; margin-bottom: 10px; }
+        .menu-card p { position: relative; z-index: 2; color: var(--text-dim); font-size: 14px; }
+
+        /* Footer العبقري */
         footer {
-            text-align: center;
-            padding: 25px;
-            background: rgba(30, 41, 59, 0.5);
+            text-align: center; padding: 30px;
+            background: rgba(15, 23, 42, 0.9);
             border-top: 1px solid rgba(255,255,255,0.05);
-            margin-top: 40px;
         }
-        .rights-text { font-size: 14px; color: var(--text-dim); font-weight: 600; }
-        .rights-text b { color: var(--primary-light); }
+        .rights-text { font-size: 14px; color: var(--text-dim); letter-spacing: 0.5px; }
+        .rights-text b { color: var(--primary-light); font-weight: 700; }
 
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; z-index: 1500; }
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; z-index: 1500; backdrop-filter: blur(5px); }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 26px; }
+            .main-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
 
     <div id="announcementBanner" class="announcement-banner">
         <div class="announcement-content">
-            <i class="fas fa-bullhorn"></i> <span id="announcementText">تحميل...</span>
+            <i class="fas fa-star"></i> <span id="announcementText">أهلاً بك في بيتك الثاني.. منصة التميز</span>
         </div>
-        <button onclick="dismissAnnouncement()" style="background:none; border:none; color:white; cursor:pointer;"><i class="fas fa-times"></i></button>
+        <i class="fas fa-times close-ann" onclick="dismissAnnouncement()"></i>
     </div>
 
     <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
     <nav class="top-nav">
         <div class="welcome-box">
-            <h2>مرحباً، <span id="userNameTop">...</span> 🎓</h2>
+            <h2>مرحباً بك، <span id="userNameTop">...</span> 🎓</h2>
         </div>
         <div class="menu-toggle" onclick="toggleSidebar()">
-            <i class="fas fa-bars"></i>
+            <i class="fas fa-th-large"></i>
         </div>
     </nav>
 
     <div class="sidebar" id="sidebar">
-        <div style="text-align:center; margin-bottom: 20px;">
-            <div style="width:70px; height:70px; background:var(--primary); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:auto; font-size:30px;">
-                <i class="fas fa-user-graduate"></i>
+        <div style="text-align:center; margin-bottom: 30px;">
+            <div style="width:80px; height:80px; background:linear-gradient(135deg, var(--primary), #a855f7); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:auto; font-size:35px; box-shadow: 0 10px 20px rgba(0,0,0,0.3);">
+                <i class="fas fa-user-tie"></i>
             </div>
-            <h4 id="sideName" style="margin:10px 0 5px;">...</h4>
-            <p id="sideEmail" style="font-size:12px; color:var(--text-dim);">...</p>
+            <h4 id="sideName" style="margin:15px 0 5px; font-weight: 800;">جاري التحميل...</h4>
+            <p id="sideEmail" style="font-size:13px; color:var(--text-dim);"></p>
         </div>
         <ul class="sidebar-menu">
-            <li onclick="toggleSidebar()"><i class="fas fa-home"></i> الرئيسية</li>
-            <a href="student-dash.html" style="text-decoration:none"><li><i class="fas fa-chart-line"></i> درجاتي</li></a>
-            <a href="https://wa.me/201060234399" style="text-decoration:none"><li><i class="fab fa-whatsapp"></i> الدعم الفني</li></a>
-            <li onclick="logout()" style="color:#ef4444;"><i class="fas fa-sign-out-alt"></i> خروج</li>
+            <li onclick="toggleSidebar()"><i class="fas fa-layer-group"></i> لوحة التحكم</li>
+            <a href="student-dash.html" style="text-decoration:none"><li><i class="fas fa-award"></i> كشف درجاتي</li></a>
+            <a href="https://wa.me/201060234399" style="text-decoration:none"><li><i class="fab fa-whatsapp"></i> تواصل مع المستشار</li></a>
+            <li onclick="logout()" style="color:#f87171; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); pt-10">
+                <i class="fas fa-power-off"></i> تسجيل الخروج
+            </li>
         </ul>
     </div>
 
     <div class="hero">
-        <h1>منصة المستشار التعليمية</h1>
-        <p>رحلتك نحو الـ 100% تبدأ من هنا</p>
+        <h1>منصة المستشار حازم سالم</h1>
+        <p>القانون والتميز.. وجهان لعملة واحدة</p>
     </div>
 
     <div class="container">
         <div class="main-grid">
             <a href="lessons.html" class="menu-card">
-                <div class="icon-box"><i class="fas fa-play-circle"></i></div>
-                <h3>المحاضرات</h3>
-                <p>شاهد حصص الشرح والحل</p>
+                <div class="icon-box"><i class="fas fa-clapperboard"></i></div>
+                <h3>المحاضرات الذكية</h3>
+                <p>تجربة مشاهدة فريدة بجودة عالية</p>
             </a>
             <a href="homework.html" class="menu-card">
-                <div class="icon-box"><i class="fas fa-book"></i></div>
-                <h3>المذكرات</h3>
-                <p>PDF مذكرات الشرح والواجب</p>
+                <div class="icon-box"><i class="fas fa-file-invoice"></i></div>
+                <h3>بنك الملفات</h3>
+                <p>مذكرات وملخصات حصرية PDF</p>
             </a>
             <a href="exams.html" class="menu-card">
-                <div class="icon-box"><i class="fas fa-pen-nib"></i></div>
-                <h3>الامتحانات</h3>
-                <p>اختبر نفسك الآن</p>
+                <div class="icon-box"><i class="fas fa-vial-circle-check"></i></div>
+                <h3>الاختبارات</h3>
+                <p>تحدى نفسك ونافس الأوائل</p>
             </a>
             <a href="student-dash.html" class="menu-card">
-                <div class="icon-box"><i class="fas fa-user-check"></i></div>
-                <h3>ملفي الشخصي</h3>
-                <p>متابعة المستوى والنتائج</p>
+                <div class="icon-box"><i class="fas fa-chart-pie"></i></div>
+                <h3>إحصائياتي</h3>
+                <p>راقب تطور مستواك التعليمي</p>
             </a>
         </div>
     </div>
 
     <footer>
-        <p class="rights-text">جميع الحقوق محفوظة لدى <b>المستشار حازم سالم</b> &copy; 2026</p>
+        <p class="rights-text">جميع الحقوق محفوظة ومنظمة برمجياً لدى <b>المستشار حازم سالم</b> &copy; 2026</p>
     </footer>
 
     <script>
@@ -181,52 +213,61 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // --- نظام مراقبة الجلسة الواحدة المحدث ---
-        function startSessionMonitor() {
+        // --- نظام "الجلسة الأحدث تسيطر" ---
+        function initSessionLogic() {
             const email = localStorage.getItem("userEmail");
-            const localToken = localStorage.getItem("sessionToken");
+            const myToken = localStorage.getItem("sessionToken");
 
-            if (!email || !localToken) {
-                window.location.replace("index.html");
+            if (!email || !myToken) {
+                location.replace("index.html");
                 return;
             }
 
-            // الاستماع اللحظي لأي تغيير في التوكن الخاص بالمستخدم
+            // مراقبة حية لبيانات المستخدم
             db.collection("users").where("email", "==", email).onSnapshot((snapshot) => {
                 if (!snapshot.empty) {
                     const userData = snapshot.docs[0].data();
-                    const cloudToken = userData.lastSessionToken; // تم التوحيد مع صفحة الدخول
+                    const serverToken = userData.lastSessionToken;
 
-                    // إذا كان التوكن في السيرفر مختلف عن المتصفح الحالي
-                    if (cloudToken && cloudToken !== localToken) {
-                        alert("⚠️ تنبيه: تم تسجيل الدخول لحسابك من جهاز جديد. سيتم الخروج من هذا الجهاز.");
-                        localStorage.clear();
-                        window.location.replace("index.html");
+                    // القاعدة الذهبية: إذا التوكن في السيرفر تغير عن اللي في المتصفح ده، اخرج حالاً
+                    if (serverToken && serverToken !== myToken) {
+                        // تنبيه المستخدم قبل الخروج
+                        alert("⚠️ عذراً.. تم الدخول لحسابك من جهاز آخر، سيتم إغلاق هذه الجلسة.");
+                        forceLogout();
                     }
                     
-                    // تحديث الاسم في الصفحة لو تغير
-                    const name = userData.name || "طالب المستشار";
-                    document.getElementById('userNameTop').innerText = name;
-                    document.getElementById('sideName').innerText = name;
+                    // تحديث البيانات في الواجهة
+                    document.getElementById('userNameTop').innerText = userData.name || "طالبنا";
+                    document.getElementById('sideName').innerText = userData.name || "طالبنا";
                     document.getElementById('sideEmail').innerText = email;
+                } else {
+                    // إذا الحساب اتمسح مثلاً
+                    forceLogout();
                 }
+            }, (error) => {
+                console.error("Session Monitor Error:", error);
             });
         }
 
-        // تشغيل المراقبة فور تحميل الصفحة
-        window.onload = startSessionMonitor;
+        function forceLogout() {
+            localStorage.clear();
+            location.replace("index.html");
+        }
+
+        // تشغيل النظام
+        window.onload = initSessionLogic;
 
         // جلب التنبيهات
         async function fetchAnnouncements() {
             try {
-                const snapshot = await db.collection("announcements").where("isActive", "==", true).limit(1).get();
-                if (!snapshot.empty) {
-                    const data = snapshot.docs[0].data();
-                    const id = snapshot.docs[0].id;
-                    if (localStorage.getItem("hide_msg_" + id) !== "true") {
+                const snap = await db.collection("announcements").where("isActive", "==", true).limit(1).get();
+                if (!snap.empty) {
+                    const data = snap.docs[0].data();
+                    const id = snap.docs[0].id;
+                    if (localStorage.getItem("closed_msg_" + id) !== "true") {
                         document.getElementById("announcementText").innerText = data.message;
                         document.getElementById("announcementBanner").style.display = "flex";
-                        window.currentMsgId = id;
+                        window.activeMsgId = id;
                     }
                 }
             } catch (e) {}
@@ -235,21 +276,18 @@
 
         function dismissAnnouncement() {
             document.getElementById("announcementBanner").style.display = "none";
-            if (window.currentMsgId) localStorage.setItem("hide_msg_" + window.currentMsgId, "true");
+            if (window.activeMsgId) localStorage.setItem("closed_msg_" + window.activeMsgId, "true");
         }
 
         function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('overlay');
-            sidebar.classList.toggle('active');
-            overlay.style.display = sidebar.classList.contains('active') ? 'block' : 'none';
+            const sb = document.getElementById('sidebar');
+            const ov = document.getElementById('overlay');
+            sb.classList.toggle('active');
+            ov.style.display = sb.classList.contains('active') ? 'block' : 'none';
         }
 
         function logout() {
-            if(confirm("هل تود تسجيل الخروج من المنصة؟")) {
-                localStorage.clear();
-                window.location.replace("index.html");
-            }
+            if(confirm("هل تريد تسجيل الخروج؟")) forceLogout();
         }
     </script>
 </body>
