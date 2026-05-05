@@ -3,24 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الرئيسية | منصة المستشار حازم سالم</title>
+    <title>لوحة التحكم | منصة المستشار حازم سالم</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     
     <style>
         :root {
             --primary: #6366f1;
-            --primary-light: #818cf8;
-            --bg: #0f172a;
-            --card: #1e293b;
-            --text-main: #f1f5f9;
+            --primary-dark: #4f46e5;
+            --secondary: #a855f7;
+            --bg: #0b0f1a;
+            --card: #161e2d;
+            --text-main: #ffffff;
             --text-dim: #94a3b8;
-            --accent-success: #10b981;
-            --glass: rgba(30, 41, 59, 0.7);
+            --accent-gold: #fbbf24;
+            --glass: rgba(22, 30, 45, 0.8);
         }
 
         body {
@@ -28,183 +30,253 @@
             background-color: var(--bg);
             color: var(--text-main);
             margin: 0;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
+            padding-bottom: 80px; /* لترك مساحة للبوت */
             overflow-x: hidden;
         }
 
-        /* ----- شريط التنبيهات الاحترافي ----- */
-        .announcement-banner {
-            background: linear-gradient(90deg, #6366f1, #a855f7);
-            color: #fff;
-            padding: 10px 20px;
-            display: none;
-            justify-content: center;
+        /* ----- شريط المحفظة العلوي ----- */
+        .top-bar {
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            padding: 12px 5%;
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .user-identity { display: flex; align-items: center; gap: 12px; }
+        .user-avatar {
+            width: 45px; height: 45px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-size: 20px; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .wallet-badge {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid var(--accent-gold);
+            padding: 6px 15px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent-gold);
+            font-weight: 800;
             font-size: 14px;
+        }
+
+        /* ----- التصميم الشبكي (The Grid) ----- */
+        .hero-section {
+            padding: 40px 5%;
+            text-align: center;
+            background: radial-gradient(circle at top, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+        }
+        .hero-section h1 { font-size: clamp(24px, 5vw, 36px); font-weight: 900; margin-bottom: 10px; }
+        .hero-section p { color: var(--text-dim); }
+
+        .main-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .pro-card {
+            background: var(--card);
+            border-radius: 24px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: white;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(255,255,255,0.03);
             position: relative;
-            z-index: 3000;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-        .announcement-content { display: flex; align-items: center; gap: 10px; }
-        .close-ann { position: absolute; left: 20px; cursor: pointer; opacity: 0.8; }
-
-        /* نافبار علوي (Glassmorphism) */
-        .top-nav {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 15px 5%; background: var(--glass);
-            backdrop-filter: blur(15px); position: sticky; top: 0; z-index: 1000;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
+            overflow: hidden;
         }
 
-        .welcome-box h2 { margin: 0; font-size: 16px; font-weight: 600; }
-        .welcome-box span { color: var(--primary-light); font-weight: 900; }
+        .pro-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
 
-        .menu-toggle {
-            font-size: 20px; cursor: pointer; color: white;
-            background: var(--primary); width: 40px; height: 40px;
+        .pro-card i {
+            font-size: 40px;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .pro-card h3 { font-size: 20px; margin: 0 0 10px 0; font-weight: 800; }
+        .pro-card p { font-size: 13px; color: var(--text-dim); margin: 0; text-align: center; }
+
+        /* شارة "جديد" */
+        .badge-new {
+            position: absolute; top: 15px; right: 15px;
+            background: var(--accent-gold); color: #000;
+            font-size: 10px; font-weight: 900; padding: 3px 8px;
+            border-radius: 6px;
+        }
+
+        /* ----- الشات بوت (Floating Bot) ----- */
+        .chat-bot-fab {
+            position: fixed; bottom: 30px; left: 30px;
+            width: 65px; height: 65px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            border-radius: 12px; transition: 0.3s;
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+            font-size: 28px; color: white;
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.5);
+            cursor: pointer; z-index: 2000;
+            animation: pulse 2s infinite;
         }
-        .menu-toggle:hover { transform: rotate(90deg); }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(99, 102, 241, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+        }
 
         /* Sidebar */
-        .sidebar {
+        .side-panel {
             position: fixed; top: 0; right: -320px; width: 300px; height: 100%;
-            background: var(--card); z-index: 2000; transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            padding: 40px 20px; box-shadow: -15px 0 40px rgba(0,0,0,0.6);
+            background: #1a2233; z-index: 3000; transition: 0.4s;
+            padding: 40px 20px;
         }
-        .sidebar.active { right: 0; }
-        .sidebar-menu { list-style: none; padding: 0; margin-top: 30px; }
-        .sidebar-menu li { 
-            padding: 16px; border-radius: 15px; cursor: pointer; 
-            display: flex; align-items: center; gap: 15px; 
-            color: var(--text-main); transition: 0.3s; margin-bottom: 8px;
+        .side-panel.open { right: 0; }
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; z-index: 2500; backdrop-filter: blur(4px); }
+
+        .menu-list { list-style: none; padding: 0; margin-top: 40px; }
+        .menu-list li {
+            padding: 15px; border-radius: 12px; margin-bottom: 10px;
+            display: flex; align-items: center; gap: 15px; cursor: pointer;
+            transition: 0.3s; color: var(--text-dim);
         }
-        .sidebar-menu li:hover { background: rgba(99, 102, 241, 0.15); color: var(--primary-light); transform: translateX(-5px); }
+        .menu-list li:hover { background: rgba(255,255,255,0.05); color: white; }
+        .menu-list li.active { background: var(--primary); color: white; }
 
-        /* Content Section */
-        .hero { padding: 60px 20px; text-align: center; }
-        .hero h1 { font-size: 32px; font-weight: 900; background: linear-gradient(to left, #fff, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .hero p { color: var(--text-dim); margin-top: 10px; font-size: 18px; }
-        
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; flex: 1; }
-        .main-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 25px; }
-
-        .menu-card {
-            background: var(--card); border-radius: 30px; padding: 35px;
-            text-align: center; text-decoration: none; color: inherit;
-            border: 1px solid rgba(255,255,255,0.03); transition: 0.4s;
-            position: relative; overflow: hidden;
+        /* التنبيه الاحترافي */
+        #customAlert {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            background: var(--card); border: 1px solid var(--primary);
+            padding: 15px 30px; border-radius: 15px; z-index: 5000;
+            display: none; animation: fadeInDown 0.5s;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
         }
-        .menu-card::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, var(--primary), transparent); opacity: 0; transition: 0.4s;
-        }
-        .menu-card:hover { transform: translateY(-12px); border-color: var(--primary); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
-        .menu-card:hover::before { opacity: 0.05; }
 
-        .icon-box { 
-            font-size: 45px; color: var(--primary); margin-bottom: 20px; 
-            transition: 0.4s; position: relative; z-index: 2;
-        }
-        .menu-card:hover .icon-box { transform: scale(1.2) rotate(10deg); color: var(--primary-light); }
-        .menu-card h3 { position: relative; z-index: 2; font-size: 22px; margin-bottom: 10px; }
-        .menu-card p { position: relative; z-index: 2; color: var(--text-dim); font-size: 14px; }
-
-        /* Footer العبقري */
-        footer {
-            text-align: center; padding: 30px;
-            background: rgba(15, 23, 42, 0.9);
-            border-top: 1px solid rgba(255,255,255,0.05);
-        }
-        .rights-text { font-size: 14px; color: var(--text-dim); letter-spacing: 0.5px; }
-        .rights-text b { color: var(--primary-light); font-weight: 700; }
-
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; z-index: 1500; backdrop-filter: blur(5px); }
-
-        @media (max-width: 768px) {
-            .hero h1 { font-size: 26px; }
-            .main-grid { grid-template-columns: 1fr; }
+        @media (max-width: 600px) {
+            .grid-layout { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
-    <div id="announcementBanner" class="announcement-banner">
-        <div class="announcement-content">
-            <i class="fas fa-star"></i> <span id="announcementText">أهلاً بك في بيتك الثاني.. منصة التميز</span>
-        </div>
-        <i class="fas fa-times close-ann" onclick="dismissAnnouncement()"></i>
-    </div>
+    <div id="customAlert">سيتوفر قريباً وحصرياً لأبطال المستشار 🚀</div>
 
-    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+    <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
 
-    <nav class="top-nav">
-        <div class="welcome-box">
-            <h2>مرحباً بك، <span id="userNameTop">...</span> 🎓</h2>
+    <nav class="top-bar">
+        <div class="user-identity">
+            <div class="user-avatar" onclick="openSidebar()">
+                <i class="fas fa-user-graduate"></i>
+            </div>
+            <div>
+                <div style="font-size: 12px; color: var(--text-dim);">أهلاً بك،</div>
+                <div id="navUserName" style="font-weight: 800; font-size: 15px;">جاري التحميل...</div>
+            </div>
         </div>
-        <div class="menu-toggle" onclick="toggleSidebar()">
-            <i class="fas fa-th-large"></i>
+
+        <div class="wallet-badge" onclick="showSoon()">
+            <i class="fas fa-wallet"></i>
+            <span id="userWallet">0.00</span> 
+            <small>ج.م</small>
         </div>
     </nav>
 
-    <div class="sidebar" id="sidebar">
-        <div style="text-align:center; margin-bottom: 30px;">
-            <div style="width:80px; height:80px; background:linear-gradient(135deg, var(--primary), #a855f7); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:auto; font-size:35px; box-shadow: 0 10px 20px rgba(0,0,0,0.3);">
-                <i class="fas fa-user-tie"></i>
-            </div>
-            <h4 id="sideName" style="margin:15px 0 5px; font-weight: 800;">جاري التحميل...</h4>
-            <p id="sideEmail" style="font-size:13px; color:var(--text-dim);"></p>
+    <header class="hero-section">
+        <h1 class="animate__animated animate__fadeInUp">منصة المستشار حازم سالم ⚖️</h1>
+        <p class="animate__animated animate__fadeInUp">بوابتك الرقمية نحو التفوق والتميز</p>
+    </header>
+
+    <main class="main-container">
+        <div class="grid-layout">
+            <a href="lessons.html" class="pro-card">
+                <i class="fas fa-play-circle"></i>
+                <h3>المحاضرات</h3>
+                <p>شاهد حصصك بأعلى جودة وتفاعل</p>
+            </a>
+
+            <a href="#" onclick="showSoon()" class="pro-card">
+                <span class="badge-new">NEW</span>
+                <i class="fas fa-graduation-cap"></i>
+                <h3>كورساتي</h3>
+                <p>الدورات التدريبية المسجلة الخاصة بك</p>
+            </a>
+
+            <a href="homework.html" class="pro-card">
+                <i class="fas fa-cloud-download-alt"></i>
+                <h3>بنك الملفات</h3>
+                <p>تحميل المذكرات والملخصات PDF</p>
+            </a>
+
+            <a href="exams.html" class="pro-card">
+                <i class="fas fa-edit"></i>
+                <h3>الاختبارات</h3>
+                <p>قيم مستواك مع أقوى امتحانات</p>
+            </a>
+
+            <a href="#" onclick="showSoon()" class="pro-card">
+                <i class="fas fa-users"></i>
+                <h3>منتدى الأبطال</h3>
+                <p>ناقش أسئلتك مع زملائك والمستشار</p>
+            </a>
+
+            <a href="#" onclick="showSoon()" class="pro-card">
+                <i class="fas fa-credit-card"></i>
+                <h3>المدفوعات</h3>
+                <p>سجل اشتراكاتك ووصل الدفع</p>
+            </a>
+
+            <a href="student-dash.html" class="pro-card">
+                <i class="fas fa-chart-line"></i>
+                <h3>تقارير الأداء</h3>
+                <p>تابع درجاتك وترتيبك على المنصة</p>
+            </a>
         </div>
-        <ul class="sidebar-menu">
-            <li onclick="toggleSidebar()"><i class="fas fa-layer-group"></i> لوحة التحكم</li>
-            <a href="student-dash.html" style="text-decoration:none"><li><i class="fas fa-award"></i> كشف درجاتي</li></a>
-            <a href="https://wa.me/201060234399" style="text-decoration:none"><li><i class="fab fa-whatsapp"></i> تواصل مع المستشار</li></a>
-            <li onclick="logout()" style="color:#f87171; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); pt-10">
-                <i class="fas fa-power-off"></i> تسجيل الخروج
-            </li>
+    </main>
+
+    <div class="side-panel" id="sidePanel">
+        <div style="text-align: center;">
+            <div style="width: 70px; height: 70px; background: var(--primary); border-radius: 20px; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 30px;">
+                <i class="fas fa-id-card"></i>
+            </div>
+            <h3 id="sideUserName" style="margin: 15px 0 5px;">...</h3>
+            <p id="sideUserEmail" style="font-size: 12px; color: var(--text-dim);"></p>
+        </div>
+
+        <ul class="menu-list">
+            <li class="active" onclick="closeSidebar()"><i class="fas fa-home"></i> الرئيسية</li>
+            <li onclick="showSoon()"><i class="fas fa-wallet"></i> شحن المحفظة</li>
+            <li onclick="showSoon()"><i class="fas fa-user-cog"></i> إعدادات الحساب</li>
+            <a href="https://wa.me/201060234399" style="text-decoration:none; color:inherit;"><li><i class="fab fa-whatsapp"></i> الدعم الفني</li></a>
+            <li onclick="logout()" style="color: #ff4d4d; margin-top: 30px;"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</li>
         </ul>
     </div>
 
-    <div class="hero">
-        <h1>منصة المستشار حازم سالم</h1>
-        <p>القانون والتميز.. وجهان لعملة واحدة</p>
+    <div class="chat-bot-fab" onclick="showSoon()">
+        <i class="fas fa-comment-dots"></i>
     </div>
-
-    <div class="container">
-        <div class="main-grid">
-            <a href="lessons.html" class="menu-card">
-                <div class="icon-box"><i class="fas fa-clapperboard"></i></div>
-                <h3>المحاضرات الذكية</h3>
-                <p>تجربة مشاهدة فريدة بجودة عالية</p>
-            </a>
-            <a href="homework.html" class="menu-card">
-                <div class="icon-box"><i class="fas fa-file-invoice"></i></div>
-                <h3>بنك الملفات</h3>
-                <p>مذكرات وملخصات حصرية PDF</p>
-            </a>
-            <a href="exams.html" class="menu-card">
-                <div class="icon-box"><i class="fas fa-vial-circle-check"></i></div>
-                <h3>الاختبارات</h3>
-                <p>تحدى نفسك ونافس الأوائل</p>
-            </a>
-            <a href="student-dash.html" class="menu-card">
-                <div class="icon-box"><i class="fas fa-chart-pie"></i></div>
-                <h3>إحصائياتي</h3>
-                <p>راقب تطور مستواك التعليمي</p>
-            </a>
-        </div>
-    </div>
-
-    <footer>
-        <p class="rights-text">جميع الحقوق محفوظة ومنظمة برمجياً لدى <b>المستشار حازم سالم</b> &copy; 2026</p>
-    </footer>
 
     <script>
+        // تهيئة Firebase
         const firebaseConfig = { 
             apiKey: "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws", 
             authDomain: "zomaapp-744fc.firebaseapp.com", 
@@ -213,81 +285,62 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // --- نظام "الجلسة الأحدث تسيطر" ---
-        function initSessionLogic() {
+        // منطق الجلسة والمحفظة
+        async function initApp() {
             const email = localStorage.getItem("userEmail");
-            const myToken = localStorage.getItem("sessionToken");
-
-            if (!email || !myToken) {
+            if (!email) {
                 location.replace("index.html");
                 return;
             }
 
-            // مراقبة حية لبيانات المستخدم
-            db.collection("users").where("email", "==", email).onSnapshot((snapshot) => {
+            // الاستماع الحي لبيانات المستخدم
+            db.collection("users").where("email", "==", email).onSnapshot(async (snapshot) => {
                 if (!snapshot.empty) {
-                    const userData = snapshot.docs[0].data();
-                    const serverToken = userData.lastSessionToken;
+                    const userDoc = snapshot.docs[0];
+                    const userData = userDoc.data();
 
-                    // القاعدة الذهبية: إذا التوكن في السيرفر تغير عن اللي في المتصفح ده، اخرج حالاً
-                    if (serverToken && serverToken !== myToken) {
-                        // تنبيه المستخدم قبل الخروج
-                        alert("⚠️ عذراً.. تم الدخول لحسابك من جهاز آخر، سيتم إغلاق هذه الجلسة.");
-                        forceLogout();
+                    // عرض البيانات
+                    document.getElementById('navUserName').innerText = userData.name || "طالبنا المميز";
+                    document.getElementById('sideUserName').innerText = userData.name || "طالبنا المميز";
+                    document.getElementById('sideUserEmail').innerText = email;
+
+                    // منطق المحفظة والـ 10 جنيه للمستخدم الجديد
+                    if (userData.wallet === undefined) {
+                        await db.collection("users").doc(userDoc.id).update({
+                            wallet: 10
+                        });
+                        document.getElementById('userWallet').innerText = "10.00";
+                    } else {
+                        document.getElementById('userWallet').innerText = parseFloat(userData.wallet).toFixed(2);
                     }
-                    
-                    // تحديث البيانات في الواجهة
-                    document.getElementById('userNameTop').innerText = userData.name || "طالبنا";
-                    document.getElementById('sideName').innerText = userData.name || "طالبنا";
-                    document.getElementById('sideEmail').innerText = email;
-                } else {
-                    // إذا الحساب اتمسح مثلاً
-                    forceLogout();
                 }
-            }, (error) => {
-                console.error("Session Monitor Error:", error);
             });
         }
 
-        function forceLogout() {
-            localStorage.clear();
-            location.replace("index.html");
+        window.onload = initApp;
+
+        // وظائف الواجهة
+        function showSoon() {
+            const alertBox = document.getElementById('customAlert');
+            alertBox.style.display = 'block';
+            setTimeout(() => { alertBox.style.display = 'none'; }, 3000);
         }
 
-        // تشغيل النظام
-        window.onload = initSessionLogic;
-
-        // جلب التنبيهات
-        async function fetchAnnouncements() {
-            try {
-                const snap = await db.collection("announcements").where("isActive", "==", true).limit(1).get();
-                if (!snap.empty) {
-                    const data = snap.docs[0].data();
-                    const id = snap.docs[0].id;
-                    if (localStorage.getItem("closed_msg_" + id) !== "true") {
-                        document.getElementById("announcementText").innerText = data.message;
-                        document.getElementById("announcementBanner").style.display = "flex";
-                        window.activeMsgId = id;
-                    }
-                }
-            } catch (e) {}
-        }
-        fetchAnnouncements();
-
-        function dismissAnnouncement() {
-            document.getElementById("announcementBanner").style.display = "none";
-            if (window.activeMsgId) localStorage.setItem("closed_msg_" + window.activeMsgId, "true");
+        function openSidebar() {
+            document.getElementById('sidePanel').classList.add('open');
+            document.getElementById('overlay').style.display = 'block';
         }
 
-        function toggleSidebar() {
-            const sb = document.getElementById('sidebar');
-            const ov = document.getElementById('overlay');
-            sb.classList.toggle('active');
-            ov.style.display = sb.classList.contains('active') ? 'block' : 'none';
+        function closeSidebar() {
+            document.getElementById('sidePanel').classList.remove('open');
+            document.getElementById('overlay').style.display = 'none';
         }
 
         function logout() {
-            if(confirm("هل تريد تسجيل الخروج؟")) forceLogout();
+            if(confirm("هل تريد تسجيل الخروج من منصة المستشار؟")) {
+                localStorage.clear();
+                location.replace("index.html");
+            }
         }
     </script>
 </body>
