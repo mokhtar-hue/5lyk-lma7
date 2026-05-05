@@ -4,14 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>تسجيل الدخول | منصة المستشار حـازم سالم</title>
-    <meta name="description" content="المنصة التعليمية الرسمية للمستشار حازم سالم - خبير القانون والتعليم في مصر. سجل دخولك الآن للوصول للمحاضرات والامتحانات.">
-    <meta name="keywords" content="حازم سالم, المستشار حازم سالم, منصة تعليمية مصرية, ثانوية عامة, قانون, كورسات حازم سالم">
-    <meta name="author" content="Engineer Hazem Salem">
+    <title>منصة المستشار حـازم سالم | الدخول السحري</title>
+    <meta name="description" content="المنصة التعليمية الرسمية للمستشار حازم سالم. سجل دخولك الآن للوصول للمحاضرات والامتحانات.">
+    <meta name="keywords" content="حازم سالم, المستشار حازم سالم, منصة تعليمية مصرية, ثانوية عامة, قانون">
     <meta name="geo.region" content="EG" />
-    <meta name="geo.placename" content="Egypt" />
     
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;900&family=Amiri:wght@700&family=Reem+Kufi:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -20,14 +18,13 @@
     <style>
         :root {
             --primary: #6366f1; --bg: #0f172a; --card: #1e293b;
-            --text: #f1f5f9; --input: #334155; --accent: #818cf8; --danger: #ef4444;
-            --trans: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            --text: #f1f5f9; --input: #334155; --accent: #fbbf24; /* لون ذهبي للميزان */
+            --trans: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* الوضع المضيء (Light Mode) */
         body.light-mode {
             --bg: #f8fafc; --card: #ffffff; --text: #1e293b;
-            --input: #f1f5f9; --accent: #4f46e5;
+            --input: #f1f5f9; --accent: #d97706;
         }
         
         body {
@@ -36,7 +33,7 @@
             align-items: center; min-height: 100vh; overflow: hidden; transition: var(--trans);
         }
 
-        /* زر الإعدادات والسمة */
+        /* زر الإعدادات */
         .settings-fab {
             position: fixed; top: 20px; left: 20px; z-index: 10001;
             width: 45px; height: 45px; background: var(--card);
@@ -45,41 +42,54 @@
             color: var(--accent); font-size: 20px; border: 1px solid rgba(255,255,255,0.1);
         }
 
-        /* واجهة السحر */
+        /* الإنترو السحري (The Magic Intro) */
         #magicOverlay {
             position: fixed; inset: 0; background: var(--bg);
             display: flex; flex-direction: column; justify-content: center;
-            align-items: center; z-index: 10000; transition: 1s ease;
+            align-items: center; z-index: 10000; transition: 1.2s cubic-bezier(0.7, 0, 0.3, 1);
         }
 
-        .magic-scale {
-            font-size: 100px; color: var(--accent);
-            filter: drop-shadow(0 0 30px var(--primary));
-            animation: magicPulse 2.5s infinite ease-in-out;
+        .intro-content { text-align: center; opacity: 0; transform: scale(0.8); animation: fadeInScale 1.5s forwards 0.5s; }
+
+        .magic-scale-large {
+            font-size: 150px; color: var(--accent);
+            filter: drop-shadow(0 0 30px var(--accent));
+            margin-bottom: 20px;
+            animation: scaleFloat 3s infinite ease-in-out;
         }
 
-        @keyframes magicPulse {
-            0%, 100% { transform: scale(1) rotate(-8deg); opacity: 0.8; }
-            50% { transform: scale(1.15) rotate(8deg); opacity: 1; filter: drop-shadow(0 0 50px var(--accent)); }
+        .calligraphy-text {
+            font-family: 'Reem Kufi', serif;
+            font-size: 35px;
+            color: var(--text);
+            background: linear-gradient(to right, #fff, var(--accent), #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            margin-top: 20px;
         }
 
-        /* كارت تسجيل الدخول */
+        @keyframes fadeInScale { to { opacity: 1; transform: scale(1); } }
+        @keyframes scaleFloat {
+            0%, 100% { transform: translateY(0) rotate(-5deg); filter: drop-shadow(0 0 20px var(--accent)); }
+            50% { transform: translateY(-20px) rotate(5deg); filter: drop-shadow(0 0 50px var(--accent)); }
+        }
+
+        /* كارت الدخول */
         .login-card {
             background: var(--card); padding: 50px 40px; border-radius: 40px;
             box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.5);
             width: 90%; max-width: 440px; text-align: center;
             border: 1px solid rgba(255,255,255,0.05);
-            animation: slideUp 1s ease; opacity: 0;
+            display: none; opacity: 0; transform: translateY(30px);
             transition: var(--trans);
         }
 
-        @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .welcome-title { font-size: 26px; font-weight: 900; color: var(--text); margin-top: 15px; }
-        .welcome-sub { color: var(--accent); font-weight: 700; margin-bottom: 30px; font-size: 14px; opacity: 0.8; }
+        .welcome-title { font-size: 26px; font-weight: 900; margin-top: 15px; }
+        .welcome-sub { color: var(--accent); font-weight: 700; margin-bottom: 30px; font-size: 14px; }
         
         .field { position: relative; margin-bottom: 20px; text-align: right; }
-        .field i { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); color: var(--accent); font-size: 18px; }
+        .field i { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); color: var(--accent); }
         .field input {
             width: 100%; padding: 18px 55px 18px 20px; border-radius: 20px; border: 2px solid transparent;
             background: var(--input); color: var(--text); font-family: 'Cairo'; outline: none; transition: 0.3s;
@@ -93,29 +103,12 @@
             color: white; font-weight: 900; font-size: 18px; cursor: pointer;
             transition: 0.3s; box-shadow: 0 10px 25px rgba(79, 70, 229, 0.4);
         }
-        .login-btn:hover { transform: scale(1.03) translateY(-2px); }
 
-        .error-msg { 
-            background: rgba(239, 68, 68, 0.1); color: var(--danger); 
-            padding: 15px; border-radius: 15px; font-size: 14px; 
-            margin-top: 20px; display: none; border: 1px solid var(--danger);
-            animation: shake 0.4s ease;
-        }
+        .error-msg { background: rgba(239, 68, 68, 0.1); color: var(--danger); padding: 15px; border-radius: 15px; margin-top: 20px; display: none; border: 1px solid var(--danger); font-size: 14px; }
+        .support-btn { display: none; margin-top: 15px; background: #128c7e; color: white; text-decoration: none; padding: 12px; border-radius: 15px; font-weight: 700; }
 
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
-
-        .support-btn { 
-            display: none; margin-top: 15px; background: #128c7e; color: white; 
-            text-decoration: none; font-weight: 700; font-size: 15px;
-            padding: 12px; border-radius: 15px; transition: 0.3s;
-        }
-        .support-btn:hover { background: #075e54; }
-
-        #loader {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.7);
-            display: none; justify-content: center; align-items: center; z-index: 11000;
-        }
-        .spinner { width: 50px; height: 50px; border: 5px solid rgba(255,255,255,0.1); border-top-color: var(--primary); border-radius: 50%; animation: rot 1s linear infinite; }
+        #loader { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 11000; }
+        .spinner { width: 50px; height: 50px; border: 5px solid rgba(255,255,255,0.1); border-top-color: var(--accent); border-radius: 50%; animation: rot 1s linear infinite; }
         @keyframes rot { to { transform: rotate(360deg); } }
     </style>
 </head>
@@ -123,20 +116,20 @@
 
 <div id="loader"><div class="spinner"></div></div>
 
-<div class="settings-fab" onclick="toggleTheme()" title="تبديل الوضع">
-    <i class="fas fa-moon" id="themeIcon"></i>
-</div>
+<div class="settings-fab" onclick="toggleTheme()"><i class="fas fa-moon" id="themeIcon"></i></div>
 
 <div id="magicOverlay">
-    <div class="magic-scale"><i class="fas fa-balance-scale"></i></div>
-    <div class="welcome-title">مرحباً بك في عالم المستشار</div>
-    <p style="color: var(--accent); font-weight: 600;">جاري الكشف عن هويتك الرقمية...</p>
+    <div class="intro-content">
+        <div class="magic-scale-large"><i class="fas fa-balance-scale"></i></div>
+        <div class="calligraphy-text">مرحباً بك في عالم المستشار</div>
+        <p style="color: var(--text); opacity: 0.7; font-weight: 600; margin-top: 10px;">جاري فتح البوابة التعليمية...</p>
+    </div>
 </div>
 
 <div class="login-card" id="loginCard">
     <div style="font-size: 50px; color: var(--accent);"><i class="fas fa-balance-scale"></i></div>
     <div class="welcome-title">دخول المنصة</div>
-    <div class="welcome-sub">بوابة المستشار حازم سالم التعليمية</div>
+    <div class="welcome-sub">بوابة المستشار حازم سالم</div>
 
     <div class="field">
         <i class="fas fa-user-shield"></i>
@@ -148,16 +141,15 @@
         <input type="password" id="pass" placeholder="كلمة المرور" dir="ltr">
     </div>
 
-    <button class="login-btn" onclick="handleLogin()">ابدأ رحلة التميز الآن</button>
+    <button class="login-btn" onclick="handleLogin()">ابدأ الآن</button>
     
     <div id="errorArea" class="error-msg"></div>
     <a id="supportBtn" href="#" target="_blank" class="support-btn">
-        <i class="fab fa-whatsapp"></i> تواصل مع الدعم الفني للمستشار
+        <i class="fab fa-whatsapp"></i> تواصل مع الدعم الفني
     </a>
 </div>
 
 <script>
-    // تهيئة الفايربيز
     const firebaseConfig = { 
         apiKey: "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws", 
         authDomain: "zomaapp-744fc.firebaseapp.com", 
@@ -166,7 +158,6 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // السمة (Theme)
     if(localStorage.getItem('theme') === 'light') toggleTheme();
 
     function toggleTheme() {
@@ -176,30 +167,37 @@
         document.getElementById('themeIcon').className = isLight ? 'fas fa-sun' : 'fas fa-moon';
     }
 
-    // التحقق الصامت (Silent Login)
+    // منطق الإنترو والدخول التلقائي
     window.onload = async function() {
         const email = localStorage.getItem("userEmail");
         const token = localStorage.getItem("sessionToken");
 
-        if (email && token) {
-            try {
-                const snap = await db.collection("users").where("email", "==", email).get();
-                if (!snap.empty) {
-                    const data = snap.docs[0].data();
-                    if (data.lastSessionToken === token && data.status !== 'banned') {
-                        setTimeout(() => window.location.href = "home.html", 1500);
-                        return;
+        // انتظر قليلاً ليعمل الإنترو تأثيره (2 ثانية)
+        setTimeout(async () => {
+            if (email && token) {
+                try {
+                    const snap = await db.collection("users").where("email", "==", email).get();
+                    if (!snap.empty) {
+                        const data = snap.docs[0].data();
+                        if (data.lastSessionToken === token && data.status !== 'banned') {
+                            window.location.href = "home.html";
+                            return;
+                        }
                     }
-                }
-            } catch (e) { console.log("Silent login failed"); }
-        }
-        
-        // فشل الدخول الصامت - اظهر واجهة الدخول
-        document.getElementById('magicOverlay').style.opacity = '0';
-        setTimeout(() => {
-            document.getElementById('magicOverlay').style.display = 'none';
-            document.getElementById('loginCard').style.opacity = '1';
-        }, 800);
+                } catch (e) { console.log("Silent login failed"); }
+            }
+            
+            // اظهر كارت الدخول إذا لم ينجح الدخول الصامت
+            const overlay = document.getElementById('magicOverlay');
+            const card = document.getElementById('loginCard');
+            
+            overlay.style.opacity = '0';
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                card.style.display = 'block';
+                setTimeout(() => { card.style.opacity = '1'; card.style.transform = 'translateY(0)'; }, 50);
+            }, 1000);
+        }, 2500);
     };
 
     async function handleLogin() {
@@ -208,7 +206,7 @@
         const errBox = document.getElementById('errorArea');
         const supBtn = document.getElementById('supportBtn');
 
-        if(!email || !pass) return showError("برجاء ملء جميع الحقول المطلوبة.");
+        if(!email || !pass) return showError("برجاء إدخال كافة البيانات");
 
         showLoader(true);
         errBox.style.display = 'none';
@@ -216,59 +214,36 @@
 
         try {
             const snap = await db.collection("users").where("email", "==", email).get();
-            
-            if(snap.empty) {
-                showLoader(false);
-                return showError("عفواً، هذا الحساب غير مسجل لدينا.");
-            }
+            if(snap.empty) { showLoader(false); return showError("الحساب غير موجود."); }
 
             const userDoc = snap.docs[0];
             const userData = userDoc.data();
 
-            // فحص كلمة المرور
-            if((userData.password || userData.pass) !== pass) {
-                showLoader(false);
-                return showError("كلمة المرور غير صحيحة، حاول مرة أخرى.");
-            }
+            if((userData.password || userData.pass) !== pass) { showLoader(false); return showError("كلمة المرور خطأ."); }
 
-            // فحص حالة الحظر (Banned)
             if(userData.status === 'banned') {
                 showLoader(false);
-                const banMsg = userData.banReason || "عفواً، تم حظر حسابك لمخالفة الشروط.";
+                const banMsg = userData.banReason || "حسابك محظور حالياً.";
                 showError("🚫 " + banMsg);
-                
-                // زر الدعم الفني برسالة الحظر
                 supBtn.style.display = 'block';
-                supBtn.href = `https://wa.me/201060234399?text=${encodeURIComponent('السلام عليكم مستشار حازم، واجهت مشكلة حظر الحساب: ' + banMsg + ' (إيميلي: ' + email + ')')}`;
+                supBtn.href = `https://wa.me/201060234399?text=${encodeURIComponent('السلام عليكم مستشار حازم، واجهت مشكلة حظر: ' + banMsg + ' (إيميل: ' + email + ')')}`;
                 return;
             }
 
-            // توليد توكن جديد وتحديث السيرفر (استبدال التوكن القديم)
             const newToken = "zoma_" + Math.random().toString(36).substr(2, 10);
             await db.collection("users").doc(userDoc.id).update({
                 lastSessionToken: newToken,
                 lastLogin: firebase.firestore.FieldValue.serverTimestamp()
             });
 
-            // حفظ محلي
             localStorage.setItem("userEmail", email);
             localStorage.setItem("sessionToken", newToken);
-            
             window.location.href = "home.html";
 
-        } catch (e) {
-            showLoader(false);
-            showError("حدث خطأ في الاتصال بالسيرفر، حاول مجدداً.");
-        }
+        } catch (e) { showLoader(false); showError("خطأ في الاتصال."); }
     }
 
-    // وظيفة الدعم الافتراضية
-    function showError(msg) {
-        const err = document.getElementById('errorArea');
-        err.innerText = msg;
-        err.style.display = 'block';
-    }
-
+    function showError(msg) { const err = document.getElementById('errorArea'); err.innerText = msg; err.style.display = 'block'; }
     function showLoader(show) { document.getElementById('loader').style.display = show ? 'flex' : 'none'; }
 </script>
 </body>
