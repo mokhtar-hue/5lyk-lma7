@@ -4,283 +4,236 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>منصة المستشار حازم سالم | البوابة التعليمية الأولى بالدقهلية</title>
-    <meta name="description" content="المنصة الرسمية للمستشار حازم سالم - خبير التعليم بمحافظة الدقهلية. توفر المنصة اختبارات إلكترونية، دروساً تفاعلية، ومتابعة دقيقة لمستوى الطلاب في المنصورة وكافة أنحاء مصر.">
-    <meta name="keywords" content="المستشار حازم سالم, منصة المستشار حازم سالم, المستشار, حازم سالم, امتحانات الدقهلية, دروس اونلاين المنصورة, بوابة المستشار التعليمية, ثانوية عامة الدقهلية">
+    <title>تسجيل الدخول | منصة المستشار حازم سالم التعليمية</title>
+    <meta name="description" content="سجل دخولك الآن إلى منصة المستشار حازم سالم، المنصة التعليمية الرائدة في محافظة الدقهلية والمنصورة. تابع دروسك وامتحاناتك بأحدث التقنيات.">
+    <meta name="keywords" content="منصة المستشار حازم سالم, تسجيل دخول المستشار, حازم سالم, امتحانات الدقهلية, المنصورة تعليم, المستشار">
     <meta name="author" content="المستشار حازم سالم">
-    
     <meta name="geo.region" content="EG-DK">
     <meta name="geo.placename" content="Mansoura">
-    <meta name="geo.position" content="31.0409;31.3785">
-    <meta name="ICBM" content="31.0409, 31.3785">
 
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚖️</text></svg>">
-
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "EducationalOrganization",
-      "name": "منصة المستشار حازم سالم",
-      "alternateName": "Hazem Salem Platform",
-      "description": "منصة تعليمية متطورة لطلاب محافظة الدقهلية بإشراف المستشار حازم سالم.",
-      "url": "https://mokhtar-hue.github.io/5lyk-lma7/",
-      "logo": "https://mokhtar-hue.github.io/5lyk-lma7/logo.png",
-      "address": {
-        "@type": "PostalAddress",
-        "addressLocality": "المنصورة",
-        "addressRegion": "الدقهلية",
-        "addressCountry": "EG"
-      },
-      "sameAs": [
-        "https://facebook.com/your-profile",
-        "https://youtube.com/your-channel"
-      ]
-    }
-    </script>
-
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
     <style>
         :root {
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --bg: #0f172a;
-            --card: #1e293b;
-            --text: #f1f5f9;
-            --accent: #22c55e;
-            --gold: #fbbf24;
+            --primary: #6366f1; --bg: #f8fafc; --card: #ffffff;
+            --text: #1e293b; --input: #f1f5f9; --accent: #4f46e5;
         }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        [data-theme="dark"] {
+            --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --input: #334155;
+        }
 
         body {
-            font-family: 'Cairo', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            overflow-x: hidden;
+            font-family: 'Cairo', sans-serif; background-color: var(--bg);
+            color: var(--text); margin: 0; display: flex; justify-content: center;
+            align-items: center; min-height: 100vh; overflow: hidden; transition: 0.5s;
         }
 
-        /* خلفية متحركة */
-        .bg-glow {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 80%);
-            z-index: -1;
+        /* Loading Spinner */
+        #loader {
+            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.9);
+            display: none; justify-content: center; align-items: center;
+            z-index: 9999; backdrop-filter: blur(10px);
+        }
+        .spinner {
+            width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.1);
+            border-top-color: var(--primary); border-radius: 50%;
+            animation: rotate 0.8s linear infinite;
         }
 
-        /* الهيدر */
-        nav {
-            background: rgba(30, 41, 59, 0.8);
-            backdrop-filter: blur(10px);
-            padding: 15px 5%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+        .login-card {
+            background: var(--card); padding: 40px; border-radius: 35px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            width: 100%; max-width: 420px; text-align: center;
+            border: 1px solid rgba(255,255,255,0.05); animation: slideIn 0.6s ease-out;
         }
 
-        .logo { font-size: 24px; font-weight: 900; color: var(--primary); display: flex; align-items: center; gap: 10px; }
-        .logo i { color: var(--gold); }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes rotate { to { transform: rotate(360deg); } }
 
-        /* قسم الترحيب */
-        .hero {
-            padding: 80px 5% 40px;
-            text-align: center;
-            animation: fadeIn 1s ease-out;
+        .welcome-title { font-size: 28px; font-weight: 900; color: var(--primary); margin-bottom: 5px; }
+        .welcome-sub { color: #94a3b8; font-weight: 600; margin-bottom: 30px; font-size: 14px; }
+
+        .input-box { margin-bottom: 20px; text-align: right; }
+        .input-box label { display: block; margin-bottom: 8px; font-weight: 700; font-size: 14px; color: #64748b; padding-right: 5px; }
+        
+        .field { position: relative; display: flex; align-items: center; }
+        .field input {
+            width: 100%; padding: 15px 20px; border-radius: 18px; border: 2px solid transparent;
+            background: var(--input); color: var(--text); font-family: 'Cairo';
+            font-size: 16px; transition: 0.3s; outline: none;
+        }
+        .field input:focus { border-color: var(--primary); background: var(--card); box-shadow: 0 0 20px rgba(99, 102, 241, 0.15); }
+
+        .login-btn {
+            width: 100%; padding: 16px; border: none; border-radius: 20px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white; font-weight: 800; font-size: 18px; cursor: pointer;
+            transition: 0.3s; margin-top: 10px; box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
+        }
+        .login-btn:hover { transform: translateY(-2px); box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.4); }
+
+        .status-overlay {
+            position: fixed; inset: 0; background: var(--bg); z-index: 10000;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 20px; animation: fadeIn 0.4s;
         }
 
-        .hero h1 { font-size: clamp(32px, 5vw, 56px); font-weight: 900; margin-bottom: 20px; color: #fff; }
-        .hero p { font-size: 18px; color: #94a3b8; max-width: 700px; margin: 0 auto 30px; }
+        .theme-toggle { position: absolute; top: 20px; left: 20px; cursor: pointer; font-size: 24px; border: none; background: none; }
 
-        /* شبكة التحكم الرئيسية */
-        .main-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-            max-width: 1200px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
-
-        .nav-card {
-            background: var(--card);
-            border-radius: 24px;
-            padding: 40px 30px;
-            text-align: center;
-            text-decoration: none;
-            color: var(--text);
-            border: 1px solid rgba(255,255,255,0.05);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .nav-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(45deg, transparent, rgba(99, 102, 241, 0.1), transparent);
-            transform: translateX(-100%);
-            transition: 0.6s;
-        }
-
-        .nav-card:hover {
-            transform: translateY(-10px);
-            border-color: var(--primary);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-        }
-
-        .nav-card:hover::before { transform: translateX(100%); }
-
-        .nav-card i {
-            font-size: 45px;
-            margin-bottom: 20px;
-            display: block;
-            background: linear-gradient(135deg, var(--primary), var(--gold));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .nav-card h3 { font-size: 22px; margin-bottom: 10px; font-weight: 700; }
-        .nav-card p { font-size: 14px; color: #94a3b8; }
-
-        /* فوتر احترافي */
-        footer {
-            margin-top: 80px;
-            background: #070b14;
-            padding: 50px 5% 20px;
-            border-top: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .footer-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 40px;
-            max-width: 1200px;
-            margin: 0 auto;
-            text-align: center;
-        }
-
-        .footer-bottom {
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255,255,255,0.05);
-            text-align: center;
-            font-size: 13px;
-            color: #64748b;
-        }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* زر الطالب المحترف */
-        .student-profile {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: rgba(255,255,255,0.05);
-            padding: 8px 15px;
-            border-radius: 50px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
-<body>
+<body data-theme="dark">
 
-<div class="bg-glow"></div>
+<button class="theme-toggle" onclick="toggleTheme()">🌙</button>
 
-<nav>
-    <div class="logo">
-        <i class="fas fa-balance-scale"></i>
-        <span>منصة المستشار</span>
-    </div>
-    <div class="student-profile" id="userZone">
-        <span id="userNameDisplay" style="font-weight: bold; font-size: 14px;">مرحباً بك</span>
-        <i class="fas fa-user-circle" style="font-size: 24px; color: var(--primary);"></i>
-    </div>
-</nav>
+<div id="loader"><div class="spinner"></div></div>
 
-<section class="hero">
-    <h1>المستشار حازم سالم</h1>
-    <p>البوابة الأكاديمية الرقمية المتكاملة لطلاب محافظة الدقهلية. رفيقك في رحلة التفوق والنجاح من المنصورة إلى كل مصر.</p>
-    <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
-        <span style="background: rgba(34, 197, 94, 0.1); color: var(--accent); padding: 5px 15px; border-radius: 50px; font-size: 14px; font-weight: bold; border: 1px solid var(--accent);">
-            <i class="fas fa-check-circle"></i> معتمد في الدقهلية
-        </span>
-        <span style="background: rgba(251, 191, 36, 0.1); color: var(--gold); padding: 5px 15px; border-radius: 50px; font-size: 14px; font-weight: bold; border: 1px solid var(--gold);">
-            <i class="fas fa-star"></i> التعليم الذكي 2026
-        </span>
-    </div>
-</section>
-
-<div class="main-grid">
-    <a href="home.html" class="nav-card">
-        <i class="fas fa-house-chimney"></i>
-        <h3>ساحة المنصة</h3>
-        <p>آخر الأخبار والتنبيهات المباشرة من المستشار حازم سالم.</p>
-    </a>
-
-    <a href="lessons.html" class="nav-card">
-        <i class="fas fa-play-circle"></i>
-        <h3>المحاضرات الرقمية</h3>
-        <p>شرح تفصيلي للمنهج بأحدث الوسائل التعليمية المتطورة.</p>
-    </a>
-
-    <a href="homework.html" class="nav-card">
-        <i class="fas fa-book-open"></i>
-        <h3>المهام الأسبوعية</h3>
-        <p>حل الواجبات وتسليمها إلكترونياً مع تصحيح فوري دقيق.</p>
-    </a>
-
-    <a href="exams.html" class="nav-card">
-        <i class="fas fa-file-signature"></i>
-        <h3>بوابة الامتحانات</h3>
-        <p>اختبارات دورية ونهائية لتقييم مستواك الأكاديمي.</p>
-    </a>
-
-    <a href="student-dash.html" class="nav-card">
-        <i class="fas fa-chart-line"></i>
-        <h3>مركز التحليلات</h3>
-        <p>تابع تقدمك، درجاتك، وترتيبك على مستوى الدقهلية.</p>
-    </a>
+<div id="statusOverlay" class="status-overlay">
+    <div id="statusIcon" style="font-size: 80px; margin-bottom: 20px;"></div>
+    <h2 id="statusTitle" style="font-weight: 900; margin-bottom: 10px;"></h2>
+    <p id="statusDesc" style="color: #94a3b8; max-width: 300px; line-height: 1.8;"></p>
+    <button class="login-btn" style="max-width: 200px; margin-top: 25px;" onclick="closeOverlay()">إغلاق</button>
 </div>
 
-<footer>
-    <div class="footer-content">
-        <div>
-            <h3 style="color: #fff; margin-bottom: 15px;">عن المستشار</h3>
-            <p style="font-size: 14px; color: #64748b;">رؤية تعليمية تهدف إلى تمكين الطالب المصري من خلال التكنولوجيا الحديثة تحت إشراف المستشار حازم سالم.</p>
-        </div>
-        <div>
-            <h3 style="color: #fff; margin-bottom: 15px;">اتصال سريع</h3>
-            <p style="font-size: 14px; color: #64748b;"><i class="fas fa-map-marker-alt"></i> المنصورة - محافظة الدقهلية</p>
-            <p style="font-size: 14px; color: #64748b;"><i class="fas fa-envelope"></i> support@mokhtar-hue.com</p>
-        </div>
+<div class="login-card">
+    <div class="welcome-title" id="greeting">صباح الخير</div>
+    <div class="welcome-sub">مرحباً بك في منصة المستشار حازم سالم ⚖️</div>
+
+    <div class="input-box">
+        <label>البريد الإلكتروني</label>
+        <div class="field"><input type="email" id="email" placeholder="example@mail.com" dir="ltr"></div>
     </div>
-    <div class="footer-bottom">
-        <p>جميع الحقوق محفوظة © 2026 منصة المستشار حازم سالم</p>
-        <p style="margin-top: 5px; font-size: 11px;">تم التطوير لخدمة طلابنا بمحافظة الدقهلية - جمهورية مصر العربية</p>
+
+    <div class="input-box">
+        <label>كلمة المرور</label>
+        <div class="field"><input type="password" id="pass" placeholder="••••••••" dir="ltr"></div>
     </div>
-</footer>
+
+    <button class="login-btn" onclick="handleLogin()">دخول النظام</button>
+    
+    <p style="margin-top: 25px; font-size: 12px; color: #64748b; font-weight: 600;">
+        <i class="fas fa-shield-alt"></i> نظام الوصول الذكي - محافظة الدقهلية
+    </p>
+</div>
 
 <script>
-    // نظام التحقق من الجلسة
-    document.addEventListener("DOMContentLoaded", function() {
-        const userName = localStorage.getItem("userName");
-        if (userName) {
-            document.getElementById('userNameDisplay').innerText = userName;
-        } else {
-            // تحويل لصفحة تسجيل الدخول إذا لم يوجد اسم
-            // window.location.href = "login.html"; 
-        }
-    });
+    // إعدادات Firebase
+    const firebaseConfig = { 
+        apiKey: "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws", 
+        authDomain: "zomaapp-744fc.firebaseapp.com", 
+        projectId: "zomaapp-744fc" 
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-    // تتبع بسيط لتحسين تجربة المستخدم
-    console.log("منصة المستشار حازم سالم - جاهزة للعمل بنجاح ✅");
+    // إدارة التحية حسب الوقت
+    const hr = new Date().getHours();
+    document.getElementById('greeting').innerText = hr < 12 ? "صباح الخير يا بطل ☀️" : "مساء الخير يا بطل 🌙";
+
+    // تفعيل فحص الجلسة عند فتح الصفحة
+    window.onload = checkExistingSession;
+
+    async function handleLogin() {
+        const email = document.getElementById('email').value.trim().toLowerCase();
+        const pass = document.getElementById('pass').value.trim();
+
+        if(!email || !pass) return alert("من فضلك ادخل بياناتك");
+
+        showLoader(true);
+
+        try {
+            const snap = await db.collection("users").where("email", "==", email).get();
+            
+            if(snap.empty) {
+                showLoader(false);
+                return alert("الحساب غير مسجل بالنظام!");
+            }
+
+            const userDoc = snap.docs[0];
+            const userData = userDoc.data();
+
+            if(userData.password !== pass) {
+                showLoader(false);
+                return alert("كلمة المرور غير صحيحة!");
+            }
+
+            if(userData.status === "banned") {
+                showLoader(false);
+                return showStatus("🚫", "حسابك معطل", userData.banReason || "يرجى مراجعة المستشار حازم سالم.");
+            }
+
+            // إنشاء توكن فريد للجلسة (يمنع فتح الحساب من مكانين)
+            const sessionToken = Date.now().toString();
+            await db.collection("users").doc(userDoc.id).update({
+                lastSessionToken: sessionToken,
+                lastLogin: new Date().toISOString()
+            });
+
+            // حفظ البيانات محلياً
+            localStorage.setItem("userEmail", email);
+            localStorage.setItem("userName", userData.name);
+            localStorage.setItem("sessionToken", sessionToken);
+
+            showStatus("✅", "تم تسجيل الدخول", "جارٍ تحويلك إلى ساحة المستشار...");
+            
+            setTimeout(() => {
+                window.location.href = "home.html";
+            }, 2000);
+
+        } catch (e) {
+            showLoader(false);
+            alert("خطأ في الاتصال بالشبكة!");
+        }
+    }
+
+    // وظيفة فحص الجلسة (الطرد التلقائي)
+    async function checkExistingSession() {
+        const localToken = localStorage.getItem("sessionToken");
+        const email = localStorage.getItem("userEmail");
+
+        if(localToken && email) {
+            const snap = await db.collection("users").where("email", "==", email).get();
+            if(!snap.empty) {
+                const cloudToken = snap.docs[0].data().lastSessionToken;
+                if(localToken !== cloudToken) {
+                    localStorage.clear();
+                    showStatus("⚠️", "تنبيه أمني", "تم تسجيل الدخول من جهاز آخر، تم تسجيل خروجك لحماية حسابك.");
+                } else {
+                    // إذا كان التوكن سليم، وجهه للرئيسية فوراً دون تسجيل دخول مجدد
+                    window.location.href = "home.html";
+                }
+            }
+        }
+    }
+
+    function showStatus(icon, title, desc) {
+        const over = document.getElementById('statusOverlay');
+        document.getElementById('statusIcon').innerText = icon;
+        document.getElementById('statusTitle').innerText = title;
+        document.getElementById('statusDesc').innerText = desc;
+        over.style.display = 'flex';
+    }
+
+    function closeOverlay() {
+        document.getElementById('statusOverlay').style.display = 'none';
+    }
+
+    function showLoader(show) {
+        document.getElementById('loader').style.display = show ? 'flex' : 'none';
+    }
+
+    function toggleTheme() {
+        const b = document.body;
+        const current = b.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        b.setAttribute('data-theme', next);
+        document.querySelector('.theme-toggle').innerText = next === 'dark' ? "🌙" : "☀️";
+    }
 </script>
 
 </body>
