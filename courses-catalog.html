@@ -8,193 +8,26 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
-        :root {
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --bg: #0f172a;
-            --card: #1e293b;
-            --accent: #10b981;
-            --text-main: #f1f5f9;
-            --text-dim: #94a3b8;
-        }
-
-        body {
-            font-family: 'Cairo', sans-serif;
-            background: var(--bg);
-            color: var(--text-main);
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-        }
-
-        /* Hero Section */
-        .hero {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(15, 23, 42, 1) 100%);
-            padding: 80px 5% 40px;
-            text-align: center;
-            border-bottom: 1px solid #1e293b;
-        }
-
-        .hero h1 {
-            font-size: 3rem;
-            font-weight: 900;
-            margin-bottom: 10px;
-            background: linear-gradient(to right, #818cf8, #c084fc);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        /* Filter Tabs */
-        .filters {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin: 30px 0;
-        }
-
-        .filter-btn {
-            background: var(--card);
-            border: 1px solid #334155;
-            color: var(--text-dim);
-            padding: 8px 25px;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: 0.3s;
-            font-weight: bold;
-        }
-
-        .filter-btn.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
-        }
-
-        /* Grid */
-        .course-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 30px;
-            padding: 40px 5%;
-            max-width: 1400px;
-            margin: auto;
-        }
-
-        /* Course Card */
-        .course-card {
-            background: var(--card);
-            border-radius: 24px;
-            overflow: hidden;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 1px solid #334155;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .course-card:hover {
-            transform: translateY(-12px);
-            border-color: var(--primary);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
-
-        .course-banner {
-            height: 180px;
-            background: linear-gradient(45deg, #1e1b4b, #312e81);
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .course-banner i {
-            font-size: 60px;
-            color: rgba(255, 255, 255, 0.2);
-        }
-
-        .badge-type {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            padding: 5px 15px;
-            border-radius: 10px;
-            font-size: 12px;
-            font-weight: 900;
-            text-transform: uppercase;
-        }
-
+        :root { --primary: #6366f1; --primary-dark: #4f46e5; --bg: #0f172a; --card: #1e293b; --accent: #10b981; --text-main: #f1f5f9; --text-dim: #94a3b8; }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--text-main); margin: 0; padding: 0; overflow-x: hidden; }
+        .hero { background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(15, 23, 42, 1) 100%); padding: 80px 5% 40px; text-align: center; border-bottom: 1px solid #1e293b; }
+        .hero h1 { font-size: 3rem; font-weight: 900; background: linear-gradient(to right, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .filters { display: flex; justify-content: center; gap: 15px; margin: 30px 0; }
+        .filter-btn { background: var(--card); border: 1px solid #334155; color: var(--text-dim); padding: 8px 25px; border-radius: 50px; cursor: pointer; transition: 0.3s; font-weight: bold; }
+        .filter-btn.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); }
+        .course-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; padding: 40px 5%; max-width: 1400px; margin: auto; }
+        .course-card { background: var(--card); border-radius: 24px; overflow: hidden; transition: all 0.4s; border: 1px solid #334155; position: relative; display: flex; flex-direction: column; }
+        .course-card:hover { transform: translateY(-12px); border-color: var(--primary); }
+        .course-banner { height: 180px; background: linear-gradient(45deg, #1e1b4b, #312e81); display: flex; align-items: center; justify-content: center; }
+        .badge-type { position: absolute; top: 15px; left: 15px; padding: 5px 15px; border-radius: 10px; font-size: 12px; font-weight: 900; }
         .badge-paid { background: #f59e0b; color: #000; }
         .badge-free { background: var(--accent); color: #fff; }
-
-        .course-content {
-            padding: 25px;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .course-content h3 {
-            margin: 0 0 10px 0;
-            font-size: 20px;
-            line-height: 1.4;
-        }
-
-        .course-meta {
-            display: flex;
-            gap: 15px;
-            color: var(--text-dim);
-            font-size: 13px;
-            margin-bottom: 20px;
-        }
-
-        .price-row {
-            margin-top: auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-top: 15px;
-            border-top: 1px solid #334155;
-        }
-
-        .price-val {
-            font-size: 22px;
-            font-weight: 900;
-            color: var(--text-main);
-        }
-
-        .enter-btn {
-            background: var(--primary);
-            color: white;
-            padding: 10px 25px;
-            border-radius: 12px;
-            text-decoration: none;
-            font-weight: bold;
-            transition: 0.3s;
-            border: none;
-            cursor: pointer;
-        }
-
-        .enter-btn:hover {
-            background: var(--primary-dark);
-            box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
-        }
-
-        /* Loading Animation */
-        #loader {
-            display: flex;
-            justify-content: center;
-            padding: 100px;
-        }
-        .shimmer {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #334155;
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 1s infinite linear;
-        }
+        .course-content { padding: 25px; flex-grow: 1; }
+        .price-row { margin-top: 15px; display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 1px solid #334155; }
+        .enter-btn { background: var(--primary); color: white; padding: 10px 25px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        #loader { text-align: center; padding: 50px; }
+        .shimmer { width: 40px; height: 40px; border: 4px solid #334155; border-top-color: var(--primary); border-radius: 50%; animation: spin 1s infinite linear; display: inline-block; }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
@@ -202,8 +35,7 @@
 
 <header class="hero">
     <h1>أكاديمية المستشار</h1>
-    <p style="color: var(--text-dim); font-size: 1.1rem;">استكشف أقوى الدورات التعليمية المصممة لتمكينك من التفوق</p>
-    
+    <p style="color: var(--text-dim);">مستقبلك يبدأ من هنا.. اختر دورتك الآن</p>
     <div class="filters">
         <button class="filter-btn active" onclick="filterCourses('all', this)">الكل</button>
         <button class="filter-btn" onclick="filterCourses('paid', this)">مدفوع</button>
@@ -212,16 +44,10 @@
 </header>
 
 <div id="loader"><div class="shimmer"></div></div>
-
-<div class="course-grid" id="coursesList">
-    </div>
+<div class="course-grid" id="coursesList"></div>
 
 <script>
-    const firebaseConfig = { 
-        apiKey: "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws", 
-        authDomain: "zomaapp-744fc.firebaseapp.com", 
-        projectId: "zomaapp-744fc" 
-    };
+    const firebaseConfig = { apiKey: "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws", authDomain: "zomaapp-744fc.firebaseapp.com", projectId: "zomaapp-744fc" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const userEmail = localStorage.getItem("userEmail");
@@ -229,90 +55,54 @@
     let allCoursesData = [];
 
     async function loadCatalog() {
-        try {
-            const snap = await db.collection("courses").orderBy("createdAt", "desc").get();
-            document.getElementById('loader').style.display = 'none';
-            
-            allCoursesData = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            renderCards(allCoursesData);
-        } catch (e) {
-            console.error(e);
-            document.getElementById('coursesList').innerHTML = "حدث خطأ أثناء تحميل البيانات.";
-        }
+        if(!userEmail) { window.location.href="login.html"; return; }
+        const snap = await db.collection("courses").get();
+        document.getElementById('loader').style.display = 'none';
+        allCoursesData = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderCards(allCoursesData);
     }
 
     function renderCards(data) {
         const list = document.getElementById('coursesList');
         list.innerHTML = "";
-
-        if(data.length === 0) {
-            list.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:var(--text-dim);">لا توجد كورسات متاحة حالياً.</p>`;
-            return;
-        }
-
         data.forEach(c => {
             const isPaid = c.type === 'paid';
             list.innerHTML += `
-                <div class="course-card animate">
-                    <div class="course-banner">
-                        <span class="badge-type ${isPaid ? 'badge-paid' : 'badge-free'}">
-                            ${isPaid ? '<i class="fas fa-crown"></i> مميز' : 'مجاني'}
-                        </span>
-                        <i class="fas fa-laptop-code"></i>
-                    </div>
+                <div class="course-card">
+                    <div class="course-banner"><i class="fas fa-graduation-cap" style="font-size:50px; opacity:0.3"></i></div>
+                    <span class="badge-type ${isPaid ? 'badge-paid' : 'badge-free'}">${isPaid ? 'مدفوع' : 'مجاني'}</span>
                     <div class="course-content">
                         <h3>${c.title}</h3>
-                        <div class="course-meta">
-                            <span><i class="fas fa-play-circle"></i> ${c.content ? c.content.length : 0} درس</span>
-                            <span><i class="fas fa-lock"></i> ${c.isLocked ? 'امتحان إجباري' : 'دخول مباشر'}</span>
-                        </div>
+                        <p style="color:var(--text-dim); font-size:14px;">${c.description || 'وصف مبسط للكورس'}</p>
                         <div class="price-row">
-                            <div class="price-val">${isPaid ? c.price + ' <small>ج.م</small>' : 'مجانًا'}</div>
-                            <button class="enter-btn" onclick="handleEntry('${c.id}', '${c.type}', ${c.price})">
-                                ${isPaid ? 'اشترك الآن' : 'ابدأ التعلم'}
-                            </button>
+                            <span style="font-size:20px; font-weight:bold;">${isPaid ? c.price + ' ج.م' : 'مجانًا'}</span>
+                            <button class="enter-btn" onclick="handleEntry('${c.id}', '${c.type}', ${c.price})">دخول</button>
                         </div>
                     </div>
-                </div>
-            `;
+                </div>`;
         });
     }
 
-    function filterCourses(type, btn) {
-        // تحديث الزراير
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-
-        if(type === 'all') {
-            renderCards(allCoursesData);
-        } else {
-            const filtered = allCoursesData.filter(c => c.type === type);
-            renderCards(filtered);
-        }
-    }
-
     async function handleEntry(id, type, price) {
-        if(type === 'free') {
-            window.location.href = `course-view.html?id=${id}`;
-            return;
-        }
+        if(type === 'free') { window.location.href = `course-view.html?id=${id}`; return; }
 
-        // فحص هل الطالب مشترك مسبقاً في الكورسات المدفوعة
-        const enrollment = await db.collection("enrollments")
-            .where("email", "==", userEmail)
-            .where("courseId", "==", id)
-            .get();
-
+        // 1. فحص هل الطالب مضاف يدوياً من الأدمن؟
+        const enrollment = await db.collection("enrollments").where("email", "==", userEmail).where("courseId", "==", id).get();
+        
         if(!enrollment.empty) {
             window.location.href = `course-view.html?id=${id}`;
         } else {
-            // توجيه لصفحة الدفع
+            // 2. توجيه لصفحة البرومو والدفع
             window.location.href = `payment-gateway.html?id=${id}&price=${price}`;
         }
     }
 
+    function filterCourses(type, btn) {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderCards(type === 'all' ? allCoursesData : allCoursesData.filter(c => c.type === type));
+    }
     window.onload = loadCatalog;
 </script>
-
 </body>
 </html>
