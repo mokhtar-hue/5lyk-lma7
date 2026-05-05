@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تسجيل الدخول | منصة المستشار حازم سالم التعليمية</title>
+    <title>تسجيل الدخول | منصة المستشار حازم سالم</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -14,7 +14,7 @@
     <style>
         :root {
             --primary: #6366f1; --bg: #f8fafc; --card: #ffffff;
-            --text: #1e293b; --input: #f1f5f9; --accent: #4f46e5;
+            --text: #1e293b; --input: #f1f5f9; --accent: #4f46e5; --danger: #ef4444;
         }
         [data-theme="dark"] {
             --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --input: #334155;
@@ -37,27 +37,40 @@
         .login-card {
             background: var(--card); padding: 40px; border-radius: 35px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            width: 100%; max-width: 420px; text-align: center;
+            width: 90%; max-width: 420px; text-align: center;
             animation: slideIn 0.6s ease-out;
         }
         @keyframes slideIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes rotate { to { transform: rotate(360deg); } }
+        
         .welcome-title { font-size: 28px; font-weight: 900; color: var(--primary); margin-bottom: 5px; }
         .welcome-sub { color: #94a3b8; font-weight: 600; margin-bottom: 30px; font-size: 14px; }
+        
         .input-box { margin-bottom: 20px; text-align: right; }
         .input-box label { display: block; margin-bottom: 8px; font-weight: 700; color: #64748b; padding-right: 5px; }
+        
         .field { display: flex; align-items: center; gap: 10px; }
         .field input {
             flex: 1; padding: 15px 20px; border-radius: 18px; border: 2px solid transparent;
-            background: var(--input); color: var(--text); font-family: 'Cairo'; font-size: 16px; outline: none;
+            background: var(--input); color: var(--text); font-family: 'Cairo'; font-size: 16px; outline: none; transition: 0.3s;
         }
         .field input:focus { border-color: var(--primary); background: var(--card); }
-        .eye-btn { background: var(--input); border: none; padding: 14px; border-radius: 15px; cursor: pointer; color: var(--text); }
+        
         .login-btn {
             width: 100%; padding: 16px; border: none; border-radius: 20px;
             background: linear-gradient(135deg, var(--primary), var(--accent));
             color: white; font-weight: 800; font-size: 18px; cursor: pointer; margin-top: 10px;
+            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
         }
+        
+        .support-btn {
+            display: none; width: 100%; padding: 14px; border-radius: 20px;
+            background: #25d366; color: white; text-decoration: none;
+            font-weight: 700; margin-top: 15px; font-size: 15px;
+        }
+
+        .error-msg { color: var(--danger); font-size: 14px; font-weight: 700; margin-top: 10px; display: none; }
+
         .theme-toggle { position: absolute; top: 20px; left: 20px; cursor: pointer; font-size: 24px; border: none; background: none; }
     </style>
 </head>
@@ -79,15 +92,18 @@
         <label>كلمة المرور</label>
         <div class="field">
             <input type="password" id="pass" placeholder="••••••••" dir="ltr">
-            <button class="eye-btn" onclick="togglePass()"><i class="fas fa-eye"></i></button>
         </div>
     </div>
 
-    <button class="login-btn" onclick="handleLogin()">دخول النظام</button>
+    <button class="login-btn" id="loginBtn" onclick="handleLogin()">دخول النظام</button>
+    
+    <div id="errorArea" class="error-msg"></div>
+    <a id="supportBtn" href="#" target="_blank" class="support-btn">
+        <i class="fab fa-whatsapp"></i> تواصل مع الدعم الفني
+    </a>
 </div>
 
 <script>
-    // تهيئة فايربيز
     const firebaseConfig = { 
         apiKey: "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws", 
         authDomain: "zomaapp-744fc.firebaseapp.com", 
@@ -96,36 +112,27 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // رسالة الترحيب حسب الوقت
     const hr = new Date().getHours();
     document.getElementById('greeting').innerText = hr < 12 ? "صباح الخير يا بطل ☀️" : "مساء الخير يا بطل 🌙";
-
-    // إذا كان المستخدم مسجل دخوله بالفعل، نوجهه للرئيسية فوراً
-    if(localStorage.getItem("sessionToken") && localStorage.getItem("userEmail")) {
-        window.location.href = "home.html";
-    }
-
-    function togglePass() {
-        const p = document.getElementById('pass');
-        const icon = document.querySelector('.eye-btn i');
-        p.type = p.type === 'password' ? 'text' : 'password';
-        icon.className = p.type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
-    }
 
     async function handleLogin() {
         const email = document.getElementById('email').value.trim();
         const pass = document.getElementById('pass').value.trim();
+        const errorArea = document.getElementById('errorArea');
+        const supportBtn = document.getElementById('supportBtn');
 
-        if(!email || !pass) return alert("من فضلك ادخل بياناتك كاملة");
+        if(!email || !pass) return showError("من فضلك أدخل بريدك وكلمة المرور");
 
         showLoader(true);
+        errorArea.style.display = 'none';
+        supportBtn.style.display = 'none';
 
         try {
             const snap = await db.collection("users").where("email", "==", email).get();
             
             if(snap.empty) {
                 showLoader(false);
-                return alert("الحساب غير موجود.");
+                return showSupportError("هذا الحساب غير مسجل لدينا.", "أهلاً، أحاول الدخول وحسابي غير مسجل (الإيميل: " + email + ")");
             }
 
             const userDoc = snap.docs[0];
@@ -133,39 +140,57 @@
 
             if((userData.password || userData.pass) !== pass) {
                 showLoader(false);
-                return alert("كلمة المرور خطأ!");
+                return showError("كلمة المرور التي أدخلتها غير صحيحة");
             }
 
-            // إنشاء توكن فريد لهذه الجلسة الجديدة
-            const newSessionToken = "sess_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
+            // فحص حالة الحساب (محظور أو غير مفعل)
+            if(userData.status === "banned" || userData.status === "inactive") {
+                showLoader(false);
+                const reason = userData.banReason || "حسابك معطل حالياً.";
+                return showSupportError(reason, "السلام عليكم ورحمة الله، حسابي معطل لسبب: " + reason + " (إيميلي: " + email + ")");
+            }
+
+            // إنشاء توكن الجلسة الجديدة (هذا هو المفتاح الذي سيطرد الآخرين)
+            const newSessionToken = "active_" + Math.random().toString(36).substr(2, 9);
             
-            // تحديث التوكن في فايربيز (هذا سيجعل الأجهزة الأخرى تخرج)
             await db.collection("users").doc(userDoc.id).update({
                 lastSessionToken: newSessionToken,
                 lastLogin: firebase.firestore.FieldValue.serverTimestamp()
             });
 
-            // حفظ البيانات محلياً للجهاز الحالي
             localStorage.setItem("userEmail", email);
             localStorage.setItem("sessionToken", newSessionToken);
-            localStorage.setItem("userName", userData.name || "طالب");
+            localStorage.setItem("userName", userData.name || "طالب المستشار");
 
-            showLoader(false);
+            // نجاح الدخول - توجيه فوري
             window.location.href = "home.html";
 
         } catch (e) {
             showLoader(false);
-            alert("خطأ في الاتصال!");
+            showError("حدث خطأ في الاتصال، حاول مرة أخرى.");
         }
+    }
+
+    function showError(msg) {
+        const err = document.getElementById('errorArea');
+        err.innerText = msg;
+        err.style.display = 'block';
+    }
+
+    function showSupportError(msg, whatsappMsg) {
+        showError(msg);
+        const btn = document.getElementById('supportBtn');
+        btn.href = "https://wa.me/201060234399?text=" + encodeURIComponent(whatsappMsg);
+        btn.style.display = 'block';
     }
 
     function showLoader(show) { document.getElementById('loader').style.display = show ? 'flex' : 'none'; }
     
     function toggleTheme() {
         const b = document.body;
-        const isDark = b.getAttribute('data-theme') === 'dark';
-        b.setAttribute('data-theme', isDark ? 'light' : 'dark');
-        document.querySelector('.theme-toggle').innerText = isDark ? "☀️" : "🌙";
+        const current = b.getAttribute('data-theme');
+        b.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+        document.querySelector('.theme-toggle').innerText = current === 'dark' ? "☀️" : "🌙";
     }
 </script>
 </body>
