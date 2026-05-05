@@ -30,7 +30,7 @@
             background-color: var(--bg);
             color: var(--text-main);
             margin: 0;
-            padding-bottom: 80px; /* لترك مساحة للبوت */
+            padding-bottom: 80px;
             overflow-x: hidden;
         }
 
@@ -48,7 +48,7 @@
             border-bottom: 1px solid rgba(255,255,255,0.05);
         }
 
-        .user-identity { display: flex; align-items: center; gap: 12px; }
+        .user-identity { display: flex; align-items: center; gap: 12px; cursor: pointer; }
         .user-avatar {
             width: 45px; height: 45px;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
@@ -67,6 +67,7 @@
             color: var(--accent-gold);
             font-weight: 800;
             font-size: 14px;
+            cursor: pointer;
         }
 
         /* ----- التصميم الشبكي (The Grid) ----- */
@@ -118,7 +119,6 @@
         .pro-card h3 { font-size: 20px; margin: 0 0 10px 0; font-weight: 800; }
         .pro-card p { font-size: 13px; color: var(--text-dim); margin: 0; text-align: center; }
 
-        /* شارة "جديد" */
         .badge-new {
             position: absolute; top: 15px; right: 15px;
             background: var(--accent-gold); color: #000;
@@ -126,7 +126,25 @@
             border-radius: 6px;
         }
 
-        /* ----- الشات بوت (Floating Bot) ----- */
+        /* ----- Sidebar & Menu ----- */
+        .side-panel {
+            position: fixed; top: 0; right: -320px; width: 300px; height: 100%;
+            background: #1a2233; z-index: 3000; transition: 0.4s;
+            padding: 40px 20px; box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+        }
+        .side-panel.open { right: 0; }
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; z-index: 2500; backdrop-filter: blur(4px); }
+
+        .menu-list { list-style: none; padding: 0; margin-top: 40px; }
+        .menu-list li {
+            padding: 15px; border-radius: 12px; margin-bottom: 10px;
+            display: flex; align-items: center; gap: 15px; cursor: pointer;
+            transition: 0.3s; color: var(--text-dim);
+        }
+        .menu-list li:hover { background: rgba(255,255,255,0.05); color: white; }
+        .menu-list li.active { background: var(--primary); color: white; }
+
+        /* الشات بوت */
         .chat-bot-fab {
             position: fixed; bottom: 30px; left: 30px;
             width: 65px; height: 65px;
@@ -145,52 +163,26 @@
             100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
         }
 
-        /* Sidebar */
-        .side-panel {
-            position: fixed; top: 0; right: -320px; width: 300px; height: 100%;
-            background: #1a2233; z-index: 3000; transition: 0.4s;
-            padding: 40px 20px;
-        }
-        .side-panel.open { right: 0; }
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; z-index: 2500; backdrop-filter: blur(4px); }
-
-        .menu-list { list-style: none; padding: 0; margin-top: 40px; }
-        .menu-list li {
-            padding: 15px; border-radius: 12px; margin-bottom: 10px;
-            display: flex; align-items: center; gap: 15px; cursor: pointer;
-            transition: 0.3s; color: var(--text-dim);
-        }
-        .menu-list li:hover { background: rgba(255,255,255,0.05); color: white; }
-        .menu-list li.active { background: var(--primary); color: white; }
-
-        /* التنبيه الاحترافي */
         #customAlert {
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
             background: var(--card); border: 1px solid var(--primary);
             padding: 15px 30px; border-radius: 15px; z-index: 5000;
             display: none; animation: fadeInDown 0.5s;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
-        }
-
-        @media (max-width: 600px) {
-            .grid-layout { grid-template-columns: 1fr; }
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5); color: white;
         }
     </style>
 </head>
 <body>
 
-    <div id="customAlert">سيتوفر قريباً وحصرياً لأبطال المستشار 🚀</div>
-
+    <div id="customAlert">قريباً في عالم المستشار 🚀</div>
     <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
 
     <nav class="top-bar">
-        <div class="user-identity">
-            <div class="user-avatar" onclick="openSidebar()">
-                <i class="fas fa-user-graduate"></i>
-            </div>
+        <div class="user-identity" onclick="openSidebar()">
+            <div class="user-avatar"><i class="fas fa-user-graduate"></i></div>
             <div>
                 <div style="font-size: 12px; color: var(--text-dim);">أهلاً بك،</div>
-                <div id="navUserName" style="font-weight: 800; font-size: 15px;">جاري التحميل...</div>
+                <div id="navUserName" style="font-weight: 800; font-size: 15px;">...</div>
             </div>
         </div>
 
@@ -239,12 +231,6 @@
                 <p>ناقش أسئلتك مع زملائك والمستشار</p>
             </a>
 
-            <a href="#" onclick="showSoon()" class="pro-card">
-                <i class="fas fa-credit-card"></i>
-                <h3>المدفوعات</h3>
-                <p>سجل اشتراكاتك ووصل الدفع</p>
-            </a>
-
             <a href="student-dash.html" class="pro-card">
                 <i class="fas fa-chart-line"></i>
                 <h3>تقارير الأداء</h3>
@@ -254,19 +240,22 @@
     </main>
 
     <div class="side-panel" id="sidePanel">
-        <div style="text-align: center;">
+        <div style="text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 20px;">
             <div style="width: 70px; height: 70px; background: var(--primary); border-radius: 20px; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 30px;">
                 <i class="fas fa-id-card"></i>
             </div>
             <h3 id="sideUserName" style="margin: 15px 0 5px;">...</h3>
-            <p id="sideUserEmail" style="font-size: 12px; color: var(--text-dim);"></p>
+            <p id="sideUserEmail" style="font-size: 12px; color: var(--text-dim); margin-bottom: 15px;"></p>
         </div>
 
         <ul class="menu-list">
             <li class="active" onclick="closeSidebar()"><i class="fas fa-home"></i> الرئيسية</li>
+            <li onclick="showSoon()"><i class="fas fa-credit-card"></i> المدفوعات والاشتراكات</li>
             <li onclick="showSoon()"><i class="fas fa-wallet"></i> شحن المحفظة</li>
             <li onclick="showSoon()"><i class="fas fa-user-cog"></i> إعدادات الحساب</li>
-            <a href="https://wa.me/201060234399" style="text-decoration:none; color:inherit;"><li><i class="fab fa-whatsapp"></i> الدعم الفني</li></a>
+            <a href="https://wa.me/201060234399" style="text-decoration:none; color:inherit;">
+                <li><i class="fab fa-whatsapp"></i> الدعم الفني</li>
+            </a>
             <li onclick="logout()" style="color: #ff4d4d; margin-top: 30px;"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</li>
         </ul>
     </div>
@@ -276,7 +265,6 @@
     </div>
 
     <script>
-        // تهيئة Firebase
         const firebaseConfig = { 
             apiKey: "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws", 
             authDomain: "zomaapp-744fc.firebaseapp.com", 
@@ -285,41 +273,59 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // منطق الجلسة والمحفظة
-        async function initApp() {
+        // نظام التحقق من التوكن والجلسة
+        async function checkSession() {
             const email = localStorage.getItem("userEmail");
-            if (!email) {
+            const localToken = localStorage.getItem("sessionToken");
+
+            if (!email || !localToken) {
                 location.replace("index.html");
                 return;
             }
 
-            // الاستماع الحي لبيانات المستخدم
-            db.collection("users").where("email", "==", email).onSnapshot(async (snapshot) => {
-                if (!snapshot.empty) {
-                    const userDoc = snapshot.docs[0];
-                    const userData = userDoc.data();
-
-                    // عرض البيانات
-                    document.getElementById('navUserName').innerText = userData.name || "طالبنا المميز";
-                    document.getElementById('sideUserName').innerText = userData.name || "طالبنا المميز";
-                    document.getElementById('sideUserEmail').innerText = email;
-
-                    // منطق المحفظة والـ 10 جنيه للمستخدم الجديد
-                    if (userData.wallet === undefined) {
-                        await db.collection("users").doc(userDoc.id).update({
-                            wallet: 10
-                        });
-                        document.getElementById('userWallet').innerText = "10.00";
-                    } else {
-                        document.getElementById('userWallet').innerText = parseFloat(userData.wallet).toFixed(2);
-                    }
+            // مراقبة حية لبيانات المستخدم والتوكن
+            db.collection("users").where("email", "==", email).onSnapshot((snapshot) => {
+                if (snapshot.empty) {
+                    logoutSilently();
+                    return;
                 }
+
+                const userData = snapshot.docs[0].data();
+
+                // 1. فحص التوكن (لو دخلت من جهاز تاني التوكن هيتغير في الداتابيز فـ الجهاز ده يخرج)
+                if (userData.lastSessionToken !== localToken) {
+                    alert("تم تسجيل الدخول من جهاز آخر. سيتم تحويلك لصفحة الدخول.");
+                    logoutSilently();
+                    return;
+                }
+
+                // 2. فحص حالة الحساب
+                if (userData.status === 'inactive' || userData.status === 'banned') {
+                    logoutSilently();
+                    return;
+                }
+
+                // 3. تحديث البيانات في الواجهة
+                document.getElementById('navUserName').innerText = userData.name || "طالبنا المميز";
+                document.getElementById('sideUserName').innerText = userData.name || "طالبنا المميز";
+                document.getElementById('sideUserEmail').innerText = email;
+                document.getElementById('userWallet').innerText = parseFloat(userData.wallet || 0).toFixed(2);
             });
         }
 
-        window.onload = initApp;
+        window.onload = checkSession;
 
-        // وظائف الواجهة
+        function logoutSilently() {
+            localStorage.clear();
+            location.replace("index.html");
+        }
+
+        function logout() {
+            if(confirm("هل تريد تسجيل الخروج؟")) {
+                logoutSilently();
+            }
+        }
+
         function showSoon() {
             const alertBox = document.getElementById('customAlert');
             alertBox.style.display = 'block';
@@ -334,13 +340,6 @@
         function closeSidebar() {
             document.getElementById('sidePanel').classList.remove('open');
             document.getElementById('overlay').style.display = 'none';
-        }
-
-        function logout() {
-            if(confirm("هل تريد تسجيل الخروج من منصة المستشار؟")) {
-                localStorage.clear();
-                location.replace("index.html");
-            }
         }
     </script>
 </body>
