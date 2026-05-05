@@ -1,0 +1,42 @@
+<style>
+    .course-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; padding: 20px; }
+    .course-card { background: #1e293b; border-radius: 20px; overflow: hidden; transition: 0.3s; border: 1px solid #334155; cursor: pointer; }
+    .course-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+    .course-img { height: 160px; background: linear-gradient(45deg, #6366f1, #a855f7); display: flex; align-items: center; justify-content: center; font-size: 50px; color: white; }
+    .course-info { padding: 20px; }
+    .course-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 10px; border-radius: 10px; font-weight: bold; }
+</style>
+
+<div class="course-grid" id="studentCourses"></div>
+
+<script>
+    async function loadStudentCourses() {
+        const snap = await db.collection("courses").get();
+        const container = document.getElementById('studentCourses');
+        // هنا يتم فحص هل الطالب مشترك أم لا (سأوضحها في كود الدفع)
+        snap.forEach(doc => {
+            const c = doc.data();
+            container.innerHTML += `
+                <div class="course-card" onclick="enterCourse('${doc.id}', '${c.type}', ${c.price})">
+                    <div class="course-img"><i class="fas fa-graduation-cap"></i></div>
+                    <div class="course-info">
+                        <h3>${c.title}</h3>
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span style="color:var(--accent)">${c.type === 'free' ? 'مجاني' : c.price + ' ج.م'}</span>
+                            <button class="course-btn">${c.type === 'free' ? 'دخول' : 'اشترك الآن'}</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+    }
+    
+    function enterCourse(id, type, price) {
+        if(type === 'free') {
+            window.location.href = `course-view.html?id=${id}`;
+        } else {
+            // فحص في الـ Firestore هل الطالب دفع؟
+            checkPayment(id, price);
+        }
+    }
+</script>
