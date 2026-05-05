@@ -14,6 +14,8 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚖️</text></svg>">
     
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
@@ -32,7 +34,6 @@
             align-items: center; min-height: 100vh; overflow: hidden; transition: 0.5s;
         }
 
-        /* Loading Spinner */
         #loader {
             position: fixed; inset: 0; background: rgba(15, 23, 42, 0.9);
             display: none; justify-content: center; align-items: center;
@@ -60,13 +61,20 @@
         .input-box { margin-bottom: 20px; text-align: right; }
         .input-box label { display: block; margin-bottom: 8px; font-weight: 700; font-size: 14px; color: #64748b; padding-right: 5px; }
         
-        .field { position: relative; display: flex; align-items: center; }
+        .field { position: relative; display: flex; align-items: center; gap: 10px; }
         .field input {
-            width: 100%; padding: 15px 20px; border-radius: 18px; border: 2px solid transparent;
+            flex: 1; padding: 15px 20px; border-radius: 18px; border: 2px solid transparent;
             background: var(--input); color: var(--text); font-family: 'Cairo';
             font-size: 16px; transition: 0.3s; outline: none;
         }
         .field input:focus { border-color: var(--primary); background: var(--card); box-shadow: 0 0 20px rgba(99, 102, 241, 0.15); }
+
+        .eye-btn {
+            background: var(--input); border: none; padding: 14px;
+            border-radius: 15px; cursor: pointer; font-size: 18px; color: var(--text);
+            transition: 0.3s;
+        }
+        .eye-btn:hover { background: var(--primary); color: white; }
 
         .login-btn {
             width: 100%; padding: 16px; border: none; border-radius: 20px;
@@ -106,12 +114,15 @@
 
     <div class="input-box">
         <label>البريد الإلكتروني</label>
-        <div class="field"><input type="email" id="email" placeholder="example@mail.com" dir="ltr"></div>
+        <div class="field"><input type="text" id="email" placeholder="example@mail.com" dir="ltr"></div>
     </div>
 
     <div class="input-box">
         <label>كلمة المرور</label>
-        <div class="field"><input type="password" id="pass" placeholder="••••••••" dir="ltr"></div>
+        <div class="field">
+            <input type="password" id="pass" placeholder="••••••••" dir="ltr">
+            <button class="eye-btn" onclick="togglePass()"><i class="fas fa-eye"></i></button>
+        </div>
     </div>
 
     <button class="login-btn" onclick="handleLogin()">دخول النظام</button>
@@ -122,7 +133,6 @@
 </div>
 
 <script>
-    // إعدادات Firebase
     const firebaseConfig = { 
         apiKey: "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws", 
         authDomain: "zomaapp-744fc.firebaseapp.com", 
@@ -131,54 +141,75 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // إدارة التحية حسب الوقت
     const hr = new Date().getHours();
     document.getElementById('greeting').innerText = hr < 12 ? "صباح الخير يا بطل ☀️" : "مساء الخير يا بطل 🌙";
 
-    // تفعيل فحص الجلسة عند فتح الصفحة
     window.onload = checkExistingSession;
 
+    function togglePass() {
+        const p = document.getElementById('pass');
+        const icon = document.querySelector('.eye-btn i');
+        if (p.type === 'password') {
+            p.type = 'text';
+            icon.className = 'fas fa-eye-slash';
+        } else {
+            p.type = 'password';
+            icon.className = 'fas fa-eye';
+        }
+    }
+
     async function handleLogin() {
-        const email = document.getElementById('email').value.trim().toLowerCase();
+        // إزالة toLowerCase() لأن بعض الإيميلات قد تكون مسجلة بحروف كبيرة في الداتا بيز
+        const email = document.getElementById('email').value.trim();
         const pass = document.getElementById('pass').value.trim();
 
-        if(!email || !pass) return alert("من فضلك ادخل بياناتك");
+        if(!email || !pass) return alert("من فضلك ادخل بياناتك كاملة");
 
         showLoader(true);
 
         try {
+            console.log("جاري البحث عن حساب:", email); // لتتبع المشكلة في الـ Console
             const snap = await db.collection("users").where("email", "==", email).get();
             
             if(snap.empty) {
                 showLoader(false);
-                return alert("الحساب غير مسجل بالنظام!");
+                return alert("الحساب غير مسجل بالنظام! تأكد من صحة الإيميل.");
             }
 
             const userDoc = snap.docs[0];
             const userData = userDoc.data();
 
-            if(userData.password !== pass) {
+            // دعم حقل كلمة المرور سواء كان اسمه password أو pass في الداتا بيز
+            const dbPassword = userData.password || userData.pass;
+
+            if(dbPassword !== pass) {
                 showLoader(false);
                 return alert("كلمة المرور غير صحيحة!");
             }
 
-            if(userData.status === "banned") {
+            if(userData.status === "banned" || userData.status === "inactive") {
                 showLoader(false);
                 return showStatus("🚫", "حسابك معطل", userData.banReason || "يرجى مراجعة المستشار حازم سالم.");
             }
 
-            // إنشاء توكن فريد للجلسة (يمنع فتح الحساب من مكانين)
+            // إنشاء توكن فريد للجلسة لمنع الفتح من جهازين
             const sessionToken = Date.now().toString();
-            await db.collection("users").doc(userDoc.id).update({
-                lastSessionToken: sessionToken,
-                lastLogin: new Date().toISOString()
-            });
+            
+            try {
+                await db.collection("users").doc(userDoc.id).update({
+                    lastSessionToken: sessionToken,
+                    lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            } catch (err) {
+                console.warn("تنبيه: تعذر تحديث التوكن في القاعدة، جاري إكمال الدخول...", err);
+            }
 
             // حفظ البيانات محلياً
             localStorage.setItem("userEmail", email);
-            localStorage.setItem("userName", userData.name);
+            localStorage.setItem("userName", userData.name || "طالب مستشار");
             localStorage.setItem("sessionToken", sessionToken);
 
+            showLoader(false);
             showStatus("✅", "تم تسجيل الدخول", "جارٍ تحويلك إلى ساحة المستشار...");
             
             setTimeout(() => {
@@ -187,26 +218,29 @@
 
         } catch (e) {
             showLoader(false);
-            alert("خطأ في الاتصال بالشبكة!");
+            console.error("Firebase Error: ", e);
+            alert("حدث خطأ! يرجى التأكد من اتصال الإنترنت أو إعدادات قاعدة البيانات (Rules).");
         }
     }
 
-    // وظيفة فحص الجلسة (الطرد التلقائي)
     async function checkExistingSession() {
         const localToken = localStorage.getItem("sessionToken");
         const email = localStorage.getItem("userEmail");
 
         if(localToken && email) {
-            const snap = await db.collection("users").where("email", "==", email).get();
-            if(!snap.empty) {
-                const cloudToken = snap.docs[0].data().lastSessionToken;
-                if(localToken !== cloudToken) {
-                    localStorage.clear();
-                    showStatus("⚠️", "تنبيه أمني", "تم تسجيل الدخول من جهاز آخر، تم تسجيل خروجك لحماية حسابك.");
-                } else {
-                    // إذا كان التوكن سليم، وجهه للرئيسية فوراً دون تسجيل دخول مجدد
-                    window.location.href = "home.html";
+            try {
+                const snap = await db.collection("users").where("email", "==", email).get();
+                if(!snap.empty) {
+                    const cloudToken = snap.docs[0].data().lastSessionToken;
+                    if(localToken !== cloudToken) {
+                        localStorage.clear();
+                        showStatus("⚠️", "تنبيه أمني", "تم تسجيل الدخول من متصفح أو جهاز آخر، تم تسجيل خروجك لحماية حسابك.");
+                    } else {
+                        window.location.href = "home.html";
+                    }
                 }
+            } catch (err) {
+                console.log("لا يوجد اتصال لفحص الجلسة التلقائي.");
             }
         }
     }
@@ -221,6 +255,8 @@
 
     function closeOverlay() {
         document.getElementById('statusOverlay').style.display = 'none';
+        document.getElementById('email').value = '';
+        document.getElementById('pass').value = '';
     }
 
     function showLoader(show) {
