@@ -3,81 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة المستشار | نظام العرض المحمي 🛡️</title>
+    <title>منصة المستشار | الحماية الفولاذية 🛡️</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        :root { --primary: #6366f1; --bg: #020617; --card: #1e293b; --accent: #10b981; }
+        :root { --primary: #6366f1; --bg: #020617; --card: #1e293b; --danger: #ef4444; }
         body { font-family: 'Cairo', sans-serif; background: var(--bg); color: #f1f5f9; margin: 0; overflow: hidden; user-select: none; }
         
-        /* الهيكل الرئيسي */
         .app-wrapper { display: flex; flex-direction: column; height: 100vh; }
-        .top-nav { height: 70px; background: var(--card); padding: 0 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; z-index: 1000; }
-        .main-content { display: grid; grid-template-columns: 1fr 350px; flex: 1; overflow: hidden; }
+        .top-nav { height: 70px; background: var(--card); padding: 0 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary); z-index: 1000; }
 
-        /* منطقة اللاعب */
-        #playerArea { position: relative; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .content-frame { width: 100%; height: 100%; z-index: 1; }
+        .main-content { display: grid; grid-template-columns: 1fr 380px; flex: 1; overflow: hidden; }
+
+        /* منطقة اللاعب والحماية */
+        #viewport { position: relative; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .content-frame { width: 100%; height: 100%; position: relative; z-index: 1; }
         iframe { width: 100%; height: 100%; border: none; }
 
-        /* عوازل الحماية لمنع الضغط على الشير واللوجو */
-        .blocker-top { position: absolute; top: 0; left: 0; width: 100%; height: 70px; z-index: 50; cursor: default; }
-        .blocker-right { position: absolute; top: 0; right: 0; width: 20%; height: 100px; z-index: 51; cursor: default; }
-        
-        /* العلامة المائية المتحركة للفيديو */
-        .v-watermark { position: absolute; color: rgba(255, 255, 255, 0.2); font-size: 15px; font-weight: bold; pointer-events: none; z-index: 100; white-space: nowrap; transition: 3s linear; text-shadow: 1px 1px 2px #000; }
+        /* طبقات المنع الذكية */
+        .trap-layer { position: absolute; z-index: 100; cursor: forbidden; }
+        .trap-top { top: 0; left: 0; width: 100%; height: 80px; } /* منع العنوان والشير */
+        .trap-bottom { bottom: 0; left: 0; width: 100%; height: 50px; } /* منع شريط يوتيوب السفلي */
+        .trap-right { top: 0; right: 0; width: 100px; height: 100%; }
 
-        /* حماية PDF (شبكة علامات مائية) */
-        .pdf-grid-mask { 
+        /* شاشة التحذير */
+        #warningScreen { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            z-index: 60; pointer-events: none; display: none;
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='120'><text transform='rotate(-25)' fill='rgba(255,255,255,0.08)' font-size='14' font-family='Cairo' x='0' y='60'>المستشار - حماية</text></svg>");
+            background: rgba(239, 68, 68, 0.95); z-index: 2000; 
+            display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; 
+        }
+
+        /* العلامة المائية للفيديو (المتحركة) */
+        #vWatermark { position: absolute; color: rgba(255, 255, 255, 0.15); font-weight: bold; pointer-events: none; z-index: 500; white-space: nowrap; transition: 3s; }
+
+        /* العلامة المائية للـ PDF (الشبكة المتكررة) */
+        #pdfOverlay { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            z-index: 150; pointer-events: none; display: none; opacity: 0.1;
+            background-repeat: repeat;
         }
 
         /* القائمة الجانبية */
-        .sidebar { background: #0f172a; border-right: 1px solid #334155; overflow-y: auto; padding: 20px; }
-        .item { background: #1e293b; padding: 15px; border-radius: 12px; margin-bottom: 12px; cursor: pointer; border: 1px solid transparent; display: flex; align-items: center; gap: 10px; transition: 0.3s; }
-        .item:hover { border-color: var(--primary); }
-        .item.active { background: var(--primary); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3); }
+        .sidebar { background: #0f172a; border-right: 1px solid #334155; overflow-y: auto; padding: 15px; }
+        .item { background: #1e293b; padding: 18px; border-radius: 15px; margin-bottom: 12px; cursor: pointer; display: flex; align-items: center; gap: 12px; border: 1px solid transparent; transition: 0.3s; }
+        .item:hover { background: #2d3748; }
+        .item.active { background: var(--primary); border-color: #fff; transform: scale(1.02); }
 
-        /* أزرار التحكم */
-        .controls-overlay { position: absolute; bottom: 20px; left: 20px; z-index: 200; display: flex; gap: 10px; }
-        .btn-action { background: rgba(0,0,0,0.7); border: 1px solid #444; color: white; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; }
+        .btn-main { background: var(--primary); color: white; border: none; padding: 10px 25px; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; }
 
-        @media (max-width: 1024px) { .main-content { grid-template-columns: 1fr; overflow-y: auto; } .sidebar { height: auto; } }
+        @media (max-width: 1024px) { .main-content { grid-template-columns: 1fr; overflow-y: auto; } }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
+<div id="warningScreen">
+    <i class="fas fa-exclamation-triangle fa-5x" style="margin-bottom:20px;"></i>
+    <h1>محاولة وصول غير مصرح بها!</h1>
+    <p>ممنوع محاولة مشاركة اللينك أو التلاعب بالمشغل. تم تسجيل المحاولة باسمك.</p>
+    <button class="btn-main" onclick="closeWarning()" style="background:#fff; color:var(--danger)">فهمت، العودة للدرس</button>
+</div>
+
 <div class="app-wrapper">
     <header class="top-nav">
         <div>
-            <h2 id="courseTitle" style="margin:0; font-size:1rem; color:var(--primary);">تحميل...</h2>
-            <small id="studentID" style="color:#94a3b8;"></small>
+            <h2 id="courseTitle" style="margin:0;">منصة المستشار</h2>
+            <small id="studentBadge" style="color:var(--accent)"></small>
         </div>
-        <a href="courses-catalog.html" style="color: #ef4444; text-decoration: none; font-size: 14px;"><i class="fas fa-power-off"></i> خروج</a>
+        <button class="btn-main" onclick="toggleFullScreen()"><i class="fas fa-expand"></i> ملء الشاشة</button>
     </header>
 
     <main class="main-content">
-        <section id="playerArea">
-            <div id="vWatermark" class="v-watermark"></div>
-            <div class="blocker-top"></div>
-            <div class="blocker-right"></div>
-            <div id="pdfMask" class="pdf-grid-mask"></div>
+        <section id="viewport">
+            <div id="vWatermark"></div>
+            <div id="pdfOverlay"></div>
             
-            <div id="view" class="content-frame">
-                <div style="text-align:center; color:#334155;">
-                    <i class="fas fa-shield-halved fa-6x" style="margin-bottom:20px;"></i>
-                    <h2>بوابة المستشار التعليمية</h2>
-                    <p>اختر درساً من القائمة لبدء التعلم الآمن</p>
-                </div>
-            </div>
+            <div class="trap-layer trap-top" onclick="triggerWarning()"></div>
+            <div class="trap-layer trap-bottom" onclick="triggerWarning()"></div>
+            <div class="trap-layer trap-right" onclick="triggerWarning()"></div>
 
-            <div class="controls-overlay" id="playerControls" style="display:none;">
-                <button class="btn-action" onclick="goFullscreen()"><i class="fas fa-expand"></i> وضع ملء الشاشة</button>
+            <div id="view" class="content-frame">
+                <div style="text-align:center;">
+                    <i class="fas fa-user-shield fa-5x" style="color:var(--primary); margin-bottom:20px;"></i>
+                    <h2>مرحباً بك يا بطل</h2>
+                    <p>اختر المحتوى من القائمة الجانبية للبدء</p>
+                </div>
             </div>
         </section>
 
@@ -92,89 +104,99 @@
 
     const params = new URLSearchParams(window.location.search);
     const courseId = params.get('id');
-    const studentMail = localStorage.getItem("userEmail") || "Unregistered_Student";
+    const studentMail = localStorage.getItem("userEmail") || "Unregistered_User";
 
-    async function initPlayer() {
+    async function init() {
         if(!courseId) return;
+        document.getElementById('studentBadge').innerText = `🔓 متصل: ${studentMail}`;
         const doc = await db.collection("courses").doc(courseId).get();
-        if(!doc.exists) return;
-        
         const data = doc.data();
         document.getElementById('courseTitle').innerText = data.title;
-        document.getElementById('studentID').innerText = `البطاقة الرقمية: ${studentMail}`;
         
         const list = document.getElementById('playlist');
         data.content.forEach(item => {
             list.innerHTML += `
                 <div class="item" onclick="loadMedia('${item.link}', '${item.type}', this)">
-                    <i class="fas fa-${item.type==='video'?'play-circle':'file-invoice'}"></i>
-                    <span>${item.title}</span>
+                    <i class="fas fa-${item.type==='video'?'play-circle':'file-pdf'}"></i>
+                    <div>
+                        <div style="font-weight:bold">${item.title}</div>
+                        <small style="opacity:0.6">${item.type==='video'?'فيديو تعليمي':'مذكرة PDF'}</small>
+                    </div>
                 </div>`;
         });
-        moveWatermark();
+        setupPDFWatermark();
+        startVideoWatermark();
     }
 
     function loadMedia(link, type, el) {
         document.querySelectorAll('.item').forEach(i => i.classList.remove('active'));
         el.classList.add('active');
-        
         const view = document.getElementById('view');
-        const pdfMask = document.getElementById('pdfMask');
-        const controls = document.getElementById('playerControls');
-        
-        controls.style.display = "flex";
+        const pdfOverlay = document.getElementById('pdfOverlay');
 
         if(type === 'video') {
-            pdfMask.style.display = "none";
-            const id = extractVideoID(link);
-            // حماية اليوتيوب: fs=0 لإلغاء زر ملء الشاشة الخاص بهم، modestbranding=1 لإخفاء الشعار
-            view.innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?rel=0&modestbranding=1&controls=1&fs=0&disablekb=1&iv_load_policy=3&autoplay=1" allow="autoplay; fullscreen"></iframe>`;
+            pdfOverlay.style.display = "none";
+            const vid = extractID(link);
+            view.innerHTML = `<iframe src="https://www.youtube.com/embed/${vid}?rel=0&modestbranding=1&controls=1&fs=0&disablekb=1&iv_load_policy=3&autoplay=1" allow="autoplay"></iframe>`;
         } else {
-            pdfMask.style.display = "block";
-            // مستعرض PDF من جوجل مع تعطيل التفاعل
-            const googleViewer = `https://docs.google.com/viewer?url=${encodeURIComponent(link)}&embedded=true`;
-            view.innerHTML = `
-                <div style="width:100%; height:100%; pointer-events: none; overflow: hidden; position:relative;">
-                    <iframe src="${googleViewer}"></iframe>
-                </div>
-                <div style="position:absolute; top:0; right:0; width:60px; height:60px; background:transparent; z-index:100;"></div> `;
+            pdfOverlay.style.display = "block";
+            // استخدام Google Drive Viewer الاحترافي مع حماية الطبقة
+            const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(link)}&embedded=true`;
+            view.innerHTML = `<iframe src="${viewerUrl}" style="pointer-events:all;"></iframe>`;
         }
     }
 
-    function extractVideoID(url) {
-        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-        const match = url.match(regExp);
-        return (match && match[2].length == 11) ? match[2] : url;
+    function triggerWarning() {
+        document.getElementById('warningScreen').style.display = "flex";
     }
 
-    // دالة ملء الشاشة (تحفظ العلامة المائية والطبقات فوق الفيديو)
-    function goFullscreen() {
-        const area = document.getElementById('playerArea');
-        if (!document.fullscreenElement) {
-            if (area.requestFullscreen) area.requestFullscreen();
-            else if (area.webkitRequestFullscreen) area.webkitRequestFullscreen();
-        } else {
-            document.exitFullscreen();
-        }
+    function closeWarning() {
+        document.getElementById('warningScreen').style.display = "none";
     }
 
-    // تحريك العلامة المائية لمنع برامج التسجيل
-    function moveWatermark() {
+    function extractID(url) {
+        const reg = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        const m = url.match(reg);
+        return (m && m[2].length == 11) ? m[2] : url;
+    }
+
+    function toggleFullScreen() {
+        const el = document.getElementById('viewport');
+        if (!document.fullscreenElement) el.requestFullscreen();
+        else document.exitFullscreen();
+    }
+
+    // إنشاء العلامة المائية الشبكية للـ PDF
+    function setupPDFWatermark() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 300;
+        canvas.height = 200;
+        const ctx = canvas.getContext('2d');
+        ctx.rotate(-25 * Math.PI / 180);
+        ctx.font = '14px Cairo';
+        ctx.fillStyle = 'rgba(255,255,255,0.3)';
+        ctx.fillText(studentMail, 0, 100);
+        ctx.fillText("حقوق المستشار محفوظة", 0, 120);
+        document.getElementById('pdfOverlay').style.backgroundImage = `url(${canvas.toDataURL()})`;
+    }
+
+    function startVideoWatermark() {
         const wm = document.getElementById('vWatermark');
-        wm.innerText = `مؤمن لـ: ${studentMail}`;
+        wm.innerText = `🔐 ${studentMail}`;
         setInterval(() => {
-            wm.style.left = Math.random() * 70 + "%";
+            wm.style.left = Math.random() * 80 + "%";
             wm.style.top = Math.random() * 80 + "%";
+            wm.style.fontSize = (Math.random() * 10 + 15) + "px";
         }, 4000);
     }
 
-    // منع الاختصارات (F12, Ctrl+U, Ctrl+P)
-    document.addEventListener('keydown', (e) => {
-        if(e.ctrlKey && ['u','s','p','c'].includes(e.key.toLowerCase())) e.preventDefault();
-        if(e.key === 'F12') e.preventDefault();
+    // منع الاختصارات نهائياً
+    window.addEventListener('keydown', e => {
+        if (e.ctrlKey && ['u', 's', 'p', 'c'].includes(e.key.toLowerCase())) e.preventDefault();
+        if (e.key === 'F12') e.preventDefault();
     });
 
-    initPlayer();
+    init();
 </script>
 </body>
 </html>
