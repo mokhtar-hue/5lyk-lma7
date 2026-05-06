@@ -48,11 +48,11 @@
 <div class="payment-container">
     <div class="main-card">
         <h2 style="margin:0;">بوابة دفع المستشار 🛡️</h2>
-        <p style="opacity: 0.5; font-size: 13px;">اختر وسيلة الدفع المناسبة لتفعيل الكورس</p>
+        <p style="opacity: 0.5; font-size: 13px;">اختر وسيلة الدفع لتفعيل الكورس</p>
 
         <div class="price-display">
             <p style="margin:0; font-size:13px;">المبلغ المطلوب سداده</p>
-            <div class="amount" id="displayAmount">0.00 ج.م</div>
+            <div class="amount" id="displayAmount">جاري التحميل...</div>
             <p id="courseNameDisplay" style="margin:5px 0 0 0; font-size:14px; font-weight:bold; color:var(--primary);"></p>
         </div>
 
@@ -66,7 +66,7 @@
                 <i class="fas fa-unlock-alt" style="color: var(--free);"></i>
                 <div>
                     <h4>تفعيل الكورس مجاناً</h4>
-                    <p>تم تغطية التكلفة بواسطة الكود</p>
+                    <p>الكود غطى كامل التكلفة</p>
                 </div>
             </div>
 
@@ -74,12 +74,12 @@
                 <i class="fas fa-wallet" style="color: var(--accent);"></i>
                 <div>
                     <h4>دفع من المحفظة</h4>
-                    <p>خصم فوري من رصيد منصة المستشار</p>
+                    <p>خصم من رصيد الحساب (كوليكشن users)</p>
                 </div>
                 <span class="wallet-badge" id="currentBalance">0.00</span>
             </div>
 
-            <div class="pay-option btn-fawry" onclick="alert('خدمة فوري قيد الصيانة مؤقتاً')">
+            <div class="pay-option btn-fawry" onclick="alert('خدمة فوري قيد التحديث')">
                 <i class="fas fa-bolt" style="color: var(--fawry);"></i>
                 <div>
                     <h4>Fawry Pay</h4>
@@ -126,28 +126,32 @@
     let appliedVoucherId = null;
     let userCurrentBalance = 0;
 
+    // استدعاء إيميل المستخدم (المفتاح في كوليكشن users)
     const userEmail = localStorage.getItem("userEmail");
 
     async function init() {
         if (!userEmail) {
-            alert("⚠️ جلسة العمل انتهت، يرجى تسجيل الدخول");
+            alert("⚠️ يرجى تسجيل الدخول أولاً");
             return;
         }
 
         updateUI();
 
-        // مراقبة رصيد المحفظة حياً
+        // قراءة رصيد المحفظة (wallet) من كوليكشن users
         db.collection("users").doc(userEmail).onSnapshot((doc) => {
             if (doc.exists) {
-                userCurrentBalance = parseFloat(doc.data().wallet || 0);
+                const userData = doc.data();
+                // التأكد من قراءة الحقل wallet كما هو في بياناتك
+                userCurrentBalance = parseFloat(userData.wallet || 0);
                 document.getElementById('currentBalance').innerText = userCurrentBalance.toFixed(2) + " ج.م";
                 updateVisibility();
+            } else {
+                console.error("User document not found!");
             }
         });
     }
 
     function updateVisibility() {
-        // إذا السعر 0 يظهر زر التفعيل المجاني ويختفي زر المحفظة
         if (finalPrice <= 0) {
             document.getElementById('freeAccessOption').style.display = 'flex';
             document.getElementById('platformWalletOption').style.display = 'none';
@@ -169,10 +173,10 @@
 
         try {
             const snapshot = await db.collection("vouchers").where("code", "==", code).get();
-            if (snapshot.empty) { alert("❌ الكود غير صحيح"); return; }
+            if (snapshot.empty) { alert("❌ كود خصم غير صحيح"); return; }
 
             const vDoc = snapshot.docs[0];
-            if (vDoc.data().isUsed) { alert("⚠️ الكود مستخدم مسبقاً"); return; }
+            if (vDoc.data().isUsed) { alert("⚠️ هذا الكود تم استخدامه من قبل"); return; }
 
             const discount = parseFloat(vDoc.data().amount || 0);
             finalPrice = Math.max(0, originalPrice - discount);
@@ -182,49 +186,70 @@
             updateVisibility();
 
             document.getElementById('promoInput').disabled = true;
-            document.getElementById('promoBtn').innerText = "تم";
-            alert(`✅ تم تطبيق خصم ${discount} ج.م`);
-        } catch (e) { alert("خطأ في فحص الكود"); }
+            document.getElementById('promoBtn').innerHTML = '<i class="fas fa-check"></i>';
+            alert(`✅ تم تطبيق خصم بقيمة ${discount} ج.م`);
+        } catch (e) { alert("خطأ في الاتصال بقاعدة البيانات"); }
     }
 
     function handleWalletClick() {
+        // التحقق من الرصيد قبل البدء
         if (userCurrentBalance < finalPrice) {
-            alert(`❌ عذراً، رصيدك الحالي (${userCurrentBalance.toFixed(2)}) غير كافٍ. يرجى الشحن أولاً عبر خدمة الكاش.`);
+            alert(`❌ رصيدك غير كافٍ! تحتاج إلى ${finalPrice.toFixed(2)} ج.م، ورصيدك الحالي هو ${userCurrentBalance.toFixed(2)} ج.م فقط.`);
         } else {
             payWithPlatformWallet('Wallet_Payment');
         }
     }
 
     async function payWithPlatformWallet(method) {
-        const msg = finalPrice <= 0 ? "تفعيل الكورس مجاناً؟" : `تأكيد شراء الكورس وخصم ${finalPrice} ج.م من رصيدك؟`;
+        const msg = finalPrice <= 0 ? "تأكيد تفعيل الكورس مجاناً؟" : `هل أنت متأكد من خصم ${finalPrice.toFixed(2)} ج.م من محفظتك؟`;
         if (!confirm(msg)) return;
 
         try {
             await db.runTransaction(async (transaction) => {
                 const userRef = db.collection("users").doc(userEmail);
                 const userDoc = await transaction.get(userRef);
-                const currentBalance = parseFloat(userDoc.data().wallet || 0);
+                
+                if (!userDoc.exists) throw "مستند المستخدم غير موجود";
+                
+                const currentBal = parseFloat(userDoc.data().wallet || 0);
 
-                if (finalPrice > 0 && currentBalance < finalPrice) throw "رصيد غير كافٍ";
+                // فحص أخير للرصيد داخل الترانسأكشن للأمان
+                if (finalPrice > 0 && currentBal < finalPrice) {
+                    throw "عذراً، رصيدك لا يكفي لإتمام العملية.";
+                }
 
+                // 1. تحديث الرصيد في كوليكشن users
                 if (finalPrice > 0) {
-                    transaction.update(userRef, { wallet: currentBalance - finalPrice });
+                    transaction.update(userRef, { wallet: currentBal - finalPrice });
                 }
 
+                // 2. إذا كان هناك فاوتشر، اجعله مستخدماً
                 if (appliedVoucherId) {
-                    transaction.update(db.collection("vouchers").doc(appliedVoucherId), { isUsed: true, usedBy: userEmail });
+                    transaction.update(db.collection("vouchers").doc(appliedVoucherId), { 
+                        isUsed: true, 
+                        usedBy: userEmail,
+                        usedAt: new Date()
+                    });
                 }
 
+                // 3. إضافة الاشتراك في كوليكشن subscriptions
                 const subId = `${userEmail}_${courseId}`;
                 transaction.set(db.collection("subscriptions").doc(subId), {
-                    email: userEmail, courseId, courseName, pricePaid: finalPrice, 
-                    date: new Date(), status: "active", method: method
+                    email: userEmail,
+                    courseId: courseId,
+                    courseName: courseName,
+                    pricePaid: finalPrice,
+                    date: new Date(),
+                    status: "active",
+                    method: method
                 });
             });
 
-            alert("🛡️ مبروك يا مستشار! تم تفعيل الكورس بنجاح.");
+            alert("🛡️ تم تفعيل الكورس بنجاح! بالتوفيق يا مستشار.");
             window.location.href = "my-courses.html";
-        } catch (e) { alert("❌ فشل التفعيل: " + e); }
+        } catch (e) { 
+            alert("❌ فشل التفعيل: " + e); 
+        }
     }
 
     function showCashModal() { document.getElementById('cashModal').style.display = 'flex'; }
@@ -232,9 +257,16 @@
 
     async function confirmCashTransfer() {
         await db.collection("payment_requests").add({
-            email: userEmail, courseId, courseName, amount: finalPrice, status: "pending", timestamp: new Date()
+            email: userEmail,
+            courseId: courseId,
+            courseName: courseName,
+            amount: finalPrice,
+            status: "pending",
+            timestamp: new Date(),
+            method: "Manual_Cash"
         });
-        window.open(`https://wa.me/201550153566?text=تحويل دفع كاش: ${courseName}`, '_blank');
+        const waMsg = `مستشار حازم، تم تحويل ${finalPrice} ج.م اشتراك كورس (${courseName}). حسابي: ${userEmail}`;
+        window.open(`https://wa.me/201550153566?text=${encodeURIComponent(waMsg)}`, '_blank');
         closeModal();
     }
 
