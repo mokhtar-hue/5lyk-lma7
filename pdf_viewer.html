@@ -15,27 +15,32 @@
         
         #pdfViewport { position: relative; flex: 1; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         
-        #pdfIframe { width: 100%; height: 100%; border: none; transition: 0.3s transform ease; transform-origin: top center; pointer-events: all; }
+        /* جعل الـ iframe والطبقات قابلة للتمرير معاً */
+        #scrollContainer { width: 100%; height: 100%; overflow-y: auto; position: relative; }
+        
+        #pdfIframe { width: 100%; height: 5000px; border: none; transition: 0.3s transform ease; transform-origin: top center; pointer-events: all; }
 
-        /* العلامة المائية الفولاذية المطورة */
-        #centerWatermark {
-            position: absolute; 
-            top: 50%; 
-            left: 50%; 
-            transform: translate(-50%, -50%) rotate(-30deg);
-            /* زيادة الوضوح لدرجة تمنع المسح وتسمح بالقراءة */
-            color: rgba(255, 255, 255, 0.18); 
-            text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
-            font-size: 10vw; 
-            font-weight: 900;
-            pointer-events: none; 
-            z-index: 500; 
-            white-space: nowrap; 
-            text-align: center;
-            line-height: 1.2;
+        /* العلامة المائية المتكررة على كل الصفحات باللون الأسود */
+        #watermarkLayer {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 500;
+            /* إنشاء خلفية متكررة تحتوي على اليوزر */
+            background-repeat: repeat;
+            opacity: 0.15; /* شفافية موزونة للقراءة */
         }
 
-        .date-stamp { font-size: 3vw; display: block; margin-top: 10px; opacity: 0.8; }
+        /* التاريخ المذيل الثابت في أسفل الشاشة */
+        #footerDate {
+            position: fixed; bottom: 10px; right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 5px 15px; border-radius: 20px;
+            font-size: 14px; z-index: 1001;
+            border: 1px solid var(--primary);
+            color: #fff;
+        }
 
         /* درع حماية الأزرار */
         .shield-top { position: absolute; top: 0; left: 0; width: 100%; height: 65px; z-index: 600; cursor: not-allowed; }
@@ -44,7 +49,6 @@
         .btn-tool { background: var(--primary); color: white; border: none; padding: 8px 18px; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; }
         .btn-back { background: var(--danger); color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; text-decoration: none; }
 
-        /* شاشة الحماية السوداء */
         #blackout { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: #000; z-index: 9999; display: none; 
@@ -58,14 +62,16 @@
 <div id="blackout">
     <i class="fas fa-user-lock fa-5x" style="color: var(--danger); margin-bottom: 20px;"></i>
     <h1 style="color: var(--danger)">تم رصد محاولة تصوير!</h1>
-    <p>تم إغلاق المحتوى فوراً وحظر الشاشة كإجراء أمني.</p>
-    <button class="btn-tool" onclick="location.reload()" style="margin-top:20px;">إعادة تنشيط المستعرض</button>
+    <p>تم إغلاق المحتوى فوراً لحماية حقوق المستشار.</p>
+    <button class="btn-tool" onclick="location.reload()" style="margin-top:20px;">إعادة فتح المذكرة</button>
 </div>
+
+<div id="footerDate">جاري تحديث التاريخ...</div>
 
 <div class="viewer-wrapper">
     <div class="nav-header">
         <button class="btn-back" onclick="window.close()"><i class="fas fa-times"></i> إغلاق</button>
-        <h3 id="pdfTitle" style="margin:0;">جاري التحميل...</h3>
+        <h3 id="pdfTitle" style="margin:0;">تحميل المذكرة...</h3>
         <div class="tools">
             <button class="btn-tool" onclick="zoomPDF(0.2)"><i class="fas fa-search-plus"></i></button>
             <button class="btn-tool" onclick="zoomPDF(-0.2)"><i class="fas fa-search-minus"></i></button>
@@ -75,12 +81,10 @@
     <div id="pdfViewport">
         <div class="shield-top"></div>
         
-        <div id="centerWatermark">
-            <span id="uMail"></span>
-            <span id="uDate" class="date-stamp"></span>
+        <div id="scrollContainer">
+            <div id="watermarkLayer"></div>
+            <iframe id="pdfIframe" src=""></iframe>
         </div>
-        
-        <iframe id="pdfIframe" src=""></iframe>
     </div>
 </div>
 
@@ -93,17 +97,43 @@
     function init() {
         document.getElementById('pdfTitle').innerText = pdfTitle;
         
-        // ضبط بيانات العلامة المائية
-        document.getElementById('uMail').innerText = studentMail;
+        // 1. توليد العلامة المائية المتكررة (سوداء)
+        generateRepeatingWatermark();
+
+        // 2. ضبط التاريخ الثابت في الأسفل
         const now = new Date();
-        document.getElementById('uDate').innerText = now.toLocaleDateString('ar-EG') + " " + now.getHours() + ":" + now.getMinutes();
+        document.getElementById('footerDate').innerText = "توقيت الوصول: " + now.toLocaleString('ar-EG');
         
         let finalUrl = rawLink;
         if(rawLink.includes('drive.google.com')) {
             finalUrl = rawLink.replace(/\/view.*|\/edit.*/, '/preview');
         }
-
         document.getElementById('pdfIframe').src = finalUrl;
+    }
+
+    function generateRepeatingWatermark() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 500;
+        canvas.height = 400;
+        const ctx = canvas.getContext('2d');
+        
+        // ضبط ستايل النص (أسود)
+        ctx.fillStyle = "black"; 
+        ctx.font = "bold 30px Cairo";
+        ctx.textAlign = "center";
+        
+        // تدوير النص
+        ctx.translate(250, 200);
+        ctx.rotate(-30 * Math.PI / 180);
+        
+        // رسم اليوزر
+        ctx.fillText(studentMail, 0, 0);
+        ctx.font = "15px Cairo";
+        ctx.fillText("حقوق المستشار محفوظة 🛡️", 0, 40);
+        
+        // تحويل الكانفاس لصورة متكررة
+        const dataUrl = canvas.toDataURL();
+        document.getElementById('watermarkLayer').style.backgroundImage = `url(${dataUrl})`;
     }
 
     function zoomPDF(val) {
@@ -112,43 +142,33 @@
         if(zoomLevel > 2.5) zoomLevel = 2.5;
         
         const iframe = document.getElementById('pdfIframe');
+        const watermark = document.getElementById('watermarkLayer');
+        
         iframe.style.transform = `scale(${zoomLevel})`;
-        iframe.style.width = (100 / zoomLevel) + "%";
-        iframe.style.height = (100 / zoomLevel) + "%";
+        // الحفاظ على تطابق حجم العلامة المائية مع الملف عند الزووم
+        watermark.style.transform = `scale(${zoomLevel})`;
+        watermark.style.transformOrigin = "top center";
     }
 
-    // --- وظائف الحماية المتقدمة ---
+    // --- نظام الحماية الصارم ---
 
     function triggerSecurity() {
         document.getElementById('blackout').style.display = "flex";
-        // مسح الحافظة لضمان عدم حفظ أي صورة
-        navigator.clipboard.writeText('ممنوع التصوير - منصة المستشار 🛡️');
+        navigator.clipboard.writeText('⚠️ محاولة سرقة محتوى مرصودة');
     }
 
-    // 1. عند الضغط على زر التصوير (PrintScreen)
     window.addEventListener('keyup', (e) => {
-        if (e.key === 'PrintScreen' || e.key === 'Snapshot') {
-            triggerSecurity();
-        }
+        if (e.key === 'PrintScreen' || e.key === 'Snapshot') triggerSecurity();
     });
 
-    // 2. عند محاولة الخروج من التبويب أو تصغيره (التصوير الخارجي)
-    window.addEventListener('blur', () => {
-        triggerSecurity();
-    });
+    window.addEventListener('blur', () => triggerSecurity());
 
-    // 3. منع الاختصارات بلوحة المفاتيح
     window.addEventListener('keydown', (e) => {
-        // Ctrl+P, Ctrl+S, Ctrl+U, Ctrl+Shift+I
-        if (e.ctrlKey && (e.key === 'p' || e.key === 's' || e.key === 'u' || e.key === 'Shift')) {
+        if (e.ctrlKey && ['p','s','u','c','j'].includes(e.key.toLowerCase())) {
             e.preventDefault();
             triggerSecurity();
         }
-        // زر F12 (Inspect Element)
-        if(e.keyCode == 123) {
-            e.preventDefault();
-            triggerSecurity();
-        }
+        if(e.keyCode == 123) { e.preventDefault(); triggerSecurity(); }
     });
 
     init();
