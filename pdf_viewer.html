@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مستعرض المذكرات | منصة المستشار 🛡️</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --primary: #6366f1; --bg: #020617; --card: #1e293b; --danger: #ef4444; }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: white; margin: 0; overflow: hidden; user-select: none; }
+        
+        .viewer-wrapper { display: flex; flex-direction: column; height: 100vh; }
+        .nav-header { height: 65px; background: var(--card); display: flex; justify-content: space-between; align-items: center; padding: 0 25px; border-bottom: 2px solid var(--primary); z-index: 1000; }
+        
+        #pdfViewport { position: relative; flex: 1; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        
+        iframe { width: 100%; height: 100%; border: none; transition: 0.3s transform ease; }
+
+        /* العلامة المائية الشبكية */
+        #pdfOverlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 150; pointer-events: none; opacity: 0.15; background-repeat: repeat; }
+
+        .tools { display: flex; gap: 15px; }
+        .btn-tool { background: var(--primary); color: white; border: none; padding: 8px 20px; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; }
+        
+        #blackout { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+<div id="blackout">
+    <i class="fas fa-user-shield fa-5x" style="color: var(--danger); margin-bottom: 20px;"></i>
+    <h1>تنبيه أمني: التصوير ممنوع!</h1>
+    <p>تم إخفاء المحتوى لأنك حاولت الخروج من الشاشة أو استخدام برنامج تسجيل.</p>
+</div>
+
+<div class="viewer-wrapper">
+    <div class="nav-header">
+        <button class="btn-tool" onclick="window.close()" style="background:var(--danger)">إغلاق</button>
+        <h3 id="pdfTitle" style="margin:0;">تحميل المذكرة...</h3>
+        <div class="tools">
+            <button class="btn-tool" onclick="zoomPDF(0.2)"><i class="fas fa-search-plus"></i> تكبير</button>
+            <button class="btn-tool" onclick="zoomPDF(-0.2)"><i class="fas fa-search-minus"></i> تصغير</button>
+        </div>
+    </div>
+
+    <div id="pdfViewport">
+        <div id="pdfOverlay"></div>
+        <div id="iframeContainer" style="width:100%; height:100%;">
+            <iframe id="pdfIframe"></iframe>
+        </div>
+    </div>
+</div>
+
+<script>
+    const pdfLink = localStorage.getItem('currentPdfLink');
+    const pdfTitle = localStorage.getItem('currentPdfTitle');
+    const studentMail = localStorage.getItem("userEmail") || "Student_Member";
+    let zoomLevel = 1;
+
+    function initPdf() {
+        if(!pdfLink) { window.close(); return; }
+        document.getElementById('pdfTitle').innerText = pdfTitle;
+        
+        const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(pdfLink)}&embedded=true`;
+        document.getElementById('pdfIframe').src = viewerUrl;
+        
+        setupWatermark();
+    }
+
+    function zoomPDF(val) {
+        zoomLevel += val;
+        if(zoomLevel < 0.5) zoomLevel = 0.5;
+        document.getElementById('pdfIframe').style.transform = `scale(${zoomLevel})`;
+    }
+
+    function setupWatermark() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 300; canvas.height = 200;
+        const ctx = canvas.getContext('2d');
+        ctx.rotate(-25 * Math.PI / 180);
+        ctx.font = '14px Cairo';
+        ctx.fillStyle = 'rgba(255,255,255,0.4)';
+        ctx.fillText(studentMail, 20, 100);
+        ctx.fillText("منصة المستشار - حماية فولاذية", 20, 120);
+        document.getElementById('pdfOverlay').style.backgroundImage = `url(${canvas.toDataURL()})`;
+    }
+
+    // تعتيم عند الخروج من التبويب (لمنع التسجيل)
+    window.addEventListener('blur', () => { document.getElementById('blackout').style.display = "flex"; });
+    window.addEventListener('focus', () => { document.getElementById('blackout').style.display = "none"; });
+
+    initPdf();
+</script>
+</body>
+</html>
