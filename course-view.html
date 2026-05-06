@@ -3,131 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مشغل الكورس المحمي | المستشار</title>
+    <title>منصة المستشار | المشغل الذكي 🛡️</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        :root { --primary: #6366f1; --bg: #0f172a; --card: #1e293b; --accent: #10b981; }
-        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: #f1f5f9; margin: 0; user-select: none; }
+        :root { --primary: #6366f1; --bg: #020617; --card: #1e293b; --accent: #10b981; }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: #f1f5f9; margin: 0; overflow: hidden; user-select: none; }
         
-        .header { background: var(--card); padding: 15px 5%; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; }
-        .user-info { font-size: 14px; color: var(--accent); font-weight: bold; }
+        /* Layout */
+        .app-wrapper { display: flex; flex-direction: column; height: 100vh; }
+        .top-nav { height: 70px; background: var(--card); display: flex; justify-content: space-between; align-items: center; padding: 0 30px; border-bottom: 1px solid #334155; z-index: 100; }
+        .main-content { display: grid; grid-template-columns: 1fr 380px; flex: 1; overflow: hidden; }
 
-        .course-container { display: grid; grid-template-columns: 1fr 350px; height: calc(100vh - 70px); }
-        
-        /* مشغل الفيديو المحمي */
-        .video-player-area { background: #000; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .video-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 60px; z-index: 10; cursor: default; } /* تغطية العنوان */
-        .video-wrapper { position: relative; width: 100%; height: 100%; }
+        /* Video Player Area */
+        .video-section { position: relative; background: #000; display: flex; align-items: center; justify-content: center; }
+        .video-container { position: relative; width: 100%; height: 100%; max-height: 100%; }
         iframe { width: 100%; height: 100%; border: none; }
 
-        .playlist { background: var(--card); border-right: 1px solid #334155; overflow-y: auto; padding: 20px; }
-        .playlist-item { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; margin-bottom: 10px; cursor: pointer; border: 1px solid transparent; transition: 0.3s; }
-        .playlist-item:hover { background: rgba(99, 102, 241, 0.1); border-color: var(--primary); }
-        .playlist-item.active { background: var(--primary); color: white; }
-        
-        .file-btn { display: block; width: 100%; background: #10b981; color: white; text-align: center; padding: 12px; border-radius: 10px; text-decoration: none; font-weight: bold; margin-top: 10px; }
+        /* Protection Overlays */
+        .protection-layer { position: absolute; top: 0; left: 0; width: 100%; height: 80px; z-index: 5; pointer-events: auto; }
+        .watermark { position: absolute; bottom: 20%; right: 10%; color: rgba(255,255,255,0.15); font-size: 18px; pointer-events: none; z-index: 6; font-weight: bold; transform: rotate(-20deg); }
 
-        @media (max-width: 900px) { .course-container { grid-template-columns: 1fr; height: auto; } }
+        /* Sidebar Playlist */
+        .sidebar { background: #0f172a; border-right: 1px solid #334155; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid #334155; }
+        .playlist-items { flex: 1; overflow-y: auto; padding: 15px; }
+        .item { background: #1e293b; padding: 15px; border-radius: 12px; margin-bottom: 12px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: 0.2s; border: 1px solid transparent; }
+        .item:hover { border-color: var(--primary); background: #2d3748; }
+        .item.active { background: var(--primary); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); }
+        .item i { font-size: 18px; opacity: 0.8; }
+
+        /* Empty State */
+        .empty-player { text-align: center; color: #475569; }
+        .empty-player i { font-size: 80px; margin-bottom: 20px; }
+
+        /* Back Button */
+        .btn-exit { background: rgba(239, 68, 68, 0.1); color: #ef4444; padding: 8px 18px; border-radius: 10px; text-decoration: none; font-weight: bold; transition: 0.3s; }
+        .btn-exit:hover { background: #ef4444; color: white; }
+
+        @media (max-width: 1024px) {
+            .main-content { grid-template-columns: 1fr; overflow-y: auto; }
+            .sidebar { height: auto; }
+            .video-section { aspect-ratio: 16/9; height: auto; }
+        }
     </style>
 </head>
-<body oncontextmenu="return false;"> <div id="courseApp">
-    <div style="text-align:center; padding:100px;">جاري التحقق من الصلاحيات والخصوصية...</div>
+<body oncontextmenu="return false;">
+
+<div class="app-wrapper" id="loader">
+    <div style="margin: auto; text-align: center;">
+        <i class="fas fa-circle-notch fa-spin fa-3x" style="color:var(--primary)"></i>
+        <p style="margin-top:20px;">جاري تشغيل محرك الحماية والدروس...</p>
+    </div>
+</div>
+
+<div class="app-wrapper" id="playerUI" style="display:none;">
+    <header class="top-nav">
+        <div>
+            <h2 id="courseTitle" style="margin:0; font-size:1.2rem;">اسم الكورس</h2>
+            <small id="studentName" style="color: var(--accent);"></small>
+        </div>
+        <a href="courses-catalog.html" class="btn-exit"><i class="fas fa-sign-out-alt"></i> خروج</a>
+    </header>
+
+    <main class="main-content">
+        <section class="video-section" id="displayArea">
+            <div class="empty-player">
+                <i class="fas fa-play-circle"></i>
+                <h3>بانتظار اختيار الدرس...</h3>
+                <p>اختر من القائمة الجانبية لبدء المشاهدة</p>
+            </div>
+        </section>
+
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h3 style="margin:0;"><i class="fas fa-list-ul"></i> محتوى الكورس</h3>
+            </div>
+            <div class="playlist-items" id="playlistItems">
+                </div>
+        </aside>
+    </main>
 </div>
 
 <script>
+    // 1. الإعدادات
     const firebaseConfig = { apiKey: "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws", authDomain: "zomaapp-744fc.firebaseapp.com", projectId: "zomaapp-744fc" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    const userEmail = localStorage.getItem("userEmail") || "طالب زائر";
     const urlParams = new URLSearchParams(window.location.search);
     const courseId = urlParams.get('id');
+    const studentEmail = localStorage.getItem("userEmail") || "طالب مجهول";
 
-    async function initCourseView() {
-        if (!courseId) return;
-        const doc = await db.collection("courses").doc(courseId).get();
-        if(!doc.exists) return;
-        const course = doc.data();
-        renderCourseUI(course);
-    }
+    // 2. التشغيل الأساسي
+    async function startPlayer() {
+        if (!courseId) { alert("خطأ في معرف الكورس"); return; }
 
-    function renderCourseUI(course) {
-        let contentHtml = "";
-        course.content.forEach((item, index) => {
-            contentHtml += `<div class="playlist-item" onclick="playMedia('${item.link}', '${item.type}', this)">
-                <i class="fas fa-${item.type === 'video' ? 'play-circle' : 'file-pdf'}"></i> ${item.title}</div>`;
-        });
-
-        document.getElementById('courseApp').innerHTML = `
-            <div class="header">
-                <div>
-                    <span style="font-weight:900;">${course.title}</span>
-                    <div class="user-info">أهلاً بك: ${userEmail}</div>
-                </div>
-                <a href="courses-catalog.html" style="color:#fff; text-decoration:none;"><i class="fas fa-sign-out-alt"></i> خروج</a>
-            </div>
-            <div class="course-container">
-                <div class="video-player-area" id="playerArea">
-                    <div style="text-align:center; color:#475569;">
-                        <i class="fas fa-play-circle" style="font-size:60px; margin-bottom:15px;"></i>
-                        <p>اختر درساً لبدء المشاهدة الآمنة</p>
-                    </div>
-                </div>
-                <div class="playlist">
-                    <h4 style="margin:0 0 15px 0;">قائمة الدروس</h4>
-                    ${contentHtml}
-                </div>
-            </div>
-        `;
-    }
-
-    function playMedia(link, type, element) {
-        const playerArea = document.getElementById('playerArea');
-        document.querySelectorAll('.playlist-item').forEach(el => el.classList.remove('active'));
-        element.classList.add('active');
-
-        if(type === 'video') {
-            const videoId = getYoutubeId(link);
-            // بارامترات الحماية: 
-            // rel=0 (منع مقترحات غريبة)
-            // modestbranding=1 (إخفاء لوجو يوتيوب)
-            // controls=1 (إظهار التحكم العادي)
-            // showinfo=0 (قديمة لكن تضاف لبعض المتصفحات)
-            const secureUrl = `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&showinfo=0&autoplay=1`;
+        try {
+            const courseDoc = await db.collection("courses").doc(courseId).get();
+            if (!courseDoc.exists) throw new Error("الكورس غير موجود");
             
-            playerArea.innerHTML = `
-                <div class="video-wrapper">
-                    <div class="video-overlay"></div> <iframe src="${secureUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                </div>
-            `;
-        } else {
-            playerArea.innerHTML = `<div style="text-align:center;">
-                <i class="fas fa-file-pdf" style="font-size:80px; color:#ef4444;"></i>
-                <h3 style="color:#fff">الملف متاح للمعاينة</h3>
-                <a href="${link}" target="_blank" class="file-btn" style="width:200px; margin:20px auto;">تحميل PDF</a>
-            </div>`;
+            const courseData = courseDoc.data();
+            document.getElementById('courseTitle').innerText = courseData.title;
+            document.getElementById('studentName').innerText = `المستخدم: ${studentEmail}`;
+            
+            renderPlaylist(courseData.content);
+            
+            document.getElementById('loader').style.display = "none";
+            document.getElementById('playerUI').style.display = "flex";
+
+        } catch (err) {
+            alert(err.message);
         }
     }
 
-    // وظيفة استخراج الـ ID الذكية
-    function getYoutubeId(url) {
-        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-        const match = url.match(regExp);
-        return (match && match[2].length == 11) ? match[2] : null;
+    // 3. رندر القائمة
+    function renderPlaylist(content) {
+        const container = document.getElementById('playlistItems');
+        if (!content || content.length === 0) {
+            container.innerHTML = "<p>لا يوجد محتوى متاح حالياً.</p>";
+            return;
+        }
+
+        container.innerHTML = content.map((item, index) => `
+            <div class="item" onclick="loadMedia('${item.link}', '${item.type}', this)">
+                <i class="fas fa-${item.type === 'video' ? 'play-circle' : 'file-pdf'}"></i>
+                <div style="flex:1">
+                    <div style="font-weight:bold; font-size:14px;">${item.title}</div>
+                    <small style="opacity:0.6">${item.type === 'video' ? 'فيديو تعليمي' : 'ملف PDF'}</small>
+                </div>
+            </div>
+        `).join('');
     }
 
-    // منع اختصارات الكيبورد (F12, Ctrl+U, etc.)
+    // 4. تشغيل الميديا (القلب النابض)
+    function loadMedia(link, type, element) {
+        const displayArea = document.getElementById('displayArea');
+        
+        // تغيير الـ Active
+        document.querySelectorAll('.item').forEach(i => i.classList.remove('active'));
+        element.classList.add('active');
+
+        if (type === 'video') {
+            const videoId = extractID(link);
+            const secureUrl = `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&controls=1&showinfo=0&autoplay=1`;
+            
+            displayArea.innerHTML = `
+                <div class="video-container">
+                    <div class="protection-layer"></div>
+                    <div class="watermark">${studentEmail} | منصة المستشار</div>
+                    <iframe src="${secureUrl}" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>
+            `;
+        } else {
+            // عرض ملف PDF
+            displayArea.innerHTML = `
+                <div style="text-align:center; padding:20px; width:100%;">
+                    <i class="fas fa-file-pdf" style="font-size:100px; color:#ef4444; margin-bottom:20px;"></i>
+                    <h2>${element.querySelector('div').innerText}</h2>
+                    <p>هذا الملف متاح للتحميل والقراءة</p>
+                    <a href="${link}" target="_blank" class="btn-exit" style="background:var(--accent); color:white; padding:15px 40px; display:inline-block;">
+                        <i class="fas fa-download"></i> فتح / تحميل الملف الآن
+                    </a>
+                </div>
+            `;
+        }
+    }
+
+    // 5. استخراج ID اليوتيوب بأي شكل كان
+    function extractID(url) {
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[2].length == 11) ? match[2] : url;
+    }
+
+    // 6. حماية إضافية (منع الاختصارات)
     document.onkeydown = function(e) {
-        if(e.keyCode == 123) return false; // F12
-        if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false;
-        if(e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) return false;
-        if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false;
-        if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false; // View Source
+        if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'C'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0))) || (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0))) {
+            return false;
+        }
     };
+
+    window.onload = startPlayer;
 </script>
 </body>
 </html>
