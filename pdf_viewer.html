@@ -17,24 +17,27 @@
         
         #pdfIframe { width: 100%; height: 100%; border: none; transition: 0.3s transform ease; transform-origin: top center; pointer-events: all; }
 
-        /* العلامة المائية الكبيرة المائلة في المنتصف - فوق النص */
+        /* العلامة المائية الفولاذية - فوق النص مباشرة */
         #centerWatermark {
             position: absolute; 
             top: 50%; 
             left: 50%; 
             transform: translate(-50%, -50%) rotate(-35deg);
-            /* الشفافية هنا (0.08) تضمن القراءة ومنع التصوير في نفس الوقت */
-            color: rgba(255, 255, 255, 0.08); 
-            font-size: 8vw; 
+            /* زيادة الوضوح مع الحفاظ على الشفافية للقراءة */
+            color: rgba(255, 255, 255, 0.14); 
+            /* إضافة ظل لجعلها مستحيلة المسح برمجياً */
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-size: 9vw; 
             font-weight: 900;
             pointer-events: none; 
-            z-index: 500; /* تجعلها فوق الـ iframe */
+            z-index: 500; 
             white-space: nowrap; 
             text-align: center;
             text-transform: uppercase;
+            letter-spacing: 2px;
         }
 
-        /* درع حماية الأزرار العلوية لمستعرض جوجل */
+        /* درع حماية الأزرار العلوية */
         .shield-top { position: absolute; top: 0; left: 0; width: 100%; height: 60px; z-index: 600; cursor: not-allowed; background: rgba(0,0,0,0.01); }
 
         .tools { display: flex; gap: 15px; }
@@ -48,15 +51,15 @@
 
 <div id="blackout">
     <i class="fas fa-user-shield fa-5x" style="color: var(--danger); margin-bottom: 20px;"></i>
-    <h1 style="color: var(--danger)">حماية المستشار النشطة 🛡️</h1>
-    <p>تم إخفاء المحتوى لتأمين بيئة التعلم.</p>
-    <button class="btn-tool" onclick="document.getElementById('blackout').style.display='none'" style="margin-top:20px;">العودة للقراءة</button>
+    <h1 style="color: var(--danger)">⚠️ نظام الحماية النشط</h1>
+    <p>ممنوع تصوير الشاشة أو مغادرة المتصفح أثناء القراءة.</p>
+    <button class="btn-tool" onclick="document.getElementById('blackout').style.display='none'" style="margin-top:20px;">العودة للمذكرة</button>
 </div>
 
 <div class="viewer-wrapper">
     <div class="nav-header">
         <button class="btn-back" onclick="window.close()"><i class="fas fa-times"></i> إغلاق</button>
-        <h3 id="pdfTitle" style="margin:0;">تحميل...</h3>
+        <h3 id="pdfTitle" style="margin:0;">جاري التحميل...</h3>
         <div class="tools">
             <button class="btn-tool" onclick="zoomPDF(0.2)"><i class="fas fa-search-plus"></i></button>
             <button class="btn-tool" onclick="zoomPDF(-0.2)"><i class="fas fa-search-minus"></i></button>
@@ -74,15 +77,13 @@
 
 <script>
     let zoomLevel = 1;
-    // جلب الإيميل/اليوزر من التخزين
-    const studentMail = localStorage.getItem("userEmail") || "STUDENT_ACCESS";
+    const studentMail = localStorage.getItem("userEmail") || "PROTECTED_USER";
     const rawLink = localStorage.getItem('currentPdfLink') || "";
     const pdfTitle = localStorage.getItem('currentPdfTitle') || "مذكرة المستشار";
 
     function init() {
         document.getElementById('pdfTitle').innerText = pdfTitle;
-        
-        // عرض اليوزر فقط بشكل كبير ومائل في المنتصف
+        // وضع اليوزر في المنتصف
         document.getElementById('centerWatermark').innerText = studentMail;
         
         let finalUrl = rawLink;
@@ -106,21 +107,32 @@
         iframe.style.height = (100 / zoomLevel) + "%";
     }
 
-    // نظام الحماية
+    // --- نظام الحماية ضد الاسكرين شوت ---
+    
+    // منع تسجيل الشاشة أو التصوير عند خروج التركيز عن الصفحة
     window.addEventListener('blur', () => {
         document.getElementById('blackout').style.display = "flex";
     });
 
+    // كشف محاولة تصوير الشاشة (Print Screen)
     window.addEventListener('keyup', (e) => {
-        if (e.key === 'PrintScreen') {
-            navigator.clipboard.writeText('Protected by Al-Mostshar 🛡️');
+        if (e.key === 'PrintScreen' || e.key === 'Snapshot') {
+            // مسح الحافظة فوراً
+            navigator.clipboard.writeText('ممنوع التصوير - حقوق المستشار محفوظة 🛡️');
             document.getElementById('blackout').style.display = "flex";
         }
     });
 
+    // منع الاختصارات (Save, Print, View Source, Copy)
     window.addEventListener('keydown', (e) => {
         if (e.ctrlKey && ['s', 'p', 'u', 'c'].includes(e.key.toLowerCase())) {
             e.preventDefault();
+            return false;
+        }
+        // منع F12
+        if(e.keyCode == 123) {
+            e.preventDefault();
+            return false;
         }
     });
 
