@@ -15,40 +15,53 @@
         
         #pdfViewport { position: relative; flex: 1; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         
-        /* جعل الـ iframe والطبقات قابلة للتمرير معاً */
-        #scrollContainer { width: 100%; height: 100%; overflow-y: auto; position: relative; }
-        
-        #pdfIframe { width: 100%; height: 5000px; border: none; transition: 0.3s transform ease; transform-origin: top center; pointer-events: all; }
+        #pdfIframe { width: 100%; height: 100%; border: none; transition: 0.3s transform ease; transform-origin: top center; pointer-events: all; }
 
-        /* العلامة المائية المتكررة على كل الصفحات باللون الأسود */
-        #watermarkLayer {
+        /* طبقة العلامات المائية المكررة (الشبكة) */
+        #watermarkGrid {
             position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            pointer-events: none;
+            top: 0; left: 0; width: 100%; height: 100%;
             z-index: 500;
-            /* إنشاء خلفية متكررة تحتوي على اليوزر */
-            background-repeat: repeat;
-            opacity: 0.15; /* شفافية موزونة للقراءة */
+            pointer-events: none; /* تسمح بالضغط والتمرير من تحتها */
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            opacity: 0.25; /* درجة الشفافية للون الأسود */
         }
 
-        /* التاريخ المذيل الثابت في أسفل الشاشة */
-        #footerDate {
-            position: fixed; bottom: 10px; right: 20px;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 5px 15px; border-radius: 20px;
-            font-size: 14px; z-index: 1001;
-            border: 1px solid var(--primary);
-            color: #fff;
+        .watermark-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: rotate(-25deg);
+            color: #000; /* اللون أسود كما طلبت */
+            font-size: 3.5vw;
+            font-weight: 900;
+            white-space: nowrap;
+            text-align: center;
+            line-height: 1.1;
+        }
+
+        /* التاريخ المذيل الثابت في زوايا الشاشة */
+        .fixed-footer-mark {
+            position: absolute;
+            bottom: 15px;
+            left: 20px;
+            z-index: 600;
+            color: rgba(0,0,0,0.4);
+            font-size: 14px;
+            font-weight: bold;
+            pointer-events: none;
         }
 
         /* درع حماية الأزرار */
-        .shield-top { position: absolute; top: 0; left: 0; width: 100%; height: 65px; z-index: 600; cursor: not-allowed; }
+        .shield-top { position: absolute; top: 0; left: 0; width: 100%; height: 65px; z-index: 700; cursor: not-allowed; }
 
         .tools { display: flex; gap: 15px; }
         .btn-tool { background: var(--primary); color: white; border: none; padding: 8px 18px; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; }
         .btn-back { background: var(--danger); color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; text-decoration: none; }
 
+        /* شاشة الحماية السوداء */
         #blackout { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: #000; z-index: 9999; display: none; 
@@ -62,16 +75,14 @@
 <div id="blackout">
     <i class="fas fa-user-lock fa-5x" style="color: var(--danger); margin-bottom: 20px;"></i>
     <h1 style="color: var(--danger)">تم رصد محاولة تصوير!</h1>
-    <p>تم إغلاق المحتوى فوراً لحماية حقوق المستشار.</p>
-    <button class="btn-tool" onclick="location.reload()" style="margin-top:20px;">إعادة فتح المذكرة</button>
+    <p>تم حظر المحتوى فوراً لحماية حقوق المستشار.</p>
+    <button class="btn-tool" onclick="location.reload()" style="margin-top:20px;">إعادة تنشيط المستعرض</button>
 </div>
-
-<div id="footerDate">جاري تحديث التاريخ...</div>
 
 <div class="viewer-wrapper">
     <div class="nav-header">
         <button class="btn-back" onclick="window.close()"><i class="fas fa-times"></i> إغلاق</button>
-        <h3 id="pdfTitle" style="margin:0;">تحميل المذكرة...</h3>
+        <h3 id="pdfTitle" style="margin:0;">جاري التحميل...</h3>
         <div class="tools">
             <button class="btn-tool" onclick="zoomPDF(0.2)"><i class="fas fa-search-plus"></i></button>
             <button class="btn-tool" onclick="zoomPDF(-0.2)"><i class="fas fa-search-minus"></i></button>
@@ -81,10 +92,12 @@
     <div id="pdfViewport">
         <div class="shield-top"></div>
         
-        <div id="scrollContainer">
-            <div id="watermarkLayer"></div>
-            <iframe id="pdfIframe" src=""></iframe>
-        </div>
+        <div id="watermarkGrid">
+            </div>
+
+        <div class="fixed-footer-mark" id="fixedDate"></div>
+        
+        <iframe id="pdfIframe" src=""></iframe>
     </div>
 </div>
 
@@ -97,12 +110,19 @@
     function init() {
         document.getElementById('pdfTitle').innerText = pdfTitle;
         
-        // 1. توليد العلامة المائية المتكررة (سوداء)
-        generateRepeatingWatermark();
+        // 1. توليد شبكة العلامات المائية (8 علامات تغطي الشاشة)
+        const grid = document.getElementById('watermarkGrid');
+        for (let i = 0; i < 8; i++) {
+            const item = document.createElement('div');
+            item.className = 'watermark-item';
+            item.innerHTML = `<div>${studentMail}<br><span style="font-size:0.5em">حقوق المستشار محفوظة</span></div>`;
+            grid.appendChild(item);
+        }
 
-        // 2. ضبط التاريخ الثابت في الأسفل
+        // 2. ضبط التاريخ المذيل الثابت
         const now = new Date();
-        document.getElementById('footerDate').innerText = "توقيت الوصول: " + now.toLocaleString('ar-EG');
+        const dateStr = "تاريخ الدخول: " + now.toLocaleDateString('ar-EG') + " | " + now.getHours() + ":" + now.getMinutes();
+        document.getElementById('fixedDate').innerText = dateStr;
         
         let finalUrl = rawLink;
         if(rawLink.includes('drive.google.com')) {
@@ -111,60 +131,37 @@
         document.getElementById('pdfIframe').src = finalUrl;
     }
 
-    function generateRepeatingWatermark() {
-        const canvas = document.createElement('canvas');
-        canvas.width = 500;
-        canvas.height = 400;
-        const ctx = canvas.getContext('2d');
-        
-        // ضبط ستايل النص (أسود)
-        ctx.fillStyle = "black"; 
-        ctx.font = "bold 30px Cairo";
-        ctx.textAlign = "center";
-        
-        // تدوير النص
-        ctx.translate(250, 200);
-        ctx.rotate(-30 * Math.PI / 180);
-        
-        // رسم اليوزر
-        ctx.fillText(studentMail, 0, 0);
-        ctx.font = "15px Cairo";
-        ctx.fillText("حقوق المستشار محفوظة 🛡️", 0, 40);
-        
-        // تحويل الكانفاس لصورة متكررة
-        const dataUrl = canvas.toDataURL();
-        document.getElementById('watermarkLayer').style.backgroundImage = `url(${dataUrl})`;
-    }
-
     function zoomPDF(val) {
         zoomLevel += val;
         if(zoomLevel < 0.7) zoomLevel = 0.7;
         if(zoomLevel > 2.5) zoomLevel = 2.5;
         
         const iframe = document.getElementById('pdfIframe');
-        const watermark = document.getElementById('watermarkLayer');
-        
         iframe.style.transform = `scale(${zoomLevel})`;
-        // الحفاظ على تطابق حجم العلامة المائية مع الملف عند الزووم
-        watermark.style.transform = `scale(${zoomLevel})`;
-        watermark.style.transformOrigin = "top center";
+        iframe.style.width = (100 / zoomLevel) + "%";
+        iframe.style.height = (100 / zoomLevel) + "%";
     }
 
-    // --- نظام الحماية الصارم ---
-
+    // --- نظام الحماية الذكي ---
     function triggerSecurity() {
         document.getElementById('blackout').style.display = "flex";
-        navigator.clipboard.writeText('⚠️ محاولة سرقة محتوى مرصودة');
+        navigator.clipboard.writeText('محاولة تصوير فاشلة 🛡️');
     }
 
+    // رصد زر تصوير الشاشة وتسويد الشاشة فوراً
     window.addEventListener('keyup', (e) => {
-        if (e.key === 'PrintScreen' || e.key === 'Snapshot') triggerSecurity();
+        if (e.key === 'PrintScreen' || e.key === 'Snapshot') {
+            triggerSecurity();
+        }
     });
 
-    window.addEventListener('blur', () => triggerSecurity());
+    // التسويد عند الخروج من النافذة
+    window.addEventListener('blur', () => {
+        triggerSecurity();
+    });
 
     window.addEventListener('keydown', (e) => {
-        if (e.ctrlKey && ['p','s','u','c','j'].includes(e.key.toLowerCase())) {
+        if (e.ctrlKey && ['s', 'p', 'u', 'c', 'shift'].includes(e.key.toLowerCase())) {
             e.preventDefault();
             triggerSecurity();
         }
