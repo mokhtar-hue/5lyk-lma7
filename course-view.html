@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مشغل الكورس | المستشار</title>
+    <title>مشغل الكورس المحمي | المستشار</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
@@ -11,18 +11,19 @@
     
     <style>
         :root { --primary: #6366f1; --bg: #0f172a; --card: #1e293b; --accent: #10b981; }
-        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: #f1f5f9; margin: 0; }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: #f1f5f9; margin: 0; user-select: none; }
         
         .header { background: var(--card); padding: 15px 5%; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; }
-        .back-btn { color: #fff; text-decoration: none; font-size: 14px; background: rgba(255,255,255,0.05); padding: 8px 15px; border-radius: 10px; }
+        .user-info { font-size: 14px; color: var(--accent); font-weight: bold; }
 
         .course-container { display: grid; grid-template-columns: 1fr 350px; height: calc(100vh - 70px); }
         
-        /* مشغل الفيديو */
-        .video-player-area { background: #000; display: flex; align-items: center; justify-content: center; position: relative; }
+        /* مشغل الفيديو المحمي */
+        .video-player-area { background: #000; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .video-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 60px; z-index: 10; cursor: default; } /* تغطية العنوان */
+        .video-wrapper { position: relative; width: 100%; height: 100%; }
         iframe { width: 100%; height: 100%; border: none; }
 
-        /* قائمة المحتوى جانبية */
         .playlist { background: var(--card); border-right: 1px solid #334155; overflow-y: auto; padding: 20px; }
         .playlist-item { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; margin-bottom: 10px; cursor: pointer; border: 1px solid transparent; transition: 0.3s; }
         .playlist-item:hover { background: rgba(99, 102, 241, 0.1); border-color: var(--primary); }
@@ -30,110 +31,55 @@
         
         .file-btn { display: block; width: 100%; background: #10b981; color: white; text-align: center; padding: 12px; border-radius: 10px; text-decoration: none; font-weight: bold; margin-top: 10px; }
 
-        @media (max-width: 900px) {
-            .course-container { grid-template-columns: 1fr; height: auto; }
-            .video-player-area { aspect-ratio: 16/9; }
-        }
-
-        /* رسالة القفل */
-        .locked-screen { text-align: center; padding: 100px 20px; background: var(--bg); height: 100vh; }
-        .locked-icon { font-size: 80px; color: #f59e0b; margin-bottom: 20px; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        @media (max-width: 900px) { .course-container { grid-template-columns: 1fr; height: auto; } }
     </style>
 </head>
-<body>
-
-<div id="courseApp">
-    <div style="text-align:center; padding:100px;">جاري التحقق من الصلاحيات...</div>
+<body oncontextmenu="return false;"> <div id="courseApp">
+    <div style="text-align:center; padding:100px;">جاري التحقق من الصلاحيات والخصوصية...</div>
 </div>
 
 <script>
-    // تهيئة Firebase
-    const firebaseConfig = { 
-        apiKey: "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws", 
-        authDomain: "zomaapp-744fc.firebaseapp.com", 
-        projectId: "zomaapp-744fc" 
-    };
+    const firebaseConfig = { apiKey: "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws", authDomain: "zomaapp-744fc.firebaseapp.com", projectId: "zomaapp-744fc" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    const userEmail = localStorage.getItem("userEmail");
+    const userEmail = localStorage.getItem("userEmail") || "طالب زائر";
     const urlParams = new URLSearchParams(window.location.search);
     const courseId = urlParams.get('id');
 
     async function initCourseView() {
-        if (!userEmail) { window.location.href = "index.html"; return; }
-        if (!courseId) { alert("كورس غير موجود"); return; }
-
+        if (!courseId) return;
         const doc = await db.collection("courses").doc(courseId).get();
-        if(!doc.exists) { alert("الكورس محذوف"); return; }
+        if(!doc.exists) return;
         const course = doc.data();
-
-        // 1. فحص القفل والامتحان
-        if(course.isLocked && course.quizId) {
-            const result = await db.collection("results")
-                .where("studentEmail", "==", userEmail)
-                .where("quizId", "==", course.quizId)
-                .get();
-            
-            if(result.empty) {
-                renderLockedScreen(course.quizId);
-                return;
-            }
-        }
-
-        // 2. إذا مسموح له بالدخول
         renderCourseUI(course);
-    }
-
-    function renderLockedScreen(quizId) {
-        document.getElementById('courseApp').innerHTML = `
-            <div class="locked-screen">
-                <i class="fas fa-lock locked-icon"></i>
-                <h1 style="color:#fff">عفواً.. الكورس مغلق!</h1>
-                <p style="color:#94a3b8; max-width:500px; margin:auto;">أنت لم تجتز الامتحان الفرعي المطلوب لهذا الكورس بعد. يرجى النجاح في الامتحان أولاً لفتح المحتوى التعليمي.</p>
-                <br>
-                <a href="quiz.html?id=${quizId}" class="file-btn" style="background:var(--primary); display:inline-block; width:250px;">
-                    <i class="fas fa-edit"></i> انتقل للامتحان الآن
-                </a>
-                <br><br>
-                <a href="courses-catalog.html" style="color:#94a3b8; text-decoration:none;">العودة للمكتبة</a>
-            </div>
-        `;
     }
 
     function renderCourseUI(course) {
         let contentHtml = "";
         course.content.forEach((item, index) => {
-            contentHtml += `
-                <div class="playlist-item" onclick="playMedia('${item.link}', '${item.type}', this)">
-                    <i class="fas fa-${item.type === 'video' ? 'play-circle' : 'file-pdf'}"></i> 
-                    ${item.title}
-                </div>
-            `;
+            contentHtml += `<div class="playlist-item" onclick="playMedia('${item.link}', '${item.type}', this)">
+                <i class="fas fa-${item.type === 'video' ? 'play-circle' : 'file-pdf'}"></i> ${item.title}</div>`;
         });
 
         document.getElementById('courseApp').innerHTML = `
             <div class="header">
-                <div style="font-weight:900; font-size:18px;">${course.title}</div>
-                <a href="courses-catalog.html" class="back-btn"><i class="fas fa-arrow-right"></i> خروج</a>
+                <div>
+                    <span style="font-weight:900;">${course.title}</span>
+                    <div class="user-info">أهلاً بك: ${userEmail}</div>
+                </div>
+                <a href="courses-catalog.html" style="color:#fff; text-decoration:none;"><i class="fas fa-sign-out-alt"></i> خروج</a>
             </div>
             <div class="course-container">
                 <div class="video-player-area" id="playerArea">
-                    <div style="color:#334155; text-align:center;">
-                        <i class="fas fa-play" style="font-size:50px;"></i>
-                        <p>اختر درساً من القائمة لبدء التعلم</p>
+                    <div style="text-align:center; color:#475569;">
+                        <i class="fas fa-play-circle" style="font-size:60px; margin-bottom:15px;"></i>
+                        <p>اختر درساً لبدء المشاهدة الآمنة</p>
                     </div>
                 </div>
                 <div class="playlist">
-                    <h4 style="margin-top:0;"><i class="fas fa-list"></i> محتويات الكورس</h4>
+                    <h4 style="margin:0 0 15px 0;">قائمة الدروس</h4>
                     ${contentHtml}
-                    ${course.quizId ? `
-                        <hr style="border-color:#334155; margin:20px 0;">
-                        <a href="quiz.html?id=${course.quizId}" class="file-btn" style="background:#6366f1">
-                            <i class="fas fa-star"></i> إعادة خوض الامتحان
-                        </a>
-                    ` : ''}
                 </div>
             </div>
         `;
@@ -141,32 +87,47 @@
 
     function playMedia(link, type, element) {
         const playerArea = document.getElementById('playerArea');
-        
-        // تمييز العنصر المختار
         document.querySelectorAll('.playlist-item').forEach(el => el.classList.remove('active'));
         element.classList.add('active');
 
         if(type === 'video') {
-            // تحويل رابط يوتيوب العادي لـ Embed لو لزم الأمر
-            let embedUrl = link;
-            if(link.includes("watch?v=")) {
-                embedUrl = link.replace("watch?v=", "embed/");
-            }
-            playerArea.innerHTML = `<iframe src="${embedUrl}" allowfullscreen></iframe>`;
-        } else {
+            const videoId = getYoutubeId(link);
+            // بارامترات الحماية: 
+            // rel=0 (منع مقترحات غريبة)
+            // modestbranding=1 (إخفاء لوجو يوتيوب)
+            // controls=1 (إظهار التحكم العادي)
+            // showinfo=0 (قديمة لكن تضاف لبعض المتصفحات)
+            const secureUrl = `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&showinfo=0&autoplay=1`;
+            
             playerArea.innerHTML = `
-                <div style="text-align:center;">
-                    <i class="fas fa-file-pdf" style="font-size:100px; color:#f43f5e;"></i>
-                    <h2 style="color:white;">تم تحميل الملف المرفق</h2>
-                    <a href="${link}" target="_blank" class="file-btn" style="display:inline-block; width:auto; padding:15px 40px;">
-                        <i class="fas fa-download"></i> فتح أو تحميل الملف
-                    </a>
+                <div class="video-wrapper">
+                    <div class="video-overlay"></div> <iframe src="${secureUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                 </div>
             `;
+        } else {
+            playerArea.innerHTML = `<div style="text-align:center;">
+                <i class="fas fa-file-pdf" style="font-size:80px; color:#ef4444;"></i>
+                <h3 style="color:#fff">الملف متاح للمعاينة</h3>
+                <a href="${link}" target="_blank" class="file-btn" style="width:200px; margin:20px auto;">تحميل PDF</a>
+            </div>`;
         }
     }
 
-    window.onload = initCourseView;
+    // وظيفة استخراج الـ ID الذكية
+    function getYoutubeId(url) {
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[2].length == 11) ? match[2] : null;
+    }
+
+    // منع اختصارات الكيبورد (F12, Ctrl+U, etc.)
+    document.onkeydown = function(e) {
+        if(e.keyCode == 123) return false; // F12
+        if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false;
+        if(e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) return false;
+        if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false;
+        if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false; // View Source
+    };
 </script>
 </body>
 </html>
