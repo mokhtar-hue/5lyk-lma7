@@ -3,82 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بوابة الدفع | المستشار 🛡️</title>
+    <title>بوابة دفع المستشار | VIP 🛡️</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root { --primary: #6366f1; --bg: #0f172a; --card: #1e293b; --accent: #10b981; --fawry: #ffc107; --cash: #ef4444; }
-        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: white; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: white; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; }
         
-        .payment-container { width: 100%; max-width: 500px; padding: 20px; }
-        .main-card { background: var(--card); border-radius: 24px; padding: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); text-align: center; }
+        .payment-container { width: 95%; max-width: 480px; padding: 20px; animation: fadeIn 0.6s ease-out; }
+        .main-card { background: var(--card); border-radius: 28px; padding: 35px; box-shadow: 0 25px 60px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.08); text-align: center; }
         
-        .price-display { background: rgba(99, 102, 241, 0.1); border-radius: 15px; padding: 20px; margin: 20px 0; border: 1px solid var(--primary); }
-        .amount { font-size: 35px; font-weight: 900; color: var(--accent); }
+        .price-display { background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(16, 185, 129, 0.1)); border-radius: 20px; padding: 25px; margin: 25px 0; border: 1px solid var(--primary); }
+        .amount { font-size: 38px; font-weight: 900; color: var(--accent); text-shadow: 0 0 15px rgba(16, 185, 129, 0.3); }
         
-        .pay-option { background: rgba(255,255,255,0.05); border-radius: 16px; padding: 15px; margin-bottom: 12px; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.3s; border: 1px solid transparent; text-align: right; position: relative; }
-        .pay-option:hover { background: rgba(255,255,255,0.1); border-color: var(--primary); transform: translateX(-5px); }
-        .pay-option i { font-size: 24px; width: 40px; text-align: center; }
-        .pay-option div h4 { margin: 0; font-size: 16px; }
-        .pay-option div p { margin: 0; font-size: 12px; opacity: 0.7; }
+        .pay-option { background: rgba(255,255,255,0.03); border-radius: 18px; padding: 18px; margin-bottom: 15px; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid rgba(255,255,255,0.05); text-align: right; position: relative; }
+        .pay-option:hover { background: rgba(255,255,255,0.08); border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .pay-option i { font-size: 26px; width: 45px; text-align: center; }
+        .pay-option h4 { margin: 0; font-size: 17px; font-weight: 700; }
+        .pay-option p { margin: 0; font-size: 13px; opacity: 0.6; }
 
-        .btn-wallet { border-color: var(--accent); color: var(--accent); }
-        .btn-fawry { border-color: var(--fawry); color: var(--fawry); }
-        .btn-cash { border-color: var(--cash); color: var(--cash); }
+        .btn-wallet { border-right: 4px solid var(--accent); }
+        .btn-fawry { border-right: 4px solid var(--fawry); }
+        .btn-cash { border-right: 4px solid var(--cash); }
 
-        /* نافذة المحفظة الإلكترونية */
-        #cashModal { display: none; background: rgba(0,0,0,0.9); position: fixed; inset: 0; z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: var(--card); padding: 30px; border-radius: 20px; max-width: 400px; width: 100%; text-align: center; }
+        .promo-box { display: flex; gap: 8px; margin-bottom: 25px; }
+        .promo-box input { flex: 1; background: #070b14; border: 1px solid #334155; border-radius: 12px; color: white; padding: 12px; font-family: 'Cairo'; text-align: center; font-size: 14px; outline: none; }
+        .promo-box button { background: var(--primary); border: none; color: white; border-radius: 12px; padding: 0 20px; cursor: pointer; font-weight: bold; transition: 0.3s; }
 
-        .promo-box { display: flex; gap: 10px; margin-bottom: 20px; }
-        .promo-box input { flex: 1; background: #0f172a; border: 1px solid #334155; border-radius: 10px; color: white; padding: 10px; font-family: 'Cairo'; text-align: center; }
-        
-        .wallet-badge { background: var(--accent); color: white; padding: 2px 8px; border-radius: 5px; font-size: 10px; position: absolute; left: 15px; top: 15px; }
+        #cashModal { display: none; background: rgba(0,0,0,0.92); position: fixed; inset: 0; z-index: 2000; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(8px); }
+        .modal-content { background: var(--card); padding: 35px; border-radius: 25px; max-width: 400px; width: 100%; text-align: center; border: 1px solid var(--cash); }
+
+        .wallet-badge { background: var(--accent); color: #000; padding: 3px 10px; border-radius: 8px; font-size: 11px; font-weight: 900; position: absolute; left: 15px; top: 50%; transform: translateY(-50%); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
 <div class="payment-container">
     <div class="main-card">
-        <h2 style="margin:0;">بوابة الدفع الآمنة 🛡️</h2>
-        <p style="opacity: 0.6; font-size: 14px;">اختر وسيلة الدفع المناسبة لك</p>
+        <h2 style="margin:0; letter-spacing: -1px;">بوابة دفع المستشار 🛡️</h2>
+        <p style="opacity: 0.5; font-size: 13px; margin-top: 5px;">نظام دفع آمن ومشفر 100%</p>
 
         <div class="price-display">
-            <p style="margin:0; font-size:14px;">المبلغ المطلوب سداده</p>
-            <div class="amount" id="displayAmount">0.00 ج.م</div>
-            <p id="courseNameDisplay" style="margin:5px 0 0 0; font-size:12px; opacity:0.8;"></p>
+            <p style="margin:0; font-size:13px; opacity: 0.8;">إجمالي المبلغ المطلوب</p>
+            <div class="amount" id="displayAmount">0 ج.م</div>
+            <p id="courseNameDisplay" style="margin:8px 0 0 0; font-size:14px; font-weight:bold; color: var(--primary);"></p>
         </div>
 
         <div class="promo-box">
-            <input type="text" id="promoInput" placeholder="كود خصم؟">
-            <button onclick="applyPromo()" style="background:var(--primary); border:none; color:white; border-radius:10px; padding:0 15px; cursor:pointer;">تطبيق</button>
+            <input type="text" id="promoInput" placeholder="كود الخصم (اختياري)">
+            <button onclick="applyPromo()">تفعيل</button>
         </div>
 
         <div id="optionsArea">
             <div class="pay-option btn-wallet" id="platformWallet" onclick="payWithPlatformWallet()" style="display: none;">
-                <i class="fas fa-wallet"></i>
+                <i class="fas fa-wallet" style="color: var(--accent);"></i>
                 <div>
                     <h4>محفظة المنصة</h4>
-                    <p>دفع فوري من رصيدك الحالي</p>
+                    <p>خصم فوري من رصيدك</p>
                 </div>
                 <span class="wallet-badge" id="currentBalance">0 ج.م</span>
             </div>
 
             <div class="pay-option btn-fawry" onclick="payWithFawry()">
-                <i class="fas fa-barcode"></i>
+                <i class="fas fa-bolt" style="color: var(--fawry);"></i>
                 <div>
-                    <h4>خدمة فوري (Fawry Pay)</h4>
-                    <p>توليد كود دفع للمكينات والمنافذ</p>
+                    <h4>Fawry Pay</h4>
+                    <p>دفع عبر كود فوري للمنافذ</p>
                 </div>
             </div>
 
             <div class="pay-option btn-cash" onclick="showCashModal()">
-                <i class="fas fa-mobile-alt"></i>
+                <i class="fas fa-university" style="color: var(--cash);"></i>
                 <div>
-                    <h4>محفظة إلكترونية (كاش)</h4>
-                    <p>فودافون، اتصالات، أورانج كاش</p>
+                    <h4>محافظ كاش</h4>
+                    <p>فودافون، اتصالات، أورانج</p>
                 </div>
             </div>
         </div>
@@ -87,112 +89,116 @@
 
 <div id="cashModal">
     <div class="modal-content">
-        <i class="fas fa-info-circle fa-3x" style="color:var(--cash); margin-bottom:15px;"></i>
-        <h3>تعليمات الدفع كاش</h3>
-        <p>يرجى تحويل مبلغ <b id="cashAmountText" style="color:var(--accent);"></b> إلى الرقم التالي:</p>
-        <h2 style="background:#0f172a; padding:10px; border-radius:10px; letter-spacing:1px; color:var(--cash);">01550153566</h2>
-        <p style="font-size:13px; opacity:0.8;">بعد التحويل، أرسل صورة الإيصال (سكرين شوت) لنفس الرقم على واتساب وسيتم تفعيل الكورس لك فوراً.</p>
-        <button onclick="confirmCashTransfer()" style="background:var(--accent); width:100%; border:none; padding:12px; border-radius:10px; color:white; font-weight:bold; cursor:pointer; margin-bottom:10px;">تم التحويل، أرسل إشعاراً</button>
-        <button onclick="closeModal()" style="background:none; border:none; color:white; cursor:pointer;">إلغاء</button>
+        <i class="fas fa-paper-plane fa-3x" style="color:var(--cash); margin-bottom:20px;"></i>
+        <h3 style="margin:0;">تحويل كاش يدوي</h3>
+        <p style="font-size:14px; margin-top:15px;">حول مبلغ <b id="cashAmountText" style="color:var(--accent);"></b> للرقم:</p>
+        <h2 style="background:#070b14; padding:15px; border-radius:15px; color:var(--cash); margin:15px 0; border: 1px dashed var(--cash); letter-spacing: 2px;">01550153566</h2>
+        <p style="font-size:12px; opacity:0.7;">صور الإيصال وأرسله واتساب ليتم تفعيل الكورس.</p>
+        <button onclick="confirmCashTransfer()" style="background:var(--accent); width:100%; border:none; padding:15px; border-radius:12px; color:white; font-weight:900; cursor:pointer; margin-top:10px;">إرسال الإشعار الآن</button>
+        <button onclick="closeModal()" style="background:none; border:none; color:white; cursor:pointer; margin-top:15px; font-size:13px;">إغلاق النافذة</button>
     </div>
 </div>
 
 <script>
-    firebase.initializeApp({ 
+    // تهيئة Firebase
+    const firebaseConfig = { 
         apiKey: "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws", 
         authDomain: "zomaapp-744fc.firebaseapp.com", 
         projectId: "zomaapp-744fc" 
-    });
+    };
+    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.firestore();
 
+    // جلب البيانات من الرابط
     const urlParams = new URLSearchParams(window.location.search);
-    const courseId = urlParams.get('id') || "course_1";
-    const courseName = urlParams.get('name') || "كورس تعليمي";
-    const userEmail = localStorage.getItem("userEmail") || "guest@test.com";
+    const courseId = urlParams.get('id');
+    const courseName = urlParams.get('name') || "اشتراك كورس";
     let price = parseFloat(urlParams.get('price')) || 0;
-    let userBalance = 0;
+    const userEmail = localStorage.getItem("userEmail");
 
     async function init() {
+        if(!userEmail) { alert("خطأ: يرجى تسجيل الدخول أولاً"); return; }
+        
         document.getElementById('displayAmount').innerText = price + " ج.م";
         document.getElementById('courseNameDisplay').innerText = courseName;
         document.getElementById('cashAmountText').innerText = price + " ج.م";
 
-        // فحص رصيد محفظة المنصة
-        const userDoc = await db.collection("users").doc(userEmail).get();
-        if(userDoc.exists) {
-            userBalance = userDoc.data().wallet || 0;
-            document.getElementById('currentBalance').innerText = userBalance + " ج.م";
-            if(userBalance >= price) {
-                document.getElementById('platformWallet').style.display = 'flex';
+        try {
+            const userDoc = await db.collection("users").doc(userEmail).get();
+            if(userDoc.exists) {
+                userBalance = userDoc.data().wallet || 0;
+                document.getElementById('currentBalance').innerText = userBalance + " ج.م";
+                // إظهار زر محفظة المنصة فقط إذا كان الرصيد كافياً
+                document.getElementById('platformWallet').style.display = (userBalance >= price) ? 'flex' : 'none';
             }
-        }
+        } catch (error) { console.log("Error fetching user data:", error); }
     }
 
     // 1. الدفع بمحفظة المنصة
     async function payWithPlatformWallet() {
-        if(confirm(`هل تريد خصم مبلغ ${price} ج.م من رصيدك في المنصة؟`)) {
+        if(confirm(`تأكيد خصم ${price} ج.م من رصيدك وتفعيل الكورس؟`)) {
             const userRef = db.collection("users").doc(userEmail);
             try {
                 await db.runTransaction(async (transaction) => {
                     const userSnap = await transaction.get(userRef);
-                    if (userSnap.data().wallet < price) throw "رصيد غير كافٍ";
-                    transaction.update(userRef, { wallet: userSnap.data().wallet - price });
+                    const currentWallet = userSnap.data().wallet || 0;
+                    if (currentWallet < price) throw "عذراً، رصيدك غير كافٍ";
+                    
+                    transaction.update(userRef, { wallet: currentWallet - price });
                     transaction.set(db.collection("subscriptions").doc(`${userEmail}_${courseId}`), {
                         email: userEmail, courseId: courseId, date: new Date(), method: "Platform_Wallet", status: "active"
                     });
                 });
-                alert("✅ تم الاشتراك بنجاح!");
+                alert("🎉 مبروك! تم تفعيل الكورس بنجاح.");
                 window.location.href = "course_viewer.html?id=" + courseId;
             } catch(e) { alert(e); }
         }
     }
 
-    // 2. الدفع عبر فوري باي
+    // 2. الدفع عبر فوري
     function payWithFawry() {
-        alert("جاري إنشاء كود الدفع عبر فوري...");
-        const merchantCode = "1T987654321"; // تجريبي
         const refNum = Math.floor(Math.random() * 900000000);
-        
-        // تسجيل العملية كـ Pending
         db.collection("payment_requests").add({
             email: userEmail, courseId: courseId, amount: price, method: "Fawry", refNum: refNum, status: "pending", date: new Date()
+        }).then(() => {
+            const merchantCode = "1T987654321"; // كود التاجر الخاص بك
+            const fawryUrl = `https://www.fawrypay.com/atfawry/pay?merchant=${merchantCode}&amount=${price}&ref=${refNum}`;
+            window.location.href = fawryUrl;
         });
-
-        const fawryUrl = `https://www.fawrypay.com/atfawry/pay?merchant=${merchantCode}&amount=${price}&ref=${refNum}`;
-        window.location.href = fawryUrl;
     }
 
-    // 3. الدفع بالمحافظ الإلكترونية (يدوي)
+    // 3. المحفظة اليدوية
     function showCashModal() { document.getElementById('cashModal').style.display = 'flex'; }
     function closeModal() { document.getElementById('cashModal').style.display = 'none'; }
 
     async function confirmCashTransfer() {
         await db.collection("payment_requests").add({
-            email: userEmail,
-            courseId: courseId,
-            courseName: courseName,
-            amount: price,
-            method: "E-Wallet (Cash)",
-            status: "pending",
-            date: new Date(),
-            msg: "الطالب أبلغ بالتحويل للرقم 01550153566"
+            email: userEmail, courseId: courseId, courseName: courseName, amount: price, 
+            method: "E-Wallet (Manual)", status: "pending", date: new Date()
         });
-        alert("✅ تم إرسال طلبك. يرجى إرسال صورة التحويل الآن للواتساب لتفعيل الكورس.");
-        window.location.href = `https://wa.me/201550153566?text=لقد قمت بتحويل مبلغ ${price} لكورس ${courseName}. الإيميل: ${userEmail}`;
+        const msg = `أهلاً مستشار، لقد حولت مبلغ ${price} ج.م لكورس ${courseName}. إيميل الحساب: ${userEmail}`;
+        window.open(`https://wa.me/201550153566?text=${encodeURIComponent(msg)}`, '_blank');
+        closeModal();
     }
 
     async function applyPromo() {
-        const code = document.getElementById('promoInput').value;
-        const promoDoc = await db.collection("promos").doc(code).get();
-        if(promoDoc.exists) {
-            const disc = promoDoc.data().percent;
-            price = price - (price * (disc / 100));
-            init();
-            alert("✅ تم تطبيق الخصم!");
-        } else { alert("❌ كود غير صحيح"); }
+        const code = document.getElementById('promoInput').value.trim();
+        if(!code) return;
+        try {
+            const promoDoc = await db.collection("promos").doc(code).get();
+            if(promoDoc.exists) {
+                const disc = promoDoc.data().percent;
+                price = price - (price * (disc / 100));
+                document.getElementById('displayAmount').innerText = price + " ج.م";
+                document.getElementById('cashAmountText').innerText = price + " ج.م";
+                alert(`✅ تم تطبيق الخصم بنجاح! السعر الجديد: ${price} ج.م`);
+                init(); // لإعادة فحص أزرار الدفع بعد الخصم
+            } else { alert("❌ كود الخصم غير صحيح أو انتهت صلاحيته"); }
+        } catch(e) { alert("خطأ في الاتصال بالخادم"); }
     }
 
-    init();
+    // بدء التشغيل
+    window.onload = init;
 </script>
 </body>
 </html>
