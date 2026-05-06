@@ -2,85 +2,181 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>بوابة الدفع | المستشار</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بوابة الدفع الذكية | المستشار 🛡️</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: 'Cairo'; background: #0f172a; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .payment-card { background: #1e293b; padding: 30px; border-radius: 20px; width: 400px; text-align: center; border: 1px solid #334155; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; }
-        .btn { background: #6366f1; color: white; padding: 12px; width: 100%; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
-        .fawry-box { background: #fff; color: #000; padding: 20px; border-radius: 10px; margin-top: 20px; display: none; }
-        .price-tag { font-size: 24px; color: #10b981; font-weight: 900; }
+        :root { --primary: #6366f1; --bg: #0f172a; --card: #1e293b; --success: #10b981; --danger: #ef4444; }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        
+        .payment-card { background: var(--card); padding: 30px; border-radius: 20px; width: 90%; max-width: 450px; text-align: center; border: 1px solid #334155; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); }
+        
+        .wallet-status { background: rgba(99, 102, 241, 0.1); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px dashed var(--primary); }
+        .wallet-balance { font-weight: 900; color: var(--primary); font-size: 1.2rem; }
+        
+        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; text-align: center; font-family: 'Cairo'; }
+        
+        .btn { background: var(--primary); color: white; padding: 14px; width: 100%; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-family: 'Cairo'; font-size: 1rem; transition: 0.3s; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn:hover { opacity: 0.9; transform: translateY(-2px); }
+        .btn-wallet { background: var(--success); display: none; } /* يظهر فقط لو الرصيد كافٍ */
+        .btn-fawry { background: #ffc107; color: #000; }
+
+        .price-tag { font-size: 28px; color: var(--success); font-weight: 900; margin: 15px 0; }
+        .fawry-box { background: #fff; color: #000; padding: 20px; border-radius: 15px; margin-top: 20px; display: none; animation: fadeIn 0.5s; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
 <div class="payment-card">
-    <h2>تأكيد الاشتراك</h2>
-    <p id="courseName">تحميل...</p>
+    <div class="wallet-status">
+        <span>رصيد محفظتك الحالي: </span>
+        <span class="wallet-balance" id="userWallet">0.00</span> <span>ج.م</span>
+    </div>
+
+    <h2 id="courseName">تأكيد اشتراك الكورس</h2>
     <div class="price-tag" id="finalPrice">0 ج.م</div>
     
     <div id="promoSection">
-        <input type="text" id="promoInput" placeholder="أدخل كود الخصم (إن وجد)">
-        <button class="btn" style="background:#334155; margin-bottom:20px;" onclick="applyPromo()">تطبيق الخصم</button>
+        <input type="text" id="promoInput" placeholder="كود الخصم">
+        <button class="btn" style="background:#334155;" onclick="applyPromo()">تطبيق الكود</button>
     </div>
 
-    <button class="btn" id="payBtn" onclick="generateFawryCode()">توليد كود فوري للدفع</button>
+    <hr style="margin: 20px 0; border: 0; border-top: 1px solid #334155;">
+
+    <div id="paymentOptions">
+        <button class="btn btn-wallet" id="walletPayBtn" onclick="payWithWallet()">
+            <i class="fas fa-wallet"></i> ادفع من المحفظة الآن
+        </button>
+        
+        <button class="btn btn-fawry" id="fawryBtn" onclick="generateFawryCode()">
+            <i class="fas fa-barcode"></i> توليد كود فوري
+        </button>
+    </div>
 
     <div class="fawry-box" id="fawryArea">
-        <p>توجه لأقرب منفذ فوري واستخدم الكود التالي:</p>
-        <h1 id="fawryCode" style="letter-spacing: 5px;">987654321</h1>
-        <p>المبلغ المطلوب: <span id="fawryAmount">0</span> ج.م</p>
-        <small>صالح لمدة 48 ساعة</small>
+        <p>توجه لأقرب منفذ فوري واستخدم الكود:</p>
+        <h1 id="fawryCode" style="letter-spacing: 5px; color: #d97706;">987654321</h1>
+        <p>المبلغ: <span id="fawryAmount">0</span> ج.م</p>
+        <small>سيتم تفعيل الكورس تلقائياً بعد الدفع</small>
     </div>
 </div>
 
 <script>
-    firebase.initializeApp({ apiKey: "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws", authDomain: "zomaapp-744fc.firebaseapp.com", projectId: "zomaapp-744fc" });
+    // تهيئة Firebase
+    firebase.initializeApp({ 
+        apiKey: "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws", 
+        authDomain: "zomaapp-744fc.firebaseapp.com", 
+        projectId: "zomaapp-744fc" 
+    });
     const db = firebase.firestore();
-    const urlParams = new URLSearchParams(window.location.search);
-    const courseId = urlParams.get('id');
-    let originalPrice = parseFloat(urlParams.get('price'));
-    let currentPrice = originalPrice;
 
-    document.getElementById('finalPrice').innerText = originalPrice + " ج.م";
+    const urlParams = new URLSearchParams(window.location.search);
+    const courseId = urlParams.get('id') || "course_1";
+    const userEmail = localStorage.getItem("userEmail") || "test@test.com";
+    
+    let originalPrice = parseFloat(urlParams.get('price')) || 100;
+    let currentPrice = originalPrice;
+    let userBalance = 0;
+
+    async function init() {
+        document.getElementById('finalPrice').innerText = originalPrice + " ج.م";
+        
+        // جلب بيانات الطالب (المحفظة)
+        const userDoc = await db.collection("users").doc(userEmail).get();
+        if(userDoc.exists) {
+            userBalance = userDoc.data().wallet || 0;
+            document.getElementById('userWallet').innerText = userBalance.toFixed(2);
+        }
+        
+        checkWalletSufficiency();
+    }
+
+    function checkWalletSufficiency() {
+        const walletBtn = document.getElementById('walletPayBtn');
+        if (userBalance >= currentPrice) {
+            walletBtn.style.display = 'flex';
+        } else {
+            walletBtn.style.display = 'none';
+        }
+    }
 
     async function applyPromo() {
         const code = document.getElementById('promoInput').value;
-        const promoDoc = await db.collection("promos").doc(code).get();
+        if(!code) return;
 
+        const promoDoc = await db.collection("promos").doc(code).get();
         if (promoDoc.exists) {
             const data = promoDoc.data();
-            const discount = data.percent; // مثلاً 20 (يعني 20%)
+            const discount = data.percent; 
             currentPrice = originalPrice - (originalPrice * (discount / 100));
-            document.getElementById('finalPrice').innerText = currentPrice + " ج.م (خصم " + discount + "%)";
-            alert("تم تطبيق الخصم بنجاح!");
+            document.getElementById('finalPrice').innerText = currentPrice + " ج.م";
+            alert("✅ تم تطبيق خصم " + discount + "%");
+            checkWalletSufficiency();
         } else {
-            alert("كود غير صالح");
+            alert("❌ كود الخصم غير صحيح");
+        }
+    }
+
+    async function payWithWallet() {
+        if (confirm("هل أنت متأكد من خصم " + currentPrice + " ج.م من محفظتك؟")) {
+            try {
+                const userRef = db.collection("users").doc(userEmail);
+                
+                // عملية الخصم وتفعيل الكورس (Transaction)
+                await db.runTransaction(async (transaction) => {
+                    const userSnap = await transaction.get(userRef);
+                    const newBalance = userSnap.data().wallet - currentPrice;
+                    
+                    if (newBalance < 0) throw "رصيد غير كافٍ";
+
+                    // 1. خصم الرصيد
+                    transaction.update(userRef, { wallet: newBalance });
+
+                    // 2. تفعيل الكورس في قائمة الكورسات المشترك بها الطالب
+                    transaction.set(db.collection("subscriptions").doc(`${userEmail}_${courseId}`), {
+                        email: userEmail,
+                        courseId: courseId,
+                        date: new Date(),
+                        method: "wallet"
+                    });
+                });
+
+                alert("🎉 تم الاشتراك بنجاح!");
+                // التحويل لصفحة الكورس فوراً
+                window.location.href = `course_viewer.html?id=${courseId}`;
+
+            } catch (e) {
+                alert("خطأ: " + e);
+            }
         }
     }
 
     async function generateFawryCode() {
-        // هنا المفروض نرسل طلب للسيرفر يولد كود فوري حقيقي، لكن كنموذج:
         const randomCode = Math.floor(100000000 + Math.random() * 900000000);
         document.getElementById('fawryCode').innerText = randomCode;
         document.getElementById('fawryAmount').innerText = currentPrice;
         document.getElementById('fawryArea').style.display = 'block';
-        document.getElementById('payBtn').style.display = 'none';
+        document.getElementById('paymentOptions').style.display = 'none';
         document.getElementById('promoSection').style.display = 'none';
 
-        // تخزين الطلب في قاعدة البيانات للأدمن
+        // تسجيل الطلب في السيستم للأدمن
         await db.collection("payment_requests").add({
-            email: localStorage.getItem("userEmail"),
+            email: userEmail,
             courseId: courseId,
             amount: currentPrice,
             fawryCode: randomCode,
             status: "pending",
+            method: "fawry",
             date: new Date()
         });
     }
+
+    init();
 </script>
 </body>
 </html>
