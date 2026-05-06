@@ -17,43 +17,49 @@
         
         #pdfIframe { width: 100%; height: 100%; border: none; transition: 0.3s transform ease; transform-origin: top center; pointer-events: all; }
 
-        /* العلامة المائية الفولاذية - فوق النص مباشرة */
+        /* العلامة المائية الفولاذية المطورة */
         #centerWatermark {
             position: absolute; 
             top: 50%; 
             left: 50%; 
-            transform: translate(-50%, -50%) rotate(-35deg);
-            /* زيادة الوضوح مع الحفاظ على الشفافية للقراءة */
-            color: rgba(255, 255, 255, 0.14); 
-            /* إضافة ظل لجعلها مستحيلة المسح برمجياً */
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            font-size: 9vw; 
+            transform: translate(-50%, -50%) rotate(-30deg);
+            /* زيادة الوضوح لدرجة تمنع المسح وتسمح بالقراءة */
+            color: rgba(255, 255, 255, 0.18); 
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+            font-size: 10vw; 
             font-weight: 900;
             pointer-events: none; 
             z-index: 500; 
             white-space: nowrap; 
             text-align: center;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+            line-height: 1.2;
         }
 
-        /* درع حماية الأزرار العلوية */
-        .shield-top { position: absolute; top: 0; left: 0; width: 100%; height: 60px; z-index: 600; cursor: not-allowed; background: rgba(0,0,0,0.01); }
+        .date-stamp { font-size: 3vw; display: block; margin-top: 10px; opacity: 0.8; }
+
+        /* درع حماية الأزرار */
+        .shield-top { position: absolute; top: 0; left: 0; width: 100%; height: 65px; z-index: 600; cursor: not-allowed; }
 
         .tools { display: flex; gap: 15px; }
         .btn-tool { background: var(--primary); color: white; border: none; padding: 8px 18px; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; }
         .btn-back { background: var(--danger); color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; text-decoration: none; }
 
-        #blackout { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
+        /* شاشة الحماية السوداء */
+        #blackout { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: #000; z-index: 9999; display: none; 
+            flex-direction: column; align-items: center; justify-content: center; 
+            text-align: center; padding: 20px; 
+        }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
 <div id="blackout">
-    <i class="fas fa-user-shield fa-5x" style="color: var(--danger); margin-bottom: 20px;"></i>
-    <h1 style="color: var(--danger)">⚠️ نظام الحماية النشط</h1>
-    <p>ممنوع تصوير الشاشة أو مغادرة المتصفح أثناء القراءة.</p>
-    <button class="btn-tool" onclick="document.getElementById('blackout').style.display='none'" style="margin-top:20px;">العودة للمذكرة</button>
+    <i class="fas fa-user-lock fa-5x" style="color: var(--danger); margin-bottom: 20px;"></i>
+    <h1 style="color: var(--danger)">تم رصد محاولة تصوير!</h1>
+    <p>تم إغلاق المحتوى فوراً وحظر الشاشة كإجراء أمني.</p>
+    <button class="btn-tool" onclick="location.reload()" style="margin-top:20px;">إعادة تنشيط المستعرض</button>
 </div>
 
 <div class="viewer-wrapper">
@@ -67,9 +73,12 @@
     </div>
 
     <div id="pdfViewport">
-        <div class="shield-top" title="ممنوع استخراج الرابط"></div>
+        <div class="shield-top"></div>
         
-        <div id="centerWatermark"></div>
+        <div id="centerWatermark">
+            <span id="uMail"></span>
+            <span id="uDate" class="date-stamp"></span>
+        </div>
         
         <iframe id="pdfIframe" src=""></iframe>
     </div>
@@ -83,14 +92,15 @@
 
     function init() {
         document.getElementById('pdfTitle').innerText = pdfTitle;
-        // وضع اليوزر في المنتصف
-        document.getElementById('centerWatermark').innerText = studentMail;
+        
+        // ضبط بيانات العلامة المائية
+        document.getElementById('uMail').innerText = studentMail;
+        const now = new Date();
+        document.getElementById('uDate').innerText = now.toLocaleDateString('ar-EG') + " " + now.getHours() + ":" + now.getMinutes();
         
         let finalUrl = rawLink;
         if(rawLink.includes('drive.google.com')) {
             finalUrl = rawLink.replace(/\/view.*|\/edit.*/, '/preview');
-        } else {
-            finalUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(rawLink)}&embedded=true`;
         }
 
         document.getElementById('pdfIframe').src = finalUrl;
@@ -107,32 +117,37 @@
         iframe.style.height = (100 / zoomLevel) + "%";
     }
 
-    // --- نظام الحماية ضد الاسكرين شوت ---
-    
-    // منع تسجيل الشاشة أو التصوير عند خروج التركيز عن الصفحة
-    window.addEventListener('blur', () => {
-        document.getElementById('blackout').style.display = "flex";
-    });
+    // --- وظائف الحماية المتقدمة ---
 
-    // كشف محاولة تصوير الشاشة (Print Screen)
+    function triggerSecurity() {
+        document.getElementById('blackout').style.display = "flex";
+        // مسح الحافظة لضمان عدم حفظ أي صورة
+        navigator.clipboard.writeText('ممنوع التصوير - منصة المستشار 🛡️');
+    }
+
+    // 1. عند الضغط على زر التصوير (PrintScreen)
     window.addEventListener('keyup', (e) => {
         if (e.key === 'PrintScreen' || e.key === 'Snapshot') {
-            // مسح الحافظة فوراً
-            navigator.clipboard.writeText('ممنوع التصوير - حقوق المستشار محفوظة 🛡️');
-            document.getElementById('blackout').style.display = "flex";
+            triggerSecurity();
         }
     });
 
-    // منع الاختصارات (Save, Print, View Source, Copy)
+    // 2. عند محاولة الخروج من التبويب أو تصغيره (التصوير الخارجي)
+    window.addEventListener('blur', () => {
+        triggerSecurity();
+    });
+
+    // 3. منع الاختصارات بلوحة المفاتيح
     window.addEventListener('keydown', (e) => {
-        if (e.ctrlKey && ['s', 'p', 'u', 'c'].includes(e.key.toLowerCase())) {
+        // Ctrl+P, Ctrl+S, Ctrl+U, Ctrl+Shift+I
+        if (e.ctrlKey && (e.key === 'p' || e.key === 's' || e.key === 'u' || e.key === 'Shift')) {
             e.preventDefault();
-            return false;
+            triggerSecurity();
         }
-        // منع F12
+        // زر F12 (Inspect Element)
         if(e.keyCode == 123) {
             e.preventDefault();
-            return false;
+            triggerSecurity();
         }
     });
 
