@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة المستشار | الحماية الشاملة 🛡️</title>
+    <title>منصة المستشار | نظام العرض المحمي 🛡️</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
@@ -13,36 +13,39 @@
         :root { --primary: #6366f1; --bg: #020617; --card: #1e293b; --accent: #10b981; }
         body { font-family: 'Cairo', sans-serif; background: var(--bg); color: #f1f5f9; margin: 0; overflow: hidden; user-select: none; }
         
+        /* الهيكل الرئيسي */
         .app-wrapper { display: flex; flex-direction: column; height: 100vh; }
-        .top-nav { height: 70px; background: var(--card); padding: 0 30px; border-bottom: 1px solid #334155; z-index: 1000; display: flex; justify-content: space-between; align-items: center; }
-        .main-content { display: grid; grid-template-columns: 1fr 380px; flex: 1; overflow: hidden; }
+        .top-nav { height: 70px; background: var(--card); padding: 0 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; z-index: 1000; }
+        .main-content { display: grid; grid-template-columns: 1fr 350px; flex: 1; overflow: hidden; }
 
-        /* منطقة العرض */
-        .display-section { position: relative; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .content-frame { width: 100%; height: 100%; position: relative; z-index: 1; }
+        /* منطقة اللاعب */
+        #playerArea { position: relative; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .content-frame { width: 100%; height: 100%; z-index: 1; }
         iframe { width: 100%; height: 100%; border: none; }
 
-        /* طبقات حماية الفيديو (منع الشير واللوجو) */
-        .video-blocker-top { position: absolute; top: 0; left: 0; width: 100%; height: 12%; z-index: 50; pointer-events: auto; background: rgba(0,0,0,0.01); }
-        .video-blocker-right { position: absolute; top: 0; right: 0; width: 15%; height: 15%; z-index: 51; pointer-events: auto; }
+        /* عوازل الحماية لمنع الضغط على الشير واللوجو */
+        .blocker-top { position: absolute; top: 0; left: 0; width: 100%; height: 70px; z-index: 50; cursor: default; }
+        .blocker-right { position: absolute; top: 0; right: 0; width: 20%; height: 100px; z-index: 51; cursor: default; }
+        
+        /* العلامة المائية المتحركة للفيديو */
+        .v-watermark { position: absolute; color: rgba(255, 255, 255, 0.2); font-size: 15px; font-weight: bold; pointer-events: none; z-index: 100; white-space: nowrap; transition: 3s linear; text-shadow: 1px 1px 2px #000; }
 
-        /* العلامة المائية للفيديو (المتحركة) */
-        .video-watermark { position: absolute; color: rgba(255, 255, 255, 0.15); font-size: 16px; font-weight: bold; pointer-events: none; z-index: 100; white-space: nowrap; transition: 2.5s; }
-
-        /* حماية الـ PDF (علامة مائية شبكية ثابتة) */
-        .pdf-protection-layer { 
+        /* حماية PDF (شبكة علامات مائية) */
+        .pdf-grid-mask { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            display: none; z-index: 60; pointer-events: none;
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='150' height='100'><text transform='rotate(-30)' fill='rgba(255,255,255,0.1)' font-size='12' font-family='Cairo' x='0' y='50'>المستشار - حماية</text></svg>");
+            z-index: 60; pointer-events: none; display: none;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='120'><text transform='rotate(-25)' fill='rgba(255,255,255,0.08)' font-size='14' font-family='Cairo' x='0' y='60'>المستشار - حماية</text></svg>");
         }
 
-        /* Sidebar */
-        .sidebar { background: #0f172a; border-right: 1px solid #334155; overflow-y: auto; padding: 15px; }
-        .item { background: #1e293b; padding: 15px; border-radius: 12px; margin-bottom: 10px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 10px; border: 1px solid transparent; }
+        /* القائمة الجانبية */
+        .sidebar { background: #0f172a; border-right: 1px solid #334155; overflow-y: auto; padding: 20px; }
+        .item { background: #1e293b; padding: 15px; border-radius: 12px; margin-bottom: 12px; cursor: pointer; border: 1px solid transparent; display: flex; align-items: center; gap: 10px; transition: 0.3s; }
         .item:hover { border-color: var(--primary); }
-        .item.active { background: var(--primary); }
+        .item.active { background: var(--primary); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3); }
 
-        .fs-btn { position: absolute; bottom: 20px; left: 20px; z-index: 200; background: rgba(0,0,0,0.6); border: none; color: white; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; }
+        /* أزرار التحكم */
+        .controls-overlay { position: absolute; bottom: 20px; left: 20px; z-index: 200; display: flex; gap: 10px; }
+        .btn-action { background: rgba(0,0,0,0.7); border: 1px solid #444; color: white; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; }
 
         @media (max-width: 1024px) { .main-content { grid-template-columns: 1fr; overflow-y: auto; } .sidebar { height: auto; } }
     </style>
@@ -52,27 +55,30 @@
 <div class="app-wrapper">
     <header class="top-nav">
         <div>
-            <h2 id="courseTitle" style="margin:0; font-size:1.1rem;">جاري التحميل...</h2>
-            <small id="studentBadge" style="color:var(--accent)"></small>
+            <h2 id="courseTitle" style="margin:0; font-size:1rem; color:var(--primary);">تحميل...</h2>
+            <small id="studentID" style="color:#94a3b8;"></small>
         </div>
-        <a href="courses-catalog.html" style="color: #ef4444; text-decoration: none; font-weight: bold;"><i class="fas fa-times"></i> إغلاق المشغل</a>
+        <a href="courses-catalog.html" style="color: #ef4444; text-decoration: none; font-size: 14px;"><i class="fas fa-power-off"></i> خروج</a>
     </header>
 
     <main class="main-content">
-        <section class="display-section" id="playerContainer">
-            <div id="vWatermark" class="video-watermark"></div>
-            <div class="video-blocker-top"></div>
-            <div class="video-blocker-right"></div>
-            <div id="pdfMask" class="pdf-protection-layer"></div>
+        <section id="playerArea">
+            <div id="vWatermark" class="v-watermark"></div>
+            <div class="blocker-top"></div>
+            <div class="blocker-right"></div>
+            <div id="pdfMask" class="pdf-grid-mask"></div>
             
             <div id="view" class="content-frame">
-                <div style="text-align:center; margin-top:20vh; color:#475569;">
-                    <i class="fas fa-shield-halved fa-5x"></i>
-                    <p>بيئة تعليمية مؤمنة - اختر درساً</p>
+                <div style="text-align:center; color:#334155;">
+                    <i class="fas fa-shield-halved fa-6x" style="margin-bottom:20px;"></i>
+                    <h2>بوابة المستشار التعليمية</h2>
+                    <p>اختر درساً من القائمة لبدء التعلم الآمن</p>
                 </div>
             </div>
-            
-            <button class="fs-btn" onclick="toggleFullScreen()"><i class="fas fa-expand"></i> تكبير الشاشة الآمن</button>
+
+            <div class="controls-overlay" id="playerControls" style="display:none;">
+                <button class="btn-action" onclick="goFullscreen()"><i class="fas fa-expand"></i> وضع ملء الشاشة</button>
+            </div>
         </section>
 
         <aside class="sidebar" id="playlist"></aside>
@@ -86,84 +92,89 @@
 
     const params = new URLSearchParams(window.location.search);
     const courseId = params.get('id');
-    const studentEmail = localStorage.getItem("userEmail") || "طالب غير مسجل";
+    const studentMail = localStorage.getItem("userEmail") || "Unregistered_Student";
 
-    async function init() {
+    async function initPlayer() {
         if(!courseId) return;
         const doc = await db.collection("courses").doc(courseId).get();
-        const data = doc.data();
+        if(!doc.exists) return;
         
+        const data = doc.data();
         document.getElementById('courseTitle').innerText = data.title;
-        document.getElementById('studentBadge').innerText = `🔒 حساب الطالب: ${studentEmail}`;
+        document.getElementById('studentID').innerText = `البطاقة الرقمية: ${studentMail}`;
         
         const list = document.getElementById('playlist');
-        data.content.forEach((item, i) => {
+        data.content.forEach(item => {
             list.innerHTML += `
-                <div class="item" onclick="loadContent('${item.link}', '${item.type}', this)">
-                    <i class="fas fa-${item.type==='video'?'play-circle':'file-pdf'}"></i>
+                <div class="item" onclick="loadMedia('${item.link}', '${item.type}', this)">
+                    <i class="fas fa-${item.type==='video'?'play-circle':'file-invoice'}"></i>
                     <span>${item.title}</span>
                 </div>`;
         });
-        
-        startVideoWatermark();
+        moveWatermark();
     }
 
-    function loadContent(link, type, el) {
+    function loadMedia(link, type, el) {
         document.querySelectorAll('.item').forEach(i => i.classList.remove('active'));
         el.classList.add('active');
         
         const view = document.getElementById('view');
         const pdfMask = document.getElementById('pdfMask');
+        const controls = document.getElementById('playerControls');
+        
+        controls.style.display = "flex";
 
         if(type === 'video') {
             pdfMask.style.display = "none";
-            const id = extractID(link);
-            // بارامترات قتل الشير: controls=1 لكن مع منع التفاعل العلوي بالـ blocker
-            view.innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?rel=0&modestbranding=1&controls=1&fs=0&disablekb=1&iv_load_policy=3&autoplay=1" allow="autoplay"></iframe>`;
+            const id = extractVideoID(link);
+            // حماية اليوتيوب: fs=0 لإلغاء زر ملء الشاشة الخاص بهم، modestbranding=1 لإخفاء الشعار
+            view.innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?rel=0&modestbranding=1&controls=1&fs=0&disablekb=1&iv_load_policy=3&autoplay=1" allow="autoplay; fullscreen"></iframe>`;
         } else {
-            // تفعيل شبكة العلامة المائية للـ PDF
             pdfMask.style.display = "block";
-            // استخدام Google Viewer مع منع النقر تماماً
+            // مستعرض PDF من جوجل مع تعطيل التفاعل
+            const googleViewer = `https://docs.google.com/viewer?url=${encodeURIComponent(link)}&embedded=true`;
             view.innerHTML = `
-                <div style="width:100%; height:100%; pointer-events: none; overflow: hidden;">
-                    <iframe src="https://docs.google.com/viewer?url=${encodeURIComponent(link)}&embedded=true"></iframe>
+                <div style="width:100%; height:100%; pointer-events: none; overflow: hidden; position:relative;">
+                    <iframe src="${googleViewer}"></iframe>
                 </div>
-                <div style="position:absolute; bottom:0; width:100%; height:40px; background:var(--bg); z-index:100; color:var(--accent); text-align:center; padding:10px; font-size:12px;">
-                   🛡️ المحتوى محمي ضد النسخ والتحميل - المستشار
-                </div>`;
+                <div style="position:absolute; top:0; right:0; width:60px; height:60px; background:transparent; z-index:100;"></div> `;
         }
     }
 
-    function extractID(url) {
-        const reg = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-        const m = url.match(reg);
-        return (m && m[2].length == 11) ? m[2] : url;
+    function extractVideoID(url) {
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[2].length == 11) ? match[2] : url;
     }
 
-    function toggleFullScreen() {
-        const elem = document.getElementById('playerContainer');
+    // دالة ملء الشاشة (تحفظ العلامة المائية والطبقات فوق الفيديو)
+    function goFullscreen() {
+        const area = document.getElementById('playerArea');
         if (!document.fullscreenElement) {
-            elem.requestFullscreen().catch(err => alert(err.message));
+            if (area.requestFullscreen) area.requestFullscreen();
+            else if (area.webkitRequestFullscreen) area.webkitRequestFullscreen();
         } else {
             document.exitFullscreen();
         }
     }
 
-    function startVideoWatermark() {
+    // تحريك العلامة المائية لمنع برامج التسجيل
+    function moveWatermark() {
         const wm = document.getElementById('vWatermark');
-        wm.innerText = studentEmail + " | ملكية المستشار";
+        wm.innerText = `مؤمن لـ: ${studentMail}`;
         setInterval(() => {
-            wm.style.left = Math.random() * 80 + "%";
+            wm.style.left = Math.random() * 70 + "%";
             wm.style.top = Math.random() * 80 + "%";
         }, 4000);
     }
 
-    // منع الاختصارات نهائياً
+    // منع الاختصارات (F12, Ctrl+U, Ctrl+P)
     document.addEventListener('keydown', (e) => {
-        if(e.ctrlKey && (e.key==='u' || e.key==='s' || e.key==='p' || e.key==='c')) e.preventDefault();
+        if(e.ctrlKey && ['u','s','p','c'].includes(e.key.toLowerCase())) e.preventDefault();
         if(e.key === 'F12') e.preventDefault();
-        if(e.ctrlKey && e.shiftKey && e.key === 'I') e.preventDefault();
     });
+
+    initPlayer();
 </script>
 </body>
 </html>
