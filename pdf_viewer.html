@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مستعرض المستشار الذكي 🛡️</title>
+    <title>مستعرض المستشار الفولاذي 🛡️</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -11,126 +11,118 @@
         body { font-family: 'Cairo', sans-serif; background: var(--bg); color: white; margin: 0; overflow: hidden; user-select: none; }
         
         .viewer-wrapper { display: flex; flex-direction: column; height: 100vh; }
-        
-        /* الهيدر العلوي */
         .nav-header { height: 65px; background: var(--card); display: flex; justify-content: space-between; align-items: center; padding: 0 25px; border-bottom: 2px solid var(--primary); z-index: 1000; }
         
-        /* منطقة عرض الـ PDF */
         #pdfViewport { position: relative; flex: 1; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         
-        /* iframe متاح للتفاعل بالكامل */
         #pdfIframe { width: 100%; height: 100%; border: none; transition: 0.3s transform ease; transform-origin: top center; pointer-events: all; }
 
-        /* العلامة المائية (خلفية شفافة لا تمنع اللمس) */
-        #pdfOverlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; pointer-events: none; opacity: 0.12; background-repeat: repeat; }
+        /* العلامة المائية الشبكية الصغير */
+        #pdfOverlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; opacity: 0.1; background-repeat: repeat; }
+
+        /* العلامة المائية الكبيرة المائلة في المنتصف */
+        #centerWatermark {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 5vw; color: rgba(255, 255, 255, 0.15); font-weight: 900;
+            pointer-events: none; z-index: 11; white-space: nowrap; text-align: center;
+        }
+
+        /* حماية الأزرار العلوية (تمنع الضغط على "فتح في نافذة جديدة" أو "تحميل") */
+        .shield-top { position: absolute; top: 0; left: 0; width: 100%; height: 60px; z-index: 100; cursor: not-allowed; background: rgba(0,0,0,0.01); }
 
         .tools { display: flex; gap: 15px; }
         .btn-tool { background: var(--primary); color: white; border: none; padding: 8px 18px; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; }
-        
         .btn-back { background: var(--danger); color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; text-decoration: none; }
 
-        /* شاشة الحماية (تظهر فقط عند محاولة التصوير أو الخروج) */
         #blackout { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
 <div id="blackout">
-    <i class="fas fa-shield-alt fa-5x" style="color: var(--danger); margin-bottom: 20px;"></i>
-    <h1 style="color: var(--danger)">ممنوع تصوير المحتوى!</h1>
-    <p>لقد حاولت التقاط صورة للشاشة أو الخروج من المتصفح. تم تسجيل المحاولة أمنياً.</p>
-    <button class="btn-tool" onclick="hideBlackout()" style="margin-top:20px;">العودة للقراءة</button>
+    <i class="fas fa-user-shield fa-5x" style="color: var(--danger); margin-bottom: 20px;"></i>
+    <h1 style="color: var(--danger)">حماية المستشار النشطة 🛡️</h1>
+    <p>ممنوع تصوير الشاشة أو محاولة الخروج من بيئة التعلم الآمنة.</p>
+    <button class="btn-tool" onclick="document.getElementById('blackout').style.display='none'" style="margin-top:20px;">العودة للدرس</button>
 </div>
 
 <div class="viewer-wrapper">
     <div class="nav-header">
         <button class="btn-back" onclick="window.close()"><i class="fas fa-times"></i> إغلاق</button>
-        <h3 id="pdfTitle" style="margin:0;">جاري التحميل...</h3>
+        <h3 id="pdfTitle" style="margin:0;">تحميل...</h3>
         <div class="tools">
-            <button class="btn-tool" onclick="zoomPDF(0.2)"><i class="fas fa-plus"></i></button>
-            <button class="btn-tool" onclick="zoomPDF(-0.2)"><i class="fas fa-minus"></i></button>
+            <button class="btn-tool" onclick="zoomPDF(0.2)"><i class="fas fa-search-plus"></i></button>
+            <button class="btn-tool" onclick="zoomPDF(-0.2)"><i class="fas fa-search-minus"></i></button>
         </div>
     </div>
 
     <div id="pdfViewport">
+        <div class="shield-top" title="ممنوع استخراج الرابط"></div>
         <div id="pdfOverlay"></div>
+        <div id="centerWatermark"></div>
         
-        <iframe id="pdfIframe" src="" allow="autoplay"></iframe>
+        <iframe id="pdfIframe" src=""></iframe>
     </div>
 </div>
 
 <script>
     let zoomLevel = 1;
-    // جلب البيانات
     const rawLink = localStorage.getItem('currentPdfLink') || "https://drive.google.com/file/d/1BffqGQzpUclVm1TNOI6mDQnDKU37fyFM/view?usp=drivesdk";
     const pdfTitle = localStorage.getItem('currentPdfTitle') || "مذكرة المستشار";
-    const studentMail = localStorage.getItem("userEmail") || "Student_User";
+    const studentMail = localStorage.getItem("userEmail") || "Student_Member";
 
     function init() {
         document.getElementById('pdfTitle').innerText = pdfTitle;
+        document.getElementById('centerWatermark').innerHTML = `${studentMail}<br>حقوق المستشار محفوظة`;
         
-        // تحويل الرابط تلقائياً ليعمل داخل الموقع (Preview Mode)
         let finalUrl = rawLink;
         if(rawLink.includes('drive.google.com')) {
+            // تحويل الرابط لوضع المعاينة الذي يمنع التعديل ويسمح بالعرض المباشر
             finalUrl = rawLink.replace(/\/view.*|\/edit.*/, '/preview');
-        } else {
-            finalUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(rawLink)}&embedded=true`;
         }
 
         document.getElementById('pdfIframe').src = finalUrl;
-        createWatermark();
+        createGrid();
     }
 
     function zoomPDF(val) {
         zoomLevel += val;
-        if(zoomLevel < 0.6) zoomLevel = 0.6;
+        if(zoomLevel < 0.7) zoomLevel = 0.7;
         if(zoomLevel > 2.5) zoomLevel = 2.5;
         
         const iframe = document.getElementById('pdfIframe');
         iframe.style.transform = `scale(${zoomLevel})`;
-        
-        // تعديل أبعاد الـ iframe لتناسب الزووم بدون حواف سوداء
         iframe.style.width = (100 / zoomLevel) + "%";
         iframe.style.height = (100 / zoomLevel) + "%";
     }
 
-    function createWatermark() {
+    function createGrid() {
         const canvas = document.createElement('canvas');
         canvas.width = 400; canvas.height = 300;
         const ctx = canvas.getContext('2d');
         ctx.rotate(-30 * Math.PI / 180);
-        ctx.font = '16px Cairo';
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.font = '14px Cairo';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
         ctx.fillText(studentMail, 50, 150);
-        ctx.fillText("الـمـسـتـشـار 🛡️", 50, 180);
         document.getElementById('pdfOverlay').style.backgroundImage = `url(${canvas.toDataURL()})`;
     }
 
-    // إخفاء شاشة التنبيه
-    function hideBlackout() {
-        document.getElementById('blackout').style.display = "none";
-    }
-
-    // --- نظام الحماية الذكي ---
-
-    // 1. الحماية عند الخروج من الصفحة (تمنع برامج التسجيل والكروم كاست)
+    // منع تصوير الشاشة وتسجيلها
     window.addEventListener('blur', () => {
         document.getElementById('blackout').style.display = "flex";
     });
 
-    // 2. محاولة رصد اختصار تصوير الشاشة (PrintScreen)
     window.addEventListener('keyup', (e) => {
-        if (e.key === 'PrintScreen' || e.key === 'Snapshot') {
-            navigator.clipboard.writeText('ممنوع التصوير 🛡️'); // مسح الحافظة فوراً
+        if (e.key === 'PrintScreen') {
+            navigator.clipboard.writeText('Protected Content 🛡️');
             document.getElementById('blackout').style.display = "flex";
         }
     });
 
-    // 3. منع الاختصارات الشهيرة (Ctrl+S, Ctrl+P, Ctrl+U)
+    // منع الاختصارات
     window.addEventListener('keydown', (e) => {
-        if (e.ctrlKey && (e.key === 'p' || e.key === 's' || e.key === 'u' || e.key === 'c')) {
+        if (e.ctrlKey && ['s', 'p', 'u', 'c'].includes(e.key.toLowerCase())) {
             e.preventDefault();
-            alert("⚠️ هذا الإجراء غير مسموح به لحماية الحقوق.");
         }
     });
 
