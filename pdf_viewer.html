@@ -17,18 +17,25 @@
         
         #pdfIframe { width: 100%; height: 100%; border: none; transition: 0.3s transform ease; transform-origin: top center; pointer-events: all; }
 
-        /* العلامة المائية الشبكية الصغير */
-        #pdfOverlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; opacity: 0.1; background-repeat: repeat; }
-
-        /* العلامة المائية الكبيرة المائلة في المنتصف */
+        /* العلامة المائية الكبيرة المائلة في المنتصف - فوق النص */
         #centerWatermark {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg);
-            font-size: 5vw; color: rgba(255, 255, 255, 0.15); font-weight: 900;
-            pointer-events: none; z-index: 11; white-space: nowrap; text-align: center;
+            position: absolute; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%) rotate(-35deg);
+            /* الشفافية هنا (0.08) تضمن القراءة ومنع التصوير في نفس الوقت */
+            color: rgba(255, 255, 255, 0.08); 
+            font-size: 8vw; 
+            font-weight: 900;
+            pointer-events: none; 
+            z-index: 500; /* تجعلها فوق الـ iframe */
+            white-space: nowrap; 
+            text-align: center;
+            text-transform: uppercase;
         }
 
-        /* حماية الأزرار العلوية (تمنع الضغط على "فتح في نافذة جديدة" أو "تحميل") */
-        .shield-top { position: absolute; top: 0; left: 0; width: 100%; height: 60px; z-index: 100; cursor: not-allowed; background: rgba(0,0,0,0.01); }
+        /* درع حماية الأزرار العلوية لمستعرض جوجل */
+        .shield-top { position: absolute; top: 0; left: 0; width: 100%; height: 60px; z-index: 600; cursor: not-allowed; background: rgba(0,0,0,0.01); }
 
         .tools { display: flex; gap: 15px; }
         .btn-tool { background: var(--primary); color: white; border: none; padding: 8px 18px; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; }
@@ -42,8 +49,8 @@
 <div id="blackout">
     <i class="fas fa-user-shield fa-5x" style="color: var(--danger); margin-bottom: 20px;"></i>
     <h1 style="color: var(--danger)">حماية المستشار النشطة 🛡️</h1>
-    <p>ممنوع تصوير الشاشة أو محاولة الخروج من بيئة التعلم الآمنة.</p>
-    <button class="btn-tool" onclick="document.getElementById('blackout').style.display='none'" style="margin-top:20px;">العودة للدرس</button>
+    <p>تم إخفاء المحتوى لتأمين بيئة التعلم.</p>
+    <button class="btn-tool" onclick="document.getElementById('blackout').style.display='none'" style="margin-top:20px;">العودة للقراءة</button>
 </div>
 
 <div class="viewer-wrapper">
@@ -58,7 +65,7 @@
 
     <div id="pdfViewport">
         <div class="shield-top" title="ممنوع استخراج الرابط"></div>
-        <div id="pdfOverlay"></div>
+        
         <div id="centerWatermark"></div>
         
         <iframe id="pdfIframe" src=""></iframe>
@@ -67,22 +74,25 @@
 
 <script>
     let zoomLevel = 1;
-    const rawLink = localStorage.getItem('currentPdfLink') || "https://drive.google.com/file/d/1BffqGQzpUclVm1TNOI6mDQnDKU37fyFM/view?usp=drivesdk";
+    // جلب الإيميل/اليوزر من التخزين
+    const studentMail = localStorage.getItem("userEmail") || "STUDENT_ACCESS";
+    const rawLink = localStorage.getItem('currentPdfLink') || "";
     const pdfTitle = localStorage.getItem('currentPdfTitle') || "مذكرة المستشار";
-    const studentMail = localStorage.getItem("userEmail") || "Student_Member";
 
     function init() {
         document.getElementById('pdfTitle').innerText = pdfTitle;
-        document.getElementById('centerWatermark').innerHTML = `${studentMail}<br>حقوق المستشار محفوظة`;
+        
+        // عرض اليوزر فقط بشكل كبير ومائل في المنتصف
+        document.getElementById('centerWatermark').innerText = studentMail;
         
         let finalUrl = rawLink;
         if(rawLink.includes('drive.google.com')) {
-            // تحويل الرابط لوضع المعاينة الذي يمنع التعديل ويسمح بالعرض المباشر
             finalUrl = rawLink.replace(/\/view.*|\/edit.*/, '/preview');
+        } else {
+            finalUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(rawLink)}&embedded=true`;
         }
 
         document.getElementById('pdfIframe').src = finalUrl;
-        createGrid();
     }
 
     function zoomPDF(val) {
@@ -96,30 +106,18 @@
         iframe.style.height = (100 / zoomLevel) + "%";
     }
 
-    function createGrid() {
-        const canvas = document.createElement('canvas');
-        canvas.width = 400; canvas.height = 300;
-        const ctx = canvas.getContext('2d');
-        ctx.rotate(-30 * Math.PI / 180);
-        ctx.font = '14px Cairo';
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-        ctx.fillText(studentMail, 50, 150);
-        document.getElementById('pdfOverlay').style.backgroundImage = `url(${canvas.toDataURL()})`;
-    }
-
-    // منع تصوير الشاشة وتسجيلها
+    // نظام الحماية
     window.addEventListener('blur', () => {
         document.getElementById('blackout').style.display = "flex";
     });
 
     window.addEventListener('keyup', (e) => {
         if (e.key === 'PrintScreen') {
-            navigator.clipboard.writeText('Protected Content 🛡️');
+            navigator.clipboard.writeText('Protected by Al-Mostshar 🛡️');
             document.getElementById('blackout').style.display = "flex";
         }
     });
 
-    // منع الاختصارات
     window.addEventListener('keydown', (e) => {
         if (e.ctrlKey && ['s', 'p', 'u', 'c'].includes(e.key.toLowerCase())) {
             e.preventDefault();
