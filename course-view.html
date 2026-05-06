@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة المستشار | الحماية القصوى 🛡️</title>
+    <title>منصة المستشار | الحماية الفولاذية 🛡️</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
@@ -18,88 +18,65 @@
 
         .main-content { display: grid; grid-template-columns: 1fr 380px; flex: 1; overflow: hidden; }
 
-        /* منطقة العرض */
-        #viewport { position: relative; background: #000; flex: 1; display: flex; align-items: center; justify-content: center; }
-        .content-frame { width: 100%; height: 100%; border: none; z-index: 1; }
+        #viewport { position: relative; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .content-frame { width: 100%; height: 100%; position: relative; z-index: 1; }
+        iframe { width: 100%; height: 100%; border: none; }
 
-        /* شاشة الحماية من التسجيل (Blackout) */
-        #protectionOverlay { 
-            position: absolute; top:0; left:0; width:100%; height:100%; 
-            background: #000; z-index: 5000; display: none; 
-            flex-direction: column; align-items: center; justify-content: center; text-align: center;
-        }
+        /* طبقات المنع */
+        .trap-layer { position: absolute; z-index: 100; cursor: forbidden; }
+        .trap-top { top: 0; left: 0; width: 100%; height: 80px; }
+        .trap-bottom { bottom: 0; left: 0; width: 100%; height: 50px; }
+        .trap-right { top: 0; right: 0; width: 100px; height: 100%; }
 
-        /* الطبقات العازلة للفيديو */
-        .trap-layer { position: absolute; z-index: 100; cursor: not-allowed; background: rgba(0,0,0,0.01); }
-        .trap-top { top: 0; width: 100%; height: 20%; }
-        .trap-bottom { bottom: 0; width: 100%; height: 15%; }
+        #warningScreen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(239, 68, 68, 0.95); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
 
-        /* العلامة المائية الشبكية (للـ PDF والفيديو) */
-        #watermarkGrid { 
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            z-index: 150; pointer-events: none; opacity: 0.12; 
-            background-repeat: repeat; display: block;
-        }
+        #vWatermark { position: absolute; color: rgba(255, 255, 255, 0.15); font-weight: bold; pointer-events: none; z-index: 500; white-space: nowrap; transition: 3s; }
 
-        /* القائمة الجانبية */
         .sidebar { background: #0f172a; border-right: 1px solid #334155; overflow-y: auto; padding: 15px; }
-        .item { background: #1e293b; padding: 15px; border-radius: 12px; margin-bottom: 10px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 10px; border: 1px solid transparent; }
-        .item.active { background: var(--primary); border-color: #fff; }
+        .item { background: #1e293b; padding: 18px; border-radius: 15px; margin-bottom: 12px; cursor: pointer; display: flex; align-items: center; gap: 12px; border: 1px solid transparent; transition: 0.3s; }
+        .item:hover { background: #2d3748; }
+        .item.active { background: var(--primary); border-color: #fff; transform: scale(1.02); }
 
-        /* أزرار تحكم الـ PDF */
-        .pdf-tools { position: absolute; top: 80px; left: 20px; z-index: 1000; display: none; flex-direction: column; gap: 10px; }
-        .tool-btn { background: var(--card); color: white; border: 1px solid var(--primary); padding: 10px; border-radius: 50%; cursor: pointer; width: 45px; height: 45px; }
+        .btn-main { background: var(--primary); color: white; border: none; padding: 10px 25px; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; }
 
-        #warningMsg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2000; background: var(--danger); padding: 20px; border-radius: 15px; display: none; text-align: center; }
+        @media (max-width: 1024px) { .main-content { grid-template-columns: 1fr; overflow-y: auto; } }
     </style>
 </head>
-<body oncontextmenu="return false;" onkeydown="return false;">
+<body oncontextmenu="return false;">
 
-<div id="protectionOverlay">
-    <i class="fas fa-user-lock fa-5x" style="color: var(--danger); margin-bottom: 20px;"></i>
-    <h2>تم حجب المحتوى لحماية الحقوق</h2>
-    <p>يرجى العودة لمتصفح المحاضرة وعدم محاولة التصوير أو التسجيل</p>
+<div id="warningScreen">
+    <i class="fas fa-exclamation-triangle fa-5x" style="margin-bottom:20px;"></i>
+    <h1>محاولة وصول غير مصرح بها!</h1>
+    <p>ممنوع محاولة مشاركة اللينك أو التلاعب بالمشغل. تم تسجيل المحاولة باسمك.</p>
+    <button class="btn-main" onclick="closeWarning()" style="background:#fff; color:var(--danger)">فهمت، العودة للدرس</button>
 </div>
 
 <div class="app-wrapper">
     <header class="top-nav">
         <div>
-            <h2 id="courseTitle" style="margin:0; font-size: 1.2rem;">مشغل المستشار الذكي</h2>
+            <h2 id="courseTitle" style="margin:0;">منصة المستشار</h2>
             <small id="studentBadge" style="color:var(--primary); font-weight: bold;"></small>
         </div>
-        <button class="btn-main" onclick="location.href='home.html'" style="background:var(--danger); color:white; border:none; padding:8px 20px; border-radius:8px; cursor:pointer;">خروج</button>
+        <button class="btn-main" onclick="toggleFullScreen()"><i class="fas fa-expand"></i> ملء الشاشة</button>
     </header>
 
     <main class="main-content">
         <section id="viewport">
-            <div id="watermarkGrid"></div>
-            
-            <div id="videoTraps" style="display: none;">
-                <div class="trap-layer trap-top" onclick="showWarning()"></div>
-                <div class="trap-layer trap-bottom" onclick="showWarning()"></div>
-            </div>
-
-            <div class="pdf-tools" id="pdfTools">
-                <button class="tool-btn" onclick="zoomPDF(1.2)"><i class="fas fa-search-plus"></i></button>
-                <button class="tool-btn" onclick="zoomPDF(0.8)"><i class="fas fa-search-minus"></i></button>
-            </div>
+            <div id="vWatermark"></div>
+            <div class="trap-layer trap-top" onclick="triggerWarning()"></div>
+            <div class="trap-layer trap-bottom" onclick="triggerWarning()"></div>
+            <div class="trap-layer trap-right" onclick="triggerWarning()"></div>
 
             <div id="view" class="content-frame">
-                <div style="text-align:center; padding: 40px;">
-                    <i class="fas fa-graduation-cap fa-5x" style="color:var(--primary); margin-bottom:20px;"></i>
-                    <h2>مرحباً بك في عرين المستشار</h2>
-                    <p>اختر المحاضرة أو المذكرة للبدء فوراً</p>
+                <div style="text-align:center;">
+                    <i class="fas fa-user-shield fa-5x" style="color:var(--primary); margin-bottom:20px;"></i>
+                    <h2>مرحباً بك يا بطل</h2>
+                    <p>اختر المحتوى من القائمة الجانبية للبدء</p>
                 </div>
-            </div>
-
-            <div id="warningMsg">
-                <h3>⚠️ محاولة مشاركة غير قانونية</h3>
-                <p>ممنوع مشاركة الروابط أو تصوير الشاشة. تم تسجيل بياناتك.</p>
-                <button onclick="hideWarning()" style="padding:10px 20px; border-radius:10px; border:none; cursor:pointer;">العودة للدرس</button>
             </div>
         </section>
 
-        <aside class="sidebar" id="playlistItems"></aside>
+        <aside class="sidebar" id="playlist"></aside>
     </main>
 </div>
 
@@ -110,80 +87,55 @@
 
     const params = new URLSearchParams(window.location.search);
     const courseId = params.get('id');
-    const studentMail = localStorage.getItem("userEmail") || "Student_Member";
+    const studentMail = localStorage.getItem("userEmail") || "Unregistered_User";
 
     async function init() {
-        document.getElementById('studentBadge').innerText = studentMail;
-        createGridWatermark();
-        
         if(!courseId) return;
+        document.getElementById('studentBadge').innerText = `🔐 متصل: ${studentMail}`;
         const doc = await db.collection("courses").doc(courseId).get();
         const data = doc.data();
         document.getElementById('courseTitle').innerText = data.title;
-
-        const list = document.getElementById('playlistItems');
+        
+        const list = document.getElementById('playlist');
         data.content.forEach(item => {
             list.innerHTML += `
-                <div class="item" onclick="loadContent('${item.link}', '${item.type}', this)">
+                <div class="item" onclick="handleItemClick('${item.link}', '${item.type}', '${item.title}', this)">
                     <i class="fas fa-${item.type==='video'?'play-circle':'file-pdf'}"></i>
-                    <span>${item.title}</span>
+                    <div>
+                        <div style="font-weight:bold">${item.title}</div>
+                        <small style="opacity:0.6">${item.type==='video'?'فيديو تعليمي':'مذكرة PDF'}</small>
+                    </div>
                 </div>`;
         });
+        startVideoWatermark();
     }
 
-    function loadContent(link, type, el) {
+    function handleItemClick(link, type, title, el) {
         document.querySelectorAll('.item').forEach(i => i.classList.remove('active'));
         el.classList.add('active');
-        
-        const view = document.getElementById('view');
-        const vTraps = document.getElementById('videoTraps');
-        const pdfTools = document.getElementById('pdfTools');
 
         if(type === 'video') {
-            vTraps.style.display = "block";
-            pdfTools.style.display = "none";
             const vid = extractID(link);
-            view.innerHTML = `<iframe id="mainPlayer" src="https://www.youtube.com/embed/${vid}?rel=0&modestbranding=1&controls=1&fs=0&disablekb=1&iv_load_policy=3" allow="autoplay"></iframe>`;
+            document.getElementById('view').innerHTML = `<iframe src="https://www.youtube.com/embed/${vid}?rel=0&modestbranding=1&controls=1&fs=0&disablekb=1&iv_load_policy=3&autoplay=1" allow="autoplay"></iframe>`;
         } else {
-            vTraps.style.display = "none";
-            pdfTools.style.display = "flex";
-            // مستعرض PDF مدمج عبر جوجل مع منع التفاعل الخارجي
-            const pdfUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(link)}&embedded=true`;
-            view.innerHTML = `<iframe id="pdfViewer" src="${pdfUrl}" style="pointer-events:all;"></iframe>`;
+            // حفظ بيانات الـ PDF والانتقال للمستعرض المنفصل
+            localStorage.setItem('currentPdfLink', link);
+            localStorage.setItem('currentPdfTitle', title);
+            window.open('pdf_viewer.html', '_blank'); // يفتح في تبويب جديد أو يمكنك استخدام window.location.href
         }
     }
 
-    // إنشاء العلامة المائية الشبكية
-    function createGridWatermark() {
-        const canvas = document.createElement('canvas');
-        canvas.width = 400; canvas.height = 300;
-        const ctx = canvas.getContext('2d');
-        ctx.rotate(-30 * Math.PI / 180);
-        ctx.font = '16px Cairo';
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-        ctx.fillText(studentMail, 50, 150);
-        ctx.fillText("الـمـسـتـشـار 🛡️", 50, 180);
-        document.getElementById('watermarkGrid').style.backgroundImage = `url(${canvas.toDataURL()})`;
+    function startVideoWatermark() {
+        const wm = document.getElementById('vWatermark');
+        wm.innerText = `🔐 ${studentMail}`;
+        setInterval(() => {
+            wm.style.left = Math.random() * 80 + "%";
+            wm.style.top = Math.random() * 80 + "%";
+        }, 4000);
     }
 
-    // نظام الـ Blackout عند الخروج من التبويب
-    window.addEventListener('blur', () => {
-        document.getElementById('protectionOverlay').style.display = "flex";
-    });
-    window.addEventListener('focus', () => {
-        document.getElementById('protectionOverlay').style.display = "none";
-    });
-
-    // منع الـ Screenshots (محاكاة عبر منع المفاتيح)
-    document.addEventListener('keyup', (e) => {
-        if (e.key === 'PrintScreen') {
-            navigator.clipboard.writeText(""); // مسح الحافظة
-            alert('تم حظر تصوير الشاشة');
-        }
-    });
-
-    function showWarning() { document.getElementById('warningMsg').style.display = "block"; }
-    function hideWarning() { document.getElementById('warningMsg').style.display = "none"; }
+    function triggerWarning() { document.getElementById('warningScreen').style.display = "flex"; }
+    function closeWarning() { document.getElementById('warningScreen').style.display = "none"; }
 
     function extractID(url) {
         const reg = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
@@ -191,10 +143,16 @@
         return (m && m[2].length == 11) ? m[2] : url;
     }
 
-    function zoomPDF(val) {
-        const frame = document.getElementById('pdfViewer');
-        if(frame) frame.style.transform = `scale(${val})`;
+    function toggleFullScreen() {
+        const el = document.getElementById('viewport');
+        if (!document.fullscreenElement) el.requestFullscreen();
+        else document.exitFullscreen();
     }
+
+    window.addEventListener('keydown', e => {
+        if (e.ctrlKey && ['u', 's', 'p', 'c'].includes(e.key.toLowerCase())) e.preventDefault();
+        if (e.key === 'F12') e.preventDefault();
+    });
 
     init();
 </script>
