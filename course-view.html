@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة المستشار | الحماية القصوى 🛡️</title>
+    <title>منصة المستشار | الحماية الفولاذية 🛡️</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
@@ -17,58 +17,64 @@
         .top-nav { height: 70px; background: var(--card); display: flex; justify-content: space-between; align-items: center; padding: 0 30px; border-bottom: 1px solid #334155; z-index: 1000; }
         .main-content { display: grid; grid-template-columns: 1fr 380px; flex: 1; overflow: hidden; }
 
-        /* منطقة العرض */
-        .display-section { position: relative; background: #000; display: flex; align-items: center; justify-content: center; }
-        .content-frame { width: 100%; height: 100%; position: relative; }
-        iframe { width: 100%; height: 100%; border: none; pointer-events: auto; }
+        .display-section { position: relative; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .content-frame { width: 100%; height: 100%; position: relative; z-index: 1; }
+        iframe { width: 100%; height: 100%; border: none; }
 
-        /* طبقات الحماية */
-        .overlay-blocker { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; }
-        .top-blocker { position: absolute; top: 0; left: 0; width: 100%; height: 60px; z-index: 11; pointer-events: auto; background: transparent; }
-        
-        /* العلامة المائية المتحركة */
-        .dynamic-watermark {
-            position: absolute; color: rgba(255, 255, 255, 0.2); font-size: 20px; font-weight: bold;
-            pointer-events: none; z-index: 999; white-space: nowrap; transition: 2s ease-in-out;
+        /* طبقة حماية يوتيوب (تغطية الشير واللوجو) */
+        .yt-protector { position: absolute; top: 0; right: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; }
+        .share-blocker { position: absolute; top: 0; right: 0; width: 25%; height: 15%; pointer-events: auto; background: transparent; z-index: 11; }
+        .title-blocker { position: absolute; top: 0; left: 0; width: 80%; height: 12%; pointer-events: auto; background: transparent; z-index: 11; }
+
+        /* العلامة المائية المتكررة (Pattern) للـ PDF والفيديو */
+        .pattern-watermark {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 1fr);
+            gap: 20px; pointer-events: none; z-index: 12; opacity: 0.1; overflow: hidden;
+        }
+        .pattern-text { transform: rotate(-30deg); font-size: 14px; font-weight: bold; white-space: nowrap; }
+
+        /* العلامة المائية المتحركة الطائرة */
+        .flying-watermark {
+            position: absolute; color: rgba(255, 255, 255, 0.3); font-size: 18px; font-weight: bold;
+            pointer-events: none; z-index: 100; transition: 3s linear; white-space: nowrap;
         }
 
-        /* القائمة الجانبية */
         .sidebar { background: #0f172a; border-right: 1px solid #334155; overflow-y: auto; padding: 15px; }
         .item { background: #1e293b; padding: 15px; border-radius: 12px; margin-bottom: 10px; cursor: pointer; transition: 0.3s; border: 1px solid transparent; display: flex; align-items: center; gap: 10px; }
-        .item:hover { border-color: var(--primary); }
         .item.active { background: var(--primary); }
 
-        /* زر تكبير الشاشة المخصص */
-        .fs-btn { position: absolute; bottom: 20px; left: 20px; z-index: 100; background: rgba(0,0,0,0.5); border: none; color: white; padding: 10px; border-radius: 5px; cursor: pointer; }
+        .fs-btn { position: absolute; bottom: 20px; left: 20px; z-index: 100; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 10px 15px; border-radius: 8px; cursor: pointer; backdrop-filter: blur(5px); }
 
-        @media (max-width: 1024px) { .main-content { grid-template-columns: 1fr; overflow-y: auto; } .sidebar { height: auto; } }
+        @media (max-width: 1024px) { .main-content { grid-template-columns: 1fr; } .sidebar { display: none; } }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
-<div class="app-wrapper" id="playerUI">
+<div class="app-wrapper">
     <header class="top-nav">
         <div>
-            <h2 id="courseTitle" style="margin:0; font-size:1.1rem;">جاري التحميل...</h2>
+            <h2 id="courseTitle" style="margin:0; font-size:1.1rem;">المستشار التعليمي</h2>
             <small id="studentBadge" style="color:var(--accent)"></small>
         </div>
-        <a href="courses-catalog.html" style="color: #ef4444; text-decoration: none; font-weight: bold;"><i class="fas fa-times"></i> إغلاق</a>
+        <a href="courses-catalog.html" style="color: #94a3b8; text-decoration: none;"><i class="fas fa-chevron-left"></i> عودة</a>
     </header>
 
     <main class="main-content">
         <section class="display-section" id="playerContainer">
-            <div id="watermark" class="dynamic-watermark"></div>
-            <div class="top-blocker"></div> <div id="view" class="content-frame">
-                <div style="text-align:center; margin-top:20vh; color:#475569;">
-                    <i class="fas fa-play-circle fa-5x"></i>
-                    <p>اختر درساً للبدء</p>
+            <div id="flyingWM" class="flying-watermark"></div>
+            <div id="patternWM" class="pattern-watermark"></div>
+            <div class="share-blocker"></div> <div class="title-blocker"></div> <div id="view" class="content-frame">
+                <div style="text-align:center; color:#475569; margin-top:20vh;">
+                    <i class="fas fa-shield-alt fa-4x"></i>
+                    <p>اختر المحتوى لبدء العرض الآمن</p>
                 </div>
             </div>
+            
             <button class="fs-btn" onclick="toggleFullScreen()"><i class="fas fa-expand"></i> ملء الشاشة</button>
         </section>
 
-        <aside class="sidebar" id="playlist">
-            </aside>
+        <aside class="sidebar" id="playlist"></aside>
     </main>
 </div>
 
@@ -79,26 +85,31 @@
 
     const params = new URLSearchParams(window.location.search);
     const courseId = params.get('id');
-    const studentEmail = localStorage.getItem("userEmail") || "Guest_User";
+    const studentEmail = localStorage.getItem("userEmail") || "Unverified_User";
 
     async function init() {
         if(!courseId) return;
         const doc = await db.collection("courses").doc(courseId).get();
         const data = doc.data();
-        
         document.getElementById('courseTitle').innerText = data.title;
-        document.getElementById('studentBadge').innerText = `🔐 مؤمن لـ: ${studentEmail}`;
+        document.getElementById('studentBadge').innerText = `🔐 حساب: ${studentEmail}`;
         
+        // بناء القائمة المتكررة للعلامة المائية (Pattern)
+        const pattern = document.getElementById('patternWM');
+        for(let i=0; i<16; i++) {
+            pattern.innerHTML += `<div class="pattern-text">${studentEmail}</div>`;
+        }
+
         const list = document.getElementById('playlist');
         data.content.forEach((item, i) => {
             list.innerHTML += `
                 <div class="item" onclick="loadContent('${item.link}', '${item.type}', this)">
-                    <i class="fas fa-${item.type==='video'?'play':'file-pdf'}"></i>
+                    <i class="fas fa-${item.type==='video'?'play-circle':'file-pdf'}"></i>
                     <span>${item.title}</span>
                 </div>`;
         });
         
-        startWatermark();
+        moveFlyingWM();
     }
 
     function loadContent(link, type, el) {
@@ -108,14 +119,13 @@
 
         if(type === 'video') {
             const id = extractID(link);
-            // حماية اليوتيوب القصوى: fs=0 (منع زر ملء الشاشة الخاص بيوتيوب لاستخدام زرنا المحمي)
-            // disablekb=1 (منع الكيبورد) , iv_load_policy=3 (منع التفاعلات)
-            view.innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?rel=0&modestbranding=1&controls=1&fs=0&disablekb=1&iv_load_policy=3&autoplay=1" allow="autoplay"></iframe>`;
+            // البارامترات: controls=1 (تحكم بسيط) , modestbranding=1 (إخفاء اللوجو) , rel=0 (منع فيديوهات أخرى)
+            view.innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?rel=0&modestbranding=1&fs=0&controls=1&disablekb=1&iv_load_policy=3&autoplay=1" allow="autoplay"></iframe>`;
         } else {
-            // حماية PDF: نستخدم Google Drive Viewer ونمنع التفاعل
-            view.innerHTML = `<iframe src="https://docs.google.com/viewer?url=${encodeURIComponent(link)}&embedded=true" style="pointer-events: none;"></iframe>
-            <div style="position:absolute; bottom:0; width:100%; height:50px; background:var(--bg); z-index:20; text-align:center; padding-top:10px;">
-                ⚠️ المعاينة فقط مفعلة - التحميل ممنوع بأمر المستشار
+            // عرض الـ PDF داخل محرك جوجل مع تعطيل التفاعل
+            view.innerHTML = `<iframe src="https://docs.google.com/viewer?url=${encodeURIComponent(link)}&embedded=true" style="pointer-events:none;"></iframe>
+            <div style="position:absolute; bottom:0; width:100%; height:40px; background:var(--bg); z-index:100; text-align:center; font-size:12px; padding-top:10px; color:#ef4444;">
+               🛡️ نسخة محمية رقمياً - يمنع النسخ أو التحميل
             </div>`;
         }
     }
@@ -126,35 +136,32 @@
         return (m && m[2].length == 11) ? m[2] : url;
     }
 
-    // زر ملء الشاشة المحمي (يحافظ على الـ Watermark)
     function toggleFullScreen() {
         const elem = document.getElementById('playerContainer');
         if (!document.fullscreenElement) {
-            elem.requestFullscreen().catch(err => alert(err.message));
+            elem.requestFullscreen();
         } else {
             document.exitFullscreen();
         }
     }
 
-    // محرك العلامة المائية المتحرك
-    function startWatermark() {
-        const wm = document.getElementById('watermark');
-        wm.innerText = studentEmail + " | ملكية خاصة للمستشار";
-        
+    function moveFlyingWM() {
+        const wm = document.getElementById('flyingWM');
+        wm.innerText = "جاري المشاهدة بواسطة: " + studentEmail;
         setInterval(() => {
-            const x = Math.random() * 70;
-            const y = Math.random() * 80;
+            const x = Math.random() * 60;
+            const y = Math.random() * 90;
             wm.style.left = x + "%";
             wm.style.top = y + "%";
-        }, 3000);
+        }, 4000);
     }
 
-    // منع الاختصارات
+    // منع الاختصارات نهائياً
     window.addEventListener('keydown', (e) => {
-        if(e.ctrlKey && (e.key==='u' || e.key==='s' || e.key==='p')) e.preventDefault();
-        if(e.key === 'F12') e.preventDefault();
+        if(e.ctrlKey && (e.key==='u' || e.key==='s' || e.key==='p' || e.key==='c' || e.key==='v')) e.preventDefault();
+        if(e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) e.preventDefault();
     });
-
+    
     init();
 </script>
 </body>
