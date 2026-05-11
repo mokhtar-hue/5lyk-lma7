@@ -4,10 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>منصة المستشار | حازم سالم</title>
+    <title>منصة المستشار | حازم سالم - الاختبارات</title>
 
     <meta name="description" content="منصة المستشار - حازم سالم، بوابة الامتحانات الرقمية للطلاب وإدارة الاختبارات">
-    <meta name="keywords" content="منصة المستشار, حازم سالم, امتحانات, اختبارات, تعليم">
     
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -18,7 +17,6 @@
         :root { --primary: #6366f1; --bg: #0f172a; --card: #1e293b; --accent: #22c55e; --danger: #ef4444; --info: #3b82f6; }
         body { font-family: 'Cairo', sans-serif; background: var(--bg); color: #f1f5f9; margin: 0; overflow-x: hidden; }
         
-        /* شريط التحميل العلوي */
         .progress-bar { height: 6px; background: var(--primary); position: fixed; top: 0; left: 0; transition: 0.4s; z-index: 2000; }
 
         .navbar { display: flex; justify-content: space-between; padding: 12px 5%; background: var(--card); align-items: center; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid #334155; }
@@ -29,11 +27,9 @@
         
         .container { max-width: 900px; margin: 30px auto; padding: 0 20px; }
         
-        /* كروت الامتحانات */
         .exam-item { background: var(--card); padding: 20px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #334155; margin-bottom: 15px; transition: 0.3s; }
         .exam-item.locked { border-right: 5px solid var(--accent); opacity: 0.9; background: #162033; }
         
-        /* منطقة الأسئلة */
         #quizArea, #reviewArea { display: none; background: var(--card); padding: 30px; border-radius: 25px; border: 1px solid #334155; animation: fadeIn 0.5s; }
         .q-text { font-size: 20px; font-weight: 700; margin-bottom: 20px; color: #fff; line-height: 1.6; }
         
@@ -42,7 +38,6 @@
         
         .essay-input { width: 100%; height: 150px; background: rgba(0,0,0,0.2); border: 2px solid #334155; color: white; border-radius: 15px; padding: 15px; font-family: 'Cairo'; font-size: 16px; resize: vertical; box-sizing: border-box; outline: none; }
         
-        /* كروت المراجعة بعد الحل */
         .rev-card { background: rgba(255,255,255,0.02); padding: 20px; border-radius: 15px; margin-bottom: 15px; border-right: 4px solid #334155; }
         .rev-correct { border-right-color: var(--accent); background: rgba(34, 197, 94, 0.05); }
         .rev-wrong { border-right-color: var(--danger); background: rgba(239, 68, 68, 0.05); }
@@ -53,21 +48,20 @@
         
         #pageLoader { position: fixed; inset: 0; background: var(--bg); z-index: 5000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .spinner { width: 40px; height: 40px; border: 4px solid rgba(99,102,241,0.2); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
 <div id="pageLoader">
     <div class="spinner"></div>
-    <p style="margin-top: 15px; color: var(--primary);">جاري تحضير الامتحانات...</p>
+    <p style="margin-top: 15px; color: var(--primary);">جاري التحقق من الجلسة...</p>
 </div>
 
 <div class="progress-bar" id="progressBar" style="width: 0%"></div>
 
 <nav class="navbar">
     <div class="nav-right">
-        <a href="home.html" class="btn btn-home"><i class="fas fa-home"></i> الرئيسية</a>
+        <a href="dashboard.html" class="btn btn-home"><i class="fas fa-th-large"></i> لوحة التحكم</a>
         <a href="student-dash.html" class="btn btn-dash"><i class="fas fa-chart-pie"></i> تحليلاتي</a>
     </div>
     <div id="timerDisplay" style="font-weight:900; color:#fbbf24; font-size: 18px;">00:00</div>
@@ -76,7 +70,7 @@
 <div class="container">
     <div id="dashboard">
         <h1 style="margin-bottom: 5px; font-size: 28px; color: var(--primary);">منصة المستشار - حازم سالم</h1>
-        <p style="color: #94a3b8; margin-bottom: 25px;">مرحباً يا <span id="studentNameLabel" style="color: #fff; font-weight: 900;">...</span>، بالتوفيق في اختباراتك اليوم.</p>
+        <p style="color: #94a3b8; margin-bottom: 25px;">مرحباً يا <span id="studentNameLabel" style="color: #fff; font-weight: 900;">...</span></p>
         <div id="examsList">جاري البحث عن اختبارات نشطة...</div>
     </div>
 
@@ -106,7 +100,6 @@
 </div>
 
 <script>
-    // إعدادات Firebase
     const firebaseConfig = { 
         apiKey: "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws", 
         authDomain: "zomaapp-744fc.firebaseapp.com", 
@@ -116,16 +109,58 @@
     const db = firebase.firestore();
 
     const userEmail = localStorage.getItem("userEmail");
-    const userName = localStorage.getItem("userName");
+    const localToken = localStorage.getItem("sessionToken"); // التعديل ليتوافق مع لوحة التحكم
 
     async function checkAuth() {
-        if (!userEmail || !userName) {
-            window.location.href = "index.html"; 
+        // إذا لم توجد بيانات محلياً، اخرج فوراً
+        if (!userEmail || !localToken) {
+            window.location.replace("index.html");
             return;
         }
-        document.getElementById('studentNameLabel').innerText = userName;
-        await loadExams();
-        document.getElementById('pageLoader').style.display = 'none';
+
+        try {
+            // التحقق من قاعدة البيانات مباشرة للتأكد من صحة التوكن
+            const userSnap = await db.collection("users").where("email", "==", userEmail).get();
+            
+            if (userSnap.empty) {
+                logoutAndRedirect();
+                return;
+            }
+
+            const userData = userSnap.docs[0].data();
+
+            // فحص التوكن لمنع التكرار (نفس منطق لوحة التحكم)
+            if (userData.lastSessionToken !== localToken) {
+                alert("تم تسجيل الدخول من جهاز آخر.");
+                logoutAndRedirect();
+                return;
+            }
+
+            // فحص حالة الحساب
+            if (userData.status === 'inactive' || userData.status === 'banned') {
+                alert("حسابك غير نشط حالياً.");
+                logoutAndRedirect();
+                return;
+            }
+
+            // تحديث الواجهة باسم الطالب
+            document.getElementById('studentNameLabel').innerText = userData.name || "طالبنا المميز";
+            
+            // تحميل الاختبارات بعد نجاح الفحص
+            await loadExams();
+            document.getElementById('pageLoader').style.display = 'none';
+
+        } catch (error) {
+            console.error("Auth Error:", error);
+            // في حالة خطأ الشبكة، حاول تحميل البيانات المتاحة
+            await loadExams();
+            document.getElementById('pageLoader').style.display = 'none';
+        }
+    }
+
+    function logoutAndRedirect() {
+        localStorage.clear();
+        window.location.replace("index.html");
     }
 
     let questions = [];
@@ -160,7 +195,7 @@
                         }
                     </div>`;
             });
-        } catch (e) { list.innerHTML = "فشل الاتصال بالخادم."; }
+        } catch (e) { list.innerHTML = "فشل تحميل الاختبارات."; }
     }
 
     async function startExam(id) {
@@ -247,7 +282,7 @@
 
         const finalResult = {
             studentEmail: userEmail,
-            studentName: userName,
+            studentName: document.getElementById('studentNameLabel').innerText,
             quizId: currentQuiz.id,
             examTitle: currentQuiz.title,
             score: score,
@@ -259,7 +294,7 @@
         try {
             await db.collection("results").add(finalResult);
             showReviewPanel(score, totalMCQ, analysis);
-        } catch (e) { alert("حدث خطأ أثناء الحفظ."); }
+        } catch (e) { alert("حدث خطأ أثناء حفظ النتيجة."); }
     }
 
     function showReviewPanel(score, total, analysis) {
@@ -293,3 +328,4 @@
 </script>
 </body>
 </html>
+
