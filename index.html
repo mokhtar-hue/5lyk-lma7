@@ -11,7 +11,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;900&family=Reem+Kufi:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Firebase App -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+
+    <!-- Firebase Authentication -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+    <!-- Firebase Firestore -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
     <style>
@@ -46,38 +52,124 @@
             align-items: center; z-index: 10000; transition: 1.2s ease;
         }
 
-        .intro-content { text-align: center; opacity: 0; transform: scale(0.8); animation: fadeInScale 1.5s forwards 0.5s; }
-        .magic-scale-large { font-size: 150px; color: var(--accent); filter: drop-shadow(0 0 30px var(--accent)); animation: scaleFloat 3s infinite ease-in-out; }
-        .calligraphy-text { font-family: 'Reem Kufi', serif; font-size: 35px; color: var(--text); background: linear-gradient(to right, #fff, var(--accent), #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-top: 20px; }
+        .intro-content {
+            text-align: center;
+            opacity: 0;
+            transform: scale(0.8);
+            animation: fadeInScale 1.5s forwards 0.5s;
+        }
 
-        @keyframes fadeInScale { to { opacity: 1; transform: scale(1); } }
-        @keyframes scaleFloat { 0%, 100% { transform: translateY(0) rotate(-5deg); } 50% { transform: translateY(-20px) rotate(5deg); } }
+        .magic-scale-large {
+            font-size: 150px;
+            color: var(--accent);
+            filter: drop-shadow(0 0 30px var(--accent));
+            animation: scaleFloat 3s infinite ease-in-out;
+        }
+
+        .calligraphy-text {
+            font-family: 'Reem Kufi', serif;
+            font-size: 35px;
+            color: var(--text);
+            background: linear-gradient(to right, #fff, var(--accent), #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-top: 20px;
+        }
+
+        @keyframes fadeInScale {
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes scaleFloat {
+            0%, 100% {
+                transform: translateY(0) rotate(-5deg);
+            }
+
+            50% {
+                transform: translateY(-20px) rotate(5deg);
+            }
+        }
 
         .login-card {
-            background: var(--card); padding: 50px 40px; border-radius: 40px;
+            background: var(--card);
+            padding: 50px 40px;
+            border-radius: 40px;
             box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.5);
-            width: 90%; max-width: 440px; text-align: center;
+            width: 90%;
+            max-width: 440px;
+            text-align: center;
             border: 1px solid rgba(255,255,255,0.05);
-            display: none; opacity: 0; transform: translateY(30px);
+            display: none;
+            opacity: 0;
+            transform: translateY(30px);
             transition: var(--trans);
         }
 
-        .field { position: relative; margin-bottom: 20px; text-align: right; }
-        .field i.main-icon { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); color: var(--accent); }
-        .field .toggle-pass { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #94a3b8; cursor: pointer; transition: 0.3s; }
-        .field .toggle-pass:hover { color: var(--accent); }
-        .field input {
-            width: 100%; padding: 18px 55px 18px 45px; border-radius: 20px; border: 2px solid transparent;
-            background: var(--input); color: var(--text); font-family: 'Cairo'; outline: none; transition: 0.3s;
-            box-sizing: border-box; font-size: 16px;
+        .field {
+            position: relative;
+            margin-bottom: 20px;
+            text-align: right;
         }
-        .field input:focus { border-color: var(--primary); }
+
+        .field i.main-icon {
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--accent);
+        }
+
+        .field .toggle-pass {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .field .toggle-pass:hover {
+            color: var(--accent);
+        }
+
+        .field input {
+            width: 100%;
+            padding: 18px 55px 18px 45px;
+            border-radius: 20px;
+            border: 2px solid transparent;
+            background: var(--input);
+            color: var(--text);
+            font-family: 'Cairo';
+            outline: none;
+            transition: 0.3s;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        .field input:focus {
+            border-color: var(--primary);
+        }
         
         .login-btn {
-            width: 100%; padding: 18px; border: none; border-radius: 22px;
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 22px;
             background: linear-gradient(135deg, var(--primary), #4f46e5);
-            color: white; font-weight: 900; font-size: 18px; cursor: pointer;
-            transition: 0.3s; box-shadow: 0 10px 25px rgba(79, 70, 229, 0.4);
+            color: white;
+            font-weight: 900;
+            font-size: 18px;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 10px 25px rgba(79, 70, 229, 0.4);
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
         }
 
         /* زر دخول الاختبارات */
@@ -105,171 +197,872 @@
             box-shadow: 0 14px 30px rgba(217, 119, 6, 0.4);
         }
 
-        .error-msg { background: rgba(239, 68, 68, 0.1); color: var(--danger); padding: 15px; border-radius: 15px; margin-top: 20px; display: none; border: 1px solid var(--danger); font-size: 14px; font-weight: bold; }
-        .support-btn { display: none; margin-top: 15px; background: #128c7e; color: white; text-decoration: none; padding: 12px; border-radius: 15px; font-weight: 700; transition: 0.3s; }
-        .support-btn:hover { background: #075e54; transform: scale(1.02); }
+        .error-msg {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            padding: 15px;
+            border-radius: 15px;
+            margin-top: 20px;
+            display: none;
+            border: 1px solid var(--danger);
+            font-size: 14px;
+            font-weight: bold;
+        }
 
-        #loader { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 11000; }
-        .spinner { width: 50px; height: 50px; border: 5px solid rgba(255,255,255,0.1); border-top-color: var(--accent); border-radius: 50%; animation: rot 1s linear infinite; }
-        @keyframes rot { to { transform: rotate(360deg); } }
+        .support-btn {
+            display: none;
+            margin-top: 15px;
+            background: #128c7e;
+            color: white;
+            text-decoration: none;
+            padding: 12px;
+            border-radius: 15px;
+            font-weight: 700;
+            transition: 0.3s;
+        }
+
+        .support-btn:hover {
+            background: #075e54;
+            transform: scale(1.02);
+        }
+
+        #loader {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 11000;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255,255,255,0.1);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: rot 1s linear infinite;
+        }
+
+        @keyframes rot {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .login-card {
+                padding: 40px 25px;
+                border-radius: 30px;
+            }
+
+            .magic-scale-large {
+                font-size: 110px;
+            }
+
+            .calligraphy-text {
+                font-size: 27px;
+            }
+        }
     </style>
 </head>
+
 <body class="dark-mode">
 
-<div id="loader"><div class="spinner"></div></div>
-<div class="settings-fab" onclick="toggleTheme()"><i class="fas fa-moon" id="themeIcon"></i></div>
+<div id="loader">
+    <div class="spinner"></div>
+</div>
+
+<div class="settings-fab" onclick="toggleTheme()">
+    <i class="fas fa-moon" id="themeIcon"></i>
+</div>
 
 <div id="magicOverlay">
     <div class="intro-content">
-        <div class="magic-scale-large"><i class="fas fa-balance-scale"></i></div>
-        <div class="calligraphy-text">مرحباً بك في عالم المستشار</div>
-        <p style="color: var(--text); opacity: 0.7; font-weight: 600; margin-top: 10px;">جاري فحص تصريح الدخول...</p>
+
+        <div class="magic-scale-large">
+            <i class="fas fa-balance-scale"></i>
+        </div>
+
+        <div class="calligraphy-text">
+            مرحباً بك في عالم المستشار
+        </div>
+
+        <p style="color: var(--text); opacity: 0.7; font-weight: 600; margin-top: 10px;">
+            جاري فحص تصريح الدخول...
+        </p>
+
     </div>
 </div>
 
 <div class="login-card" id="loginCard">
-    <div style="font-size: 50px; color: var(--accent);"><i class="fas fa-balance-scale"></i></div>
-    <div style="font-size: 24px; font-weight: 900; margin-top: 10px;">بوابة المستشار حازم سالم</div>
-    <p style="color: var(--accent); font-weight: 700; margin-bottom: 30px;">التعليم كما يجب أن يكون</p>
+
+    <div style="font-size: 50px; color: var(--accent);">
+        <i class="fas fa-balance-scale"></i>
+    </div>
+
+    <div style="font-size: 24px; font-weight: 900; margin-top: 10px;">
+        بوابة المستشار حازم سالم
+    </div>
+
+    <p style="color: var(--accent); font-weight: 700; margin-bottom: 30px;">
+        التعليم كما يجب أن يكون
+    </p>
 
     <div class="field">
+
         <i class="fas fa-user-shield main-icon"></i>
-        <input type="text" id="email" placeholder="اسم المستخدم أو الإيميل" dir="ltr">
+
+        <input
+            type="text"
+            id="email"
+            placeholder="اسم المستخدم أو الإيميل"
+            dir="ltr"
+            autocomplete="username"
+        >
+
     </div>
 
     <div class="field">
+
         <i class="fas fa-key main-icon"></i>
-        <i class="fas fa-eye toggle-pass" onclick="togglePass()"></i>
-        <input type="password" id="pass" placeholder="كلمة المرور" dir="ltr">
+
+        <i
+            class="fas fa-eye toggle-pass"
+            onclick="togglePass()"
+        ></i>
+
+        <input
+            type="password"
+            id="pass"
+            placeholder="كلمة المرور"
+            dir="ltr"
+            autocomplete="current-password"
+            onkeydown="if(event.key === 'Enter') handleLogin()"
+        >
+
     </div>
 
-    <button class="login-btn" onclick="handleLogin()">دخول المنصة</button>
+    <button class="login-btn" onclick="handleLogin()">
+        دخول المنصة
+    </button>
 
     <!-- زر دخول الاختبارات -->
     <a href="exams_list.html" class="exams-btn">
+
         <i class="fas fa-file-pen"></i>
+
         دخول الاختبارات
+
     </a>
-    
+
     <div id="errorArea" class="error-msg"></div>
-    <a id="supportBtn" href="#" target="_blank" class="support-btn">
-        <i class="fab fa-whatsapp"></i> تواصل مع الدعم الفني لحل المشكلة
+
+    <a
+        id="supportBtn"
+        href="#"
+        target="_blank"
+        class="support-btn"
+    >
+
+        <i class="fab fa-whatsapp"></i>
+
+        تواصل مع الدعم الفني لحل المشكلة
+
     </a>
+
 </div>
 
 <script>
-    const firebaseConfig = { 
-        apiKey: "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws", 
-        authDomain: "zomaapp-744fc.firebaseapp.com", 
-        projectId: "zomaapp-744fc" 
+
+    /* =========================================================
+       Firebase Configuration
+    ========================================================= */
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws",
+        authDomain: "zomaapp-744fc.firebaseapp.com",
+        projectId: "zomaapp-744fc"
     };
+
     firebase.initializeApp(firebaseConfig);
+
     const db = firebase.firestore();
 
-    // تبديل الرؤية للباسورد
+    const auth = firebase.auth();
+
+
+    /* =========================================================
+       تبديل الرؤية للباسورد
+    ========================================================= */
+
     function togglePass() {
+
         const p = document.getElementById('pass');
+
         const icon = document.querySelector('.toggle-pass');
-        if(p.type === "password") {
+
+        if (p.type === "password") {
+
             p.type = "text";
-            icon.classList.replace('fa-eye', 'fa-eye-slash');
+
+            icon.classList.replace(
+                'fa-eye',
+                'fa-eye-slash'
+            );
+
         } else {
+
             p.type = "password";
-            icon.classList.replace('fa-eye-slash', 'fa-eye');
+
+            icon.classList.replace(
+                'fa-eye-slash',
+                'fa-eye'
+            );
+
         }
+
     }
+
+
+    /* =========================================================
+       الوضع الليلي / النهاري
+    ========================================================= */
 
     function toggleTheme() {
+
         document.body.classList.toggle('light-mode');
-        const isLight = document.body.classList.contains('light-mode');
-        localStorage.setItem('theme', isLight ? 'light' : 'dark');
-        document.getElementById('themeIcon').className = isLight ? 'fas fa-sun' : 'fas fa-moon';
+
+        const isLight =
+            document.body.classList.contains('light-mode');
+
+        localStorage.setItem(
+            'theme',
+            isLight ? 'light' : 'dark'
+        );
+
+        document.getElementById('themeIcon').className =
+            isLight
+                ? 'fas fa-sun'
+                : 'fas fa-moon';
+
     }
-    if(localStorage.getItem('theme') === 'light') toggleTheme();
+
+
+    if (localStorage.getItem('theme') === 'light') {
+        toggleTheme();
+    }
+
+
+    /* =========================================================
+       عند تحميل الصفحة
+    ========================================================= */
 
     window.onload = async function() {
-        const email = localStorage.getItem("userEmail");
-        const token = localStorage.getItem("sessionToken");
+
+        const email =
+            localStorage.getItem("userEmail");
+
+        const token =
+            localStorage.getItem("sessionToken");
 
         setTimeout(async () => {
-            if (email && token) {
+
+            /*
+             * لو فيه مستخدم مسجل بالفعل في Firebase Authentication
+             * يتم التحقق منه.
+             */
+
+            const currentUser = auth.currentUser;
+
+            if (currentUser) {
+
                 try {
-                    const snap = await db.collection("users").where("email", "==", email).get();
+
+                    /*
+                     * التأكد من وجود حساب المستخدم في Firestore
+                     */
+
+                    const snap =
+                        await db.collection("users")
+                        .where(
+                            "email",
+                            "==",
+                            currentUser.email
+                        )
+                        .get();
+
                     if (!snap.empty) {
-                        const data = snap.docs[0].data();
-                        if (data.lastSessionToken === token && data.status !== 'inactive' && data.status !== 'banned') {
-                            window.location.href = "home.html";
+
+                        const data =
+                            snap.docs[0].data();
+
+                        /*
+                         * منع الحسابات المعطلة أو المحظورة
+                         */
+
+                        if (
+                            data.status !== 'inactive' &&
+                            data.status !== 'banned'
+                        ) {
+
+                            window.location.href =
+                                "admin1.html";
+
                             return;
+
                         }
+
                     }
-                } catch (e) { console.log("Silent login failed"); }
+
+                } catch (e) {
+
+                    console.log(
+                        "Authentication session check failed"
+                    );
+
+                }
+
             }
+
+
+            /*
+             * التحقق القديم من الجلسة المحلية
+             * مع الحفاظ عليه للتوافق مع النظام السابق
+             */
+
+            if (email && token) {
+
+                try {
+
+                    const snap =
+                        await db.collection("users")
+                        .where(
+                            "email",
+                            "==",
+                            email
+                        )
+                        .get();
+
+                    if (!snap.empty) {
+
+                        const data =
+                            snap.docs[0].data();
+
+                        if (
+                            data.lastSessionToken === token &&
+                            data.status !== 'inactive' &&
+                            data.status !== 'banned'
+                        ) {
+
+                            /*
+                             * أصبح الدخول بعد التحقق
+                             * يتجه إلى لوحة الإدارة
+                             */
+
+                            window.location.href =
+                                "admin1.html";
+
+                            return;
+
+                        }
+
+                    }
+
+                } catch (e) {
+
+                    console.log(
+                        "Silent login failed"
+                    );
+
+                }
+
+            }
+
             showLoginInterface();
+
         }, 2200);
+
     };
 
+
+    /* =========================================================
+       إظهار واجهة الدخول
+    ========================================================= */
+
     function showLoginInterface() {
-        const overlay = document.getElementById('magicOverlay');
-        const card = document.getElementById('loginCard');
+
+        const overlay =
+            document.getElementById('magicOverlay');
+
+        const card =
+            document.getElementById('loginCard');
+
         overlay.style.opacity = '0';
+
         setTimeout(() => {
+
             overlay.style.display = 'none';
+
             card.style.display = 'block';
-            setTimeout(() => { card.style.opacity = '1'; card.style.transform = 'translateY(0)'; }, 50);
+
+            setTimeout(() => {
+
+                card.style.opacity = '1';
+
+                card.style.transform =
+                    'translateY(0)';
+
+            }, 50);
+
         }, 1000);
+
     }
+
+
+    /* =========================================================
+       تسجيل الدخول
+       Firebase Authentication
+    ========================================================= */
 
     async function handleLogin() {
-        const email = document.getElementById('email').value.trim();
-        const pass = document.getElementById('pass').value.trim();
-        const errBox = document.getElementById('errorArea');
-        const supBtn = document.getElementById('supportBtn');
 
-        if(!email || !pass) return showError("برجاء إدخال البيانات كاملة.");
+        let loginValue =
+            document.getElementById('email')
+            .value
+            .trim();
 
-        showLoader(true);
+        const pass =
+            document.getElementById('pass')
+            .value
+            .trim();
+
+        const errBox =
+            document.getElementById('errorArea');
+
+        const supBtn =
+            document.getElementById('supportBtn');
+
+
+        /* تنظيف الأخطاء السابقة */
+
         errBox.style.display = 'none';
+
         supBtn.style.display = 'none';
 
+
+        /* التحقق من البيانات */
+
+        if (!loginValue || !pass) {
+
+            return showError(
+                "برجاء إدخال البيانات كاملة."
+            );
+
+        }
+
+
+        showLoader(true);
+
+
         try {
-            const snap = await db.collection("users").where("email", "==", email).get();
-            if(snap.empty) { showLoader(false); return showError("اسم المستخدم غير مسجل."); }
 
-            const userDoc = snap.docs[0];
-            const userData = userDoc.data();
+            let authEmail = loginValue;
 
-            if((userData.password || userData.pass) !== pass) { showLoader(false); return showError("كلمة المرور غير صحيحة."); }
 
-            // فحص حالة الحساب (Inactive أو Banned)
-            if(userData.status === 'inactive' || userData.status === 'banned') {
-                showLoader(false);
-                // استخدام lockReason من الفايربيز أو نص افتراضي
-                const reason = userData.lockReason || userData.banReason || "تم تعطيل حسابك مؤقتاً.";
-                showError("🚫 عذراً: " + reason);
-                
-                // زر الواتساب برسالة مخصصة
-                supBtn.style.display = 'block';
-                const waMsg = `السلام عليكم مستشار حازم، واجهت مشكلة في الدخول.\nالسبب: ${reason}\nالمستخدم: ${email}`;
-                supBtn.href = `https://wa.me/201060234399?text=${encodeURIComponent(waMsg)}`;
-                return;
+            /* =====================================================
+               لو المستخدم كتب اسم مستخدم وليس إيميل
+               نبحث عنه في Firestore ونستخرج الإيميل
+            ===================================================== */
+
+            if (!loginValue.includes('@')) {
+
+                const usernameSnap =
+                    await db.collection("users")
+                    .where(
+                        "username",
+                        "==",
+                        loginValue
+                    )
+                    .limit(1)
+                    .get();
+
+
+                /*
+                 * دعم بعض أسماء الحقول المحتملة
+                 */
+
+                if (usernameSnap.empty) {
+
+                    const userSnap =
+                        await db.collection("users")
+                        .where(
+                            "userName",
+                            "==",
+                            loginValue
+                        )
+                        .limit(1)
+                        .get();
+
+                    if (!userSnap.empty) {
+
+                        authEmail =
+                            userSnap.docs[0]
+                            .data()
+                            .email;
+
+                    } else {
+
+                        showLoader(false);
+
+                        return showError(
+                            "اسم المستخدم غير مسجل."
+                        );
+
+                    }
+
+                } else {
+
+                    authEmail =
+                        usernameSnap.docs[0]
+                        .data()
+                        .email;
+
+                }
+
+
+                if (!authEmail) {
+
+                    showLoader(false);
+
+                    return showError(
+                        "لا يوجد إيميل مرتبط بهذا المستخدم."
+                    );
+
+                }
+
             }
 
-            // تحديث التوكن والدخول
-            const newToken = "zoma_" + Math.random().toString(36).substr(2, 10);
-            await db.collection("users").doc(userDoc.id).update({
-                lastSessionToken: newToken,
-                lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+
+            /* =====================================================
+               البحث عن بيانات المستخدم في Firestore
+            ===================================================== */
+
+            const userSnap =
+                await db.collection("users")
+                .where(
+                    "email",
+                    "==",
+                    authEmail
+                )
+                .limit(1)
+                .get();
+
+
+            if (userSnap.empty) {
+
+                showLoader(false);
+
+                return showError(
+                    "هذا الحساب غير موجود في قاعدة البيانات."
+                );
+
+            }
+
+
+            const userDoc =
+                userSnap.docs[0];
+
+            const userData =
+                userDoc.data();
+
+
+            /* =====================================================
+               فحص حالة الحساب قبل تسجيل الدخول
+            ===================================================== */
+
+            if (
+                userData.status === 'inactive' ||
+                userData.status === 'banned'
+            ) {
+
+                showLoader(false);
+
+                const reason =
+                    userData.lockReason ||
+                    userData.banReason ||
+                    "تم تعطيل حسابك مؤقتاً.";
+
+
+                showError(
+                    "🚫 عذراً: " + reason
+                );
+
+
+                /*
+                 * زر الواتساب برسالة مخصصة
+                 */
+
+                supBtn.style.display =
+                    'block';
+
+
+                const waMsg =
+                    `السلام عليكم مستشار حازم، واجهت مشكلة في الدخول.\nالسبب: ${reason}\nالمستخدم: ${authEmail}`;
+
+
+                supBtn.href =
+                    `https://wa.me/201060234399?text=${encodeURIComponent(waMsg)}`;
+
+
+                return;
+
+            }
+
+
+            /* =====================================================
+               Firebase Authentication
+            ===================================================== */
+
+            const userCredential =
+                await auth.signInWithEmailAndPassword(
+                    authEmail,
+                    pass
+                );
+
+
+            const firebaseUser =
+                userCredential.user;
+
+
+            /* =====================================================
+               التأكد من أن الحساب تم تسجيل دخوله فعلاً
+            ===================================================== */
+
+            if (!firebaseUser) {
+
+                showLoader(false);
+
+                return showError(
+                    "تعذر تسجيل الدخول."
+                );
+
+            }
+
+
+            /* =====================================================
+               إنشاء Session Token للنظام القديم
+            ===================================================== */
+
+            const newToken =
+                "zoma_" +
+                Math.random()
+                .toString(36)
+                .substr(2, 10);
+
+
+            /*
+             * تحديث Firestore
+             */
+
+            await db.collection("users")
+            .doc(userDoc.id)
+            .update({
+
+                lastSessionToken:
+                    newToken,
+
+                lastLogin:
+                    firebase.firestore.FieldValue.serverTimestamp(),
+
+                uid:
+                    firebaseUser.uid
+
             });
 
-            localStorage.setItem("userEmail", email);
-            localStorage.setItem("sessionToken", newToken);
-            window.location.href = "home.html";
 
-        } catch (e) { showLoader(false); showError("خطأ في السيرفر، تأكد من الإنترنت."); }
+            /* =====================================================
+               حفظ بيانات الجلسة
+            ===================================================== */
+
+            localStorage.setItem(
+                "userEmail",
+                firebaseUser.email
+            );
+
+            localStorage.setItem(
+                "sessionToken",
+                newToken
+            );
+
+
+            /*
+             * حفظ UID الخاص بـ Firebase Authentication
+             */
+
+            localStorage.setItem(
+                "firebaseUID",
+                firebaseUser.uid
+            );
+
+
+            /* =====================================================
+               الدخول إلى لوحة الإدارة
+            ===================================================== */
+
+            window.location.href =
+                "admin1.html";
+
+
+        } catch (e) {
+
+            console.error(
+                "Firebase Authentication Error:",
+                e
+            );
+
+
+            showLoader(false);
+
+
+            /* =====================================================
+               رسائل أخطاء Firebase Authentication
+            ===================================================== */
+
+            switch (e.code) {
+
+                case 'auth/invalid-email':
+
+                    showError(
+                        "صيغة الإيميل غير صحيحة."
+                    );
+
+                    break;
+
+
+                case 'auth/user-not-found':
+
+                    showError(
+                        "الإيميل غير مسجل في Firebase Authentication."
+                    );
+
+                    break;
+
+
+                case 'auth/wrong-password':
+
+                    showError(
+                        "كلمة المرور غير صحيحة."
+                    );
+
+                    break;
+
+
+                case 'auth/invalid-credential':
+
+                    showError(
+                        "بيانات الدخول غير صحيحة."
+                    );
+
+                    break;
+
+
+                case 'auth/user-disabled':
+
+                    showError(
+                        "🚫 تم تعطيل هذا الحساب من Firebase Authentication."
+                    );
+
+                    break;
+
+
+                case 'auth/too-many-requests':
+
+                    showError(
+                        "تم إجراء محاولات دخول كثيرة. حاول مرة أخرى بعد قليل."
+                    );
+
+                    break;
+
+
+                case 'auth/network-request-failed':
+
+                    showError(
+                        "تعذر الاتصال بالإنترنت. تأكد من الاتصال وحاول مرة أخرى."
+                    );
+
+                    break;
+
+
+                default:
+
+                    showError(
+                        "خطأ في تسجيل الدخول: " +
+                        (e.message || "حدث خطأ غير معروف.")
+                    );
+
+                    break;
+
+            }
+
+        }
+
     }
 
-    function showError(msg) { const err = document.getElementById('errorArea'); err.innerText = msg; err.style.display = 'block'; }
-    function showLoader(show) { document.getElementById('loader').style.display = show ? 'flex' : 'none'; }
+
+    /* =========================================================
+       عرض رسالة الخطأ
+    ========================================================= */
+
+    function showError(msg) {
+
+        const err =
+            document.getElementById('errorArea');
+
+        err.innerText =
+            msg;
+
+        err.style.display =
+            'block';
+
+    }
+
+
+    /* =========================================================
+       Loader
+    ========================================================= */
+
+    function showLoader(show) {
+
+        document.getElementById('loader')
+        .style
+        .display =
+            show
+                ? 'flex'
+                : 'none';
+
+    }
+
+
+    /* =========================================================
+       مراقبة حالة Firebase Authentication
+    ========================================================= */
+
+    auth.onAuthStateChanged(function(user) {
+
+        if (user) {
+
+            console.log(
+                "Firebase Auth User:",
+                user.email
+            );
+
+        }
+
+    });
+
 </script>
+
 </body>
 </html>
