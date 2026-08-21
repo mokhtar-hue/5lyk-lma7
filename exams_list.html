@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بوابة الاختبارات | منصة المستشار</title>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --primary: #d4af37; --bg: #0a0f1c; --card: rgba(20, 30, 48, 0.8); --text: #e2e8f0; }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--text); margin: 0; min-height: 100vh; background-image: radial-gradient(circle at 50% 0%, #1a233a 0%, #0a0f1c 70%); }
+        .header { text-align: center; padding: 40px 20px; border-bottom: 1px solid rgba(212, 175, 55, 0.2); }
+        .header h1 { color: var(--primary); font-size: 36px; margin: 0; text-shadow: 0 0 20px rgba(212, 175, 55, 0.3); }
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .exam-card { background: var(--card); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); padding: 25px; border-radius: 20px; transition: 0.4s; position: relative; overflow: hidden; }
+        .exam-card:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: 0 10px 30px rgba(212, 175, 55, 0.1); }
+        .exam-card h2 { margin: 0 0 15px 0; font-size: 22px; color: #fff; }
+        .badge { background: rgba(212, 175, 55, 0.1); color: var(--primary); padding: 5px 12px; border-radius: 8px; font-size: 14px; display: inline-block; margin-bottom: 15px; }
+        .btn-enter { display: block; width: 100%; padding: 12px; text-align: center; background: linear-gradient(45deg, #b8860b, #ffd700); color: #000; font-weight: 900; border-radius: 12px; text-decoration: none; border: none; cursor: pointer; transition: 0.3s; margin-top: 20px; }
+        .btn-enter:hover { opacity: 0.9; box-shadow: 0 0 15px rgba(212, 175, 55, 0.4); }
+        .closed-overlay { position: absolute; inset: 0; background: rgba(10, 15, 28, 0.8); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; color: #ef4444; backdrop-filter: blur(2px); border-radius: 20px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>منصة المستشار - حازم سالم</h1>
+        <p>بوابة الاختبارات الرقمية المتقدمة</p>
+    </div>
+    <div class="container" id="examsList">
+        <div style="text-align: center; width: 100%; color: var(--primary);"><i class="fas fa-spinner fa-spin fa-3x"></i></div>
+    </div>
+
+    <script>
+        const firebaseConfig = { apiKey: "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws", authDomain: "zomaapp-744fc.firebaseapp.com", projectId: "zomaapp-744fc" };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        async function loadExams() {
+            const list = document.getElementById('examsList');
+            try {
+                const snap = await db.collection("quizzes2").orderBy("createdAt", "desc").get();
+                list.innerHTML = "";
+                if(snap.empty) { list.innerHTML = "<h3 style='text-align:center; width:100%;'>لا توجد اختبارات حالياً</h3>"; return; }
+                
+                snap.forEach(doc => {
+                    const q = doc.data();
+                    const isClosed = q.status === "closed";
+                    list.innerHTML += `
+                        <div class="exam-card">
+                            ${isClosed ? '<div class="closed-overlay"><i class="fas fa-lock"></i> مغلق</div>' : ''}
+                            <h2>${q.title}</h2>
+                            <div class="badge"><i class="fas fa-clock"></i> ${q.duration} دقيقة</div>
+                            <div class="badge"><i class="fas fa-question-circle"></i> ${q.questions.length} سؤال</div>
+                            <button class="btn-enter" onclick="enterExam('${doc.id}')" ${isClosed ? 'disabled' : ''}>الدخول للاختبار</button>
+                        </div>`;
+                });
+            } catch (error) { console.error(error); list.innerHTML = "حدث خطأ في جلب البيانات."; }
+        }
+
+        function enterExam(id) {
+            window.location.href = `exam_room.html?id=${id}`;
+        }
+        window.onload = loadExams;
+    </script>
+</body>
+</html>
