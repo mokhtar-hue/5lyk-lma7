@@ -80,6 +80,31 @@
             transition: 0.3s; box-shadow: 0 10px 25px rgba(79, 70, 229, 0.4);
         }
 
+        /* زر دخول الاختبارات */
+        .exams-btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            margin-top: 15px;
+            border: none;
+            border-radius: 22px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 900;
+            font-size: 17px;
+            cursor: pointer;
+            text-decoration: none;
+            box-sizing: border-box;
+            transition: 0.3s;
+            box-shadow: 0 10px 25px rgba(217, 119, 6, 0.3);
+        }
+
+        .exams-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 30px rgba(217, 119, 6, 0.4);
+        }
+
         .error-msg { background: rgba(239, 68, 68, 0.1); color: var(--danger); padding: 15px; border-radius: 15px; margin-top: 20px; display: none; border: 1px solid var(--danger); font-size: 14px; font-weight: bold; }
         .support-btn { display: none; margin-top: 15px; background: #128c7e; color: white; text-decoration: none; padding: 12px; border-radius: 15px; font-weight: 700; transition: 0.3s; }
         .support-btn:hover { background: #075e54; transform: scale(1.02); }
@@ -119,6 +144,12 @@
     </div>
 
     <button class="login-btn" onclick="handleLogin()">دخول المنصة</button>
+
+    <!-- زر دخول الاختبارات -->
+    <a href="exams_list.html" class="exams-btn">
+        <i class="fas fa-file-pen"></i>
+        دخول الاختبارات
+    </a>
     
     <div id="errorArea" class="error-msg"></div>
     <a id="supportBtn" href="#" target="_blank" class="support-btn">
