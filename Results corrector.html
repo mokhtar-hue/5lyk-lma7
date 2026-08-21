@@ -953,6 +953,242 @@
         }
 
         /* ======================================
+           PDF AREA
+        ====================================== */
+
+        #pdfExportArea {
+
+            position: fixed;
+
+            left: -99999px;
+
+            top: 0;
+
+            width: 794px;
+
+            background: #ffffff;
+
+            color: #172033;
+
+            direction: rtl;
+
+            font-family:
+                Tahoma,
+                Arial,
+                sans-serif;
+
+            z-index: -9999;
+
+            visibility: hidden;
+
+            pointer-events: none;
+        }
+
+        .pdf-container {
+
+            width: 794px;
+
+            background: #ffffff;
+
+            padding: 25px;
+
+            direction: rtl;
+        }
+
+        .pdf-header {
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #7c3aed,
+                    #4f46e5
+                );
+
+            color: #ffffff;
+
+            padding: 20px;
+
+            border-radius: 14px;
+
+            text-align: center;
+
+            margin-bottom: 15px;
+        }
+
+        .pdf-header h1 {
+
+            margin: 0 0 6px;
+
+            font-size: 25px;
+
+            font-weight: 900;
+        }
+
+        .pdf-header h2 {
+
+            margin: 0 0 6px;
+
+            font-size: 19px;
+
+            font-weight: 800;
+        }
+
+        .pdf-header p {
+
+            margin: 4px 0;
+
+            font-size: 11px;
+        }
+
+        .pdf-stats {
+
+            display: flex;
+
+            gap: 8px;
+
+            margin-bottom: 15px;
+        }
+
+        .pdf-stat {
+
+            flex: 1;
+
+            border: 1px solid #e2e8f0;
+
+            background: #f8fafc;
+
+            border-radius: 10px;
+
+            padding: 9px;
+
+            text-align: center;
+        }
+
+        .pdf-stat strong {
+
+            display: block;
+
+            color: #5b21b6;
+
+            font-size: 18px;
+
+            font-weight: 900;
+        }
+
+        .pdf-stat span {
+
+            display: block;
+
+            color: #64748b;
+
+            font-size: 9px;
+        }
+
+        .pdf-table {
+
+            width: 100%;
+
+            border-collapse: collapse;
+
+            table-layout: fixed;
+
+            direction: rtl;
+        }
+
+        .pdf-table th {
+
+            background: #ede9fe;
+
+            color: #4c1d95;
+
+            border: 1px solid #ddd6fe;
+
+            padding: 8px 5px;
+
+            font-size: 10px;
+
+            font-weight: 900;
+
+            text-align: center;
+        }
+
+        .pdf-table td {
+
+            border: 1px solid #e2e8f0;
+
+            padding: 7px 5px;
+
+            font-size: 9px;
+
+            text-align: center;
+
+            vertical-align: middle;
+
+            word-break: break-word;
+        }
+
+        .pdf-table tr {
+
+            page-break-inside: avoid;
+
+        }
+
+        .pdf-student {
+
+            font-weight: 800;
+
+            text-align: right !important;
+        }
+
+        .pdf-score {
+
+            color: #5b21b6;
+
+            font-weight: 900;
+        }
+
+        .pdf-percentage {
+
+            color: #2563eb;
+
+            font-weight: 900;
+        }
+
+        .pdf-note {
+
+            margin-top: 12px;
+
+            padding: 9px;
+
+            background: #f8fafc;
+
+            border-radius: 8px;
+
+            text-align: center;
+
+            color: #64748b;
+
+            font-size: 8px;
+        }
+
+        .pdf-footer {
+
+            margin-top: 12px;
+
+            padding-top: 8px;
+
+            border-top: 1px solid #e2e8f0;
+
+            display: flex;
+
+            justify-content: space-between;
+
+            color: #64748b;
+
+            font-size: 8px;
+        }
+
+        /* ======================================
            FOOTER
         ====================================== */
 
@@ -1009,6 +1245,7 @@
             .modal-content {
                 padding: 17px;
             }
+
         }
 
     </style>
@@ -1215,8 +1452,6 @@
 
         <div class="button-grid">
 
-            <!-- All -->
-
             <button
                 class="btn btn-green"
                 onclick="exportAllExcel()">
@@ -1238,8 +1473,6 @@
 
             </button>
 
-
-            <!-- Selected -->
 
             <button
                 class="btn btn-blue"
@@ -1492,6 +1725,13 @@
 
 
 <!-- ==========================================
+     PDF EXPORT AREA
+========================================== -->
+
+<div id="pdfExportArea"></div>
+
+
+<!-- ==========================================
      LOADING
 ========================================== -->
 
@@ -1662,11 +1902,6 @@ async function fetchResults() {
 
         showLoading("جاري تحميل النتائج...");
 
-        /*
-         * جلب النتائج بدون orderBy
-         * ثم ترتيبها محلياً
-         * لتجنب مشاكل Firestore Index
-         */
 
         const snap =
             await db
@@ -2033,7 +2268,22 @@ function toggleStudent(id, checkbox) {
     }
 
 
-    renderTable();
+    const tr =
+        checkbox.closest("tr");
+
+    if (tr) {
+
+        if (checkbox.checked) {
+
+            tr.classList.add("selected");
+
+        } else {
+
+            tr.classList.remove("selected");
+
+        }
+
+    }
 
 
     document.getElementById("selectAll").checked =
@@ -2252,10 +2502,6 @@ function downloadExcel(results, filename) {
             XLSX.utils.json_to_sheet(data);
 
 
-        /*
-         * ضبط عرض الأعمدة
-         */
-
         ws["!cols"] = [
 
             { wch: 10 },
@@ -2444,10 +2690,10 @@ function exportTopExcel() {
 
 
 /* ==================================================
-   PDF HTML
+   BUILD LIGHT PDF
 ================================================== */
 
-function buildPDFHTML(results, type) {
+function buildPDFContent(results, type) {
 
     const title =
         getExamTitle();
@@ -2455,7 +2701,11 @@ function buildPDFHTML(results, type) {
 
     const now =
         new Date().toLocaleString(
-            "ar-EG"
+            "ar-EG",
+            {
+                dateStyle: "medium",
+                timeStyle: "short"
+            }
         );
 
 
@@ -2485,6 +2735,26 @@ function buildPDFHTML(results, type) {
             : 0;
 
 
+    let subtitle = "";
+
+    if (type === "top") {
+
+        subtitle =
+            `كشف أوائل الاختبار - أول ${results.length} طالب`;
+
+    } else if (type === "selected") {
+
+        subtitle =
+            `كشف الطلاب المحددين - عدد ${results.length}`;
+
+    } else {
+
+        subtitle =
+            `كشف النتائج الكامل - عدد ${results.length}`;
+
+    }
+
+
     let rows = "";
 
 
@@ -2502,40 +2772,50 @@ function buildPDFHTML(results, type) {
                 : "0.0";
 
 
-        let rank = index + 1;
-
-
         let rankText =
-            rank === 1
-                ? "🥇"
-                : rank === 2
-                ? "🥈"
-                : rank === 3
-                ? "🥉"
-                : rank;
+            index + 1;
+
+
+        if (index === 0) {
+
+            rankText = "🥇";
+
+        } else if (index === 1) {
+
+            rankText = "🥈";
+
+        } else if (index === 2) {
+
+            rankText = "🥉";
+
+        }
 
 
         rows += `
 
             <tr>
 
-                <td class="rank">
+                <td>
                     ${rankText}
                 </td>
 
-                <td class="student">
-                    ${escapeHtml(r.name || "-")}
+                <td class="pdf-student">
+                    ${escapeHtml(
+                        r.name || "-"
+                    )}
                 </td>
 
                 <td dir="ltr">
-                    ${escapeHtml(r.username || "-")}
+                    ${escapeHtml(
+                        r.username || "-"
+                    )}
                 </td>
 
-                <td class="score-cell">
+                <td class="pdf-score">
                     ${score} / ${max}
                 </td>
 
-                <td class="percentage-cell">
+                <td class="pdf-percentage">
                     ${percentage}%
                 </td>
 
@@ -2562,440 +2842,158 @@ function buildPDFHTML(results, type) {
     });
 
 
-    const subtitle =
-        type === "top"
-            ? `كشف أوائل الاختبار - أول ${results.length} طالب`
-            : type === "selected"
-            ? `كشف الطلاب المحددين - عدد ${results.length}`
-            : `كشف النتائج الكامل - عدد ${results.length}`;
-
-
     return `
 
-<!DOCTYPE html>
+        <div class="pdf-container">
 
-<html lang="ar" dir="rtl">
+            <div class="pdf-header">
 
-<head>
+                <h1>
+                    المستشار
+                </h1>
 
-<meta charset="UTF-8">
+                <h2>
+                    ${escapeHtml(title)}
+                </h2>
 
-<style>
+                <p>
+                    ${escapeHtml(subtitle)}
+                </p>
 
-* {
-    box-sizing: border-box;
-}
+                <p>
+                    تاريخ الإصدار:
+                    ${escapeHtml(now)}
+                </p>
 
-body {
+            </div>
 
-    margin: 0;
 
-    padding: 0;
+            <div class="pdf-stats">
 
-    font-family:
-        'Cairo',
-        Tahoma,
-        Arial,
-        sans-serif;
+                <div class="pdf-stat">
 
-    color: #172033;
+                    <strong>
+                        ${total}
+                    </strong>
 
-    direction: rtl;
+                    <span>
+                        عدد الطلاب
+                    </span>
 
-}
+                </div>
 
-.pdf-page {
 
-    width: 100%;
+                <div class="pdf-stat">
 
-    padding: 28px;
+                    <strong>
+                        ${highest}
+                    </strong>
 
-    background: white;
+                    <span>
+                        أعلى درجة
+                    </span>
 
-}
+                </div>
 
-.header {
 
-    background:
-        linear-gradient(
-            135deg,
-            #7c3aed,
-            #4f46e5
-        );
+                <div class="pdf-stat">
 
-    color: white;
+                    <strong>
+                        ${average}
+                    </strong>
 
-    border-radius: 18px;
+                    <span>
+                        متوسط الدرجات
+                    </span>
 
-    padding: 24px;
+                </div>
 
-    text-align: center;
+            </div>
 
-    margin-bottom: 20px;
 
-}
+            <table class="pdf-table">
 
-.header h1 {
+                <thead>
 
-    margin: 0;
+                    <tr>
 
-    font-size: 25px;
+                        <th style="width:8%">
+                            الترتيب
+                        </th>
 
-    font-weight: 900;
+                        <th style="width:28%">
+                            اسم الطالب
+                        </th>
 
-}
+                        <th style="width:15%">
+                            الكود
+                        </th>
 
-.header h2 {
+                        <th style="width:13%">
+                            الدرجة
+                        </th>
 
-    margin: 7px 0;
+                        <th style="width:12%">
+                            النسبة
+                        </th>
 
-    font-size: 19px;
+                        <th style="width:13%">
+                            التصحيح
+                        </th>
 
-    font-weight: 800;
+                        <th style="width:11%">
+                            الغش
+                        </th>
 
-}
+                    </tr>
 
-.header p {
+                </thead>
 
-    margin: 4px 0;
+                <tbody>
 
-    font-size: 12px;
+                    ${rows}
 
-    opacity: .9;
+                </tbody>
 
-}
+            </table>
 
-.info-grid {
 
-    display: grid;
+            <div class="pdf-note">
 
-    grid-template-columns:
-        repeat(3, 1fr);
+                تم إنشاء هذا الكشف إلكترونياً بواسطة
+                <strong>
+                    نظام المستشار - كنترول النتائج
+                </strong>
 
-    gap: 10px;
+            </div>
 
-    margin-bottom: 18px;
 
-}
+            <div class="pdf-footer">
 
-.info {
+                <span>
+                    كنترول النتائج
+                </span>
 
-    border:
-        1px solid #e2e8f0;
+                <span>
+                    ${escapeHtml(now)}
+                </span>
 
-    border-radius: 12px;
-
-    padding: 12px;
-
-    text-align: center;
-
-    background: #f8fafc;
-
-}
-
-.info strong {
-
-    display: block;
-
-    font-size: 19px;
-
-    color: #5b21b6;
-
-}
-
-.info span {
-
-    font-size: 10px;
-
-    color: #64748b;
-
-}
-
-table {
-
-    width: 100%;
-
-    border-collapse: collapse;
-
-    margin-top: 10px;
-
-}
-
-thead {
-
-    display: table-header-group;
-
-}
-
-th {
-
-    background:
-        #ede9fe;
-
-    color:
-        #4c1d95;
-
-    font-size: 11px;
-
-    font-weight: 900;
-
-    padding: 10px 7px;
-
-    border:
-        1px solid #ddd6fe;
-
-}
-
-td {
-
-    padding: 9px 7px;
-
-    border:
-        1px solid #e2e8f0;
-
-    font-size: 10px;
-
-    text-align: center;
-
-}
-
-tr {
-
-    page-break-inside: avoid;
-
-}
-
-.rank {
-
-    font-weight: 900;
-
-    font-size: 13px;
-
-}
-
-.student {
-
-    font-weight: 800;
-
-    text-align: right;
-
-}
-
-.score-cell {
-
-    font-weight: 900;
-
-    color: #5b21b6;
-
-}
-
-.percentage-cell {
-
-    font-weight: 900;
-
-    color: #2563eb;
-
-}
-
-.footer {
-
-    margin-top: 20px;
-
-    border-top:
-        1px solid #e2e8f0;
-
-    padding-top: 10px;
-
-    display: flex;
-
-    justify-content: space-between;
-
-    font-size: 9px;
-
-    color: #64748b;
-
-}
-
-.note {
-
-    margin-top: 15px;
-
-    background: #f8fafc;
-
-    border-radius: 10px;
-
-    padding: 10px;
-
-    text-align: center;
-
-    font-size: 9px;
-
-    color: #64748b;
-
-}
-
-</style>
-
-</head>
-
-<body>
-
-<div class="pdf-page">
-
-
-    <div class="header">
-
-        <h1>
-            المستشار
-        </h1>
-
-        <h2>
-            ${escapeHtml(title)}
-        </h2>
-
-        <p>
-            ${subtitle}
-        </p>
-
-        <p>
-            تاريخ الإصدار:
-            ${now}
-        </p>
-
-    </div>
-
-
-    <div class="info-grid">
-
-        <div class="info">
-
-            <strong>
-                ${total}
-            </strong>
-
-            <span>
-                عدد الطلاب
-            </span>
+            </div>
 
         </div>
 
-
-        <div class="info">
-
-            <strong>
-                ${highest}
-            </strong>
-
-            <span>
-                أعلى درجة
-            </span>
-
-        </div>
-
-
-        <div class="info">
-
-            <strong>
-                ${average}
-            </strong>
-
-            <span>
-                متوسط الدرجات
-            </span>
-
-        </div>
-
-    </div>
-
-
-    <table>
-
-        <thead>
-
-            <tr>
-
-                <th>
-                    الترتيب
-                </th>
-
-                <th>
-                    اسم الطالب
-                </th>
-
-                <th>
-                    الكود
-                </th>
-
-                <th>
-                    الدرجة
-                </th>
-
-                <th>
-                    النسبة
-                </th>
-
-                <th>
-                    التصحيح
-                </th>
-
-                <th>
-                    الغش
-                </th>
-
-            </tr>
-
-        </thead>
-
-        <tbody>
-
-            ${rows}
-
-        </tbody>
-
-    </table>
-
-
-    <div class="note">
-
-        تم إنشاء هذا الكشف إلكترونياً بواسطة
-        <strong>
-            نظام المستشار - كنترول النتائج
-        </strong>
-
-    </div>
-
-
-    <div class="footer">
-
-        <span>
-            كنترول النتائج
-        </span>
-
-        <span>
-            ${now}
-        </span>
-
-    </div>
-
-
-</div>
-
-</body>
-
-</html>
-
-`;
+    `;
 
 }
 
 
 /* ==================================================
-   PDF EXPORT
+   PDF EXPORT - FIXED
 ================================================== */
 
 async function exportPDF(results, filename, type) {
 
-    if (!results.length) {
+    if (!results || !results.length) {
 
         Swal.fire(
             "تنبيه",
@@ -3008,64 +3006,93 @@ async function exportPDF(results, filename, type) {
     }
 
 
+    if (
+        typeof html2pdf === "undefined"
+    ) {
+
+        Swal.fire(
+            "خطأ",
+            "مكتبة إنشاء PDF لم يتم تحميلها. تأكد من اتصال الإنترنت ثم أعد تحميل الصفحة.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    const area =
+        document.getElementById(
+            "pdfExportArea"
+        );
+
+
     try {
 
-        showLoading("جاري إنشاء ملف PDF الاحترافي...");
+        showLoading(
+            "جاري إنشاء ملف PDF..."
+        );
 
 
-        const wrapper =
-            document.createElement("div");
+        /*
+         * تنظيف منطقة PDF القديمة
+         */
+
+        area.innerHTML = "";
 
 
-        wrapper.style.position =
-            "fixed";
+        /*
+         * إنشاء محتوى خفيف جداً
+         */
 
-        wrapper.style.left =
-            "-100000px";
-
-        wrapper.style.top =
-            "0";
-
-        wrapper.style.width =
-            "1100px";
-
-        wrapper.style.background =
-            "#ffffff";
-
-        wrapper.innerHTML =
-            buildPDFHTML(
+        area.innerHTML =
+            buildPDFContent(
                 results,
                 type
             );
 
 
-        document.body.appendChild(
-            wrapper
-        );
+        /*
+         * إظهار منطقة PDF مؤقتاً
+         * حتى يستطيع html2canvas رسمها
+         */
+
+        area.style.visibility =
+            "visible";
+
+        area.style.zIndex =
+            "99999";
+
+        area.style.left =
+            "0";
+
+        area.style.top =
+            "0";
 
 
         /*
-         * ننتظر قليلاً حتى يكتمل
-         * رسم HTML قبل التصدير
+         * انتظار بسيط حتى يكتمل
+         * إنشاء الجدول في المتصفح
          */
 
         await new Promise(
             resolve =>
-                setTimeout(
-                    resolve,
-                    700
+                requestAnimationFrame(
+                    () =>
+                        requestAnimationFrame(
+                            resolve
+                        )
                 )
         );
 
 
+        /*
+         * إعدادات PDF أخف من النسخة القديمة
+         */
+
         const options = {
 
-            margin: [
-                8,
-                8,
-                8,
-                8
-            ],
+            margin: 8,
 
             filename: filename,
 
@@ -3073,20 +3100,26 @@ async function exportPDF(results, filename, type) {
 
                 type: "jpeg",
 
-                quality: 0.98
+                quality: 0.94
 
             },
 
             html2canvas: {
 
-                scale: 2,
+                scale: 1.5,
 
                 useCORS: true,
 
-                allowTaint: true,
+                allowTaint: false,
 
                 backgroundColor:
-                    "#ffffff"
+                    "#ffffff",
+
+                logging: false,
+
+                imageTimeout: 0,
+
+                removeContainer: true
 
             },
 
@@ -3096,16 +3129,21 @@ async function exportPDF(results, filename, type) {
 
                 format: "a4",
 
-                orientation: "portrait"
+                orientation: "portrait",
+
+                compress: true
 
             },
 
             pagebreak: {
 
                 mode: [
-                    "avoid-all",
                     "css",
                     "legacy"
+                ],
+
+                avoid: [
+                    "tr"
                 ]
 
             }
@@ -3113,13 +3151,33 @@ async function exportPDF(results, filename, type) {
         };
 
 
+        /*
+         * إنشاء الملف
+         */
+
         await html2pdf()
             .set(options)
-            .from(wrapper)
+            .from(area)
             .save();
 
 
-        wrapper.remove();
+        /*
+         * تنظيف المحتوى
+         */
+
+        area.innerHTML = "";
+
+        area.style.visibility =
+            "hidden";
+
+        area.style.zIndex =
+            "-9999";
+
+        area.style.left =
+            "-99999px";
+
+        area.style.top =
+            "0";
 
 
         Swal.fire({
@@ -3129,9 +3187,9 @@ async function exportPDF(results, filename, type) {
             title: "تم إنشاء PDF",
 
             text:
-                "تم تصدير النتائج بنجاح",
+                "تم تصدير النتائج إلى ملف PDF بنجاح",
 
-            timer: 1500,
+            timer: 1800,
 
             showConfirmButton: false
 
@@ -3139,14 +3197,60 @@ async function exportPDF(results, filename, type) {
 
     } catch (error) {
 
-        console.error(error);
-
-        Swal.fire(
-            "خطأ",
-            "تعذر إنشاء ملف PDF: " +
-            error.message,
-            "error"
+        console.error(
+            "PDF ERROR:",
+            error
         );
+
+
+        /*
+         * تنظيف حتى لو حصل خطأ
+         */
+
+        area.innerHTML = "";
+
+        area.style.visibility =
+            "hidden";
+
+        area.style.zIndex =
+            "-9999";
+
+        area.style.left =
+            "-99999px";
+
+        area.style.top =
+            "0";
+
+
+        Swal.fire({
+
+            icon: "error",
+
+            title: "تعذر إنشاء PDF",
+
+            html:
+                `
+                    <div style="
+                        text-align:right;
+                        direction:rtl;
+                        line-height:1.8;
+                    ">
+
+                        حدث خطأ أثناء إنشاء ملف PDF.
+
+                        <br>
+
+                        <small style="color:#64748b;">
+                            ${escapeHtml(
+                                error?.message ||
+                                "خطأ غير معروف"
+                            )}
+                        </small>
+
+                    </div>
+                `
+
+        });
 
     } finally {
 
@@ -3627,11 +3731,6 @@ async function saveManualGrades() {
                 ) || 0;
 
 
-            /*
-             * منع إدخال درجة أكبر
-             * من الدرجة النهائية للسؤال
-             */
-
             if (pts > max) {
 
                 pts = max;
@@ -3776,4 +3875,4 @@ document.addEventListener(
 
 </body>
 
-</html>
+    </html>
