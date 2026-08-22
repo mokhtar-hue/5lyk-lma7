@@ -1,385 +1,3242 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <title>المستشار | منشئ ومعدل الاختبارات</title>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root { --primary: #2563eb; --secondary: #475569; --bg: #f1f5f9; --card: #ffffff; --accent: #10b981; --danger: #ef4444; --warning: #f59e0b; }
-        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: #1e293b; margin: 0; padding: 20px; }
-        .header { text-align: center; margin-bottom: 30px; }
-        .header h1 { color: var(--primary); margin: 0; }
-        .container { max-width: 1200px; margin: auto; }
-        .card { background: var(--card); padding: 25px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 25px; border-top: 5px solid var(--primary); }
-        .card.edit-mode { border-top-color: var(--warning); }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        input, select, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: 'Cairo'; box-sizing: border-box; font-size: 15px; }
-        button { font-family: 'Cairo'; font-weight: bold; cursor: pointer; border: none; border-radius: 8px; transition: 0.3s; padding: 12px 20px; display: inline-flex; align-items: center; gap: 8px; justify-content: center; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-accent { background: var(--accent); color: white; }
-        .btn-warning { background: var(--warning); color: white; }
-        .btn-danger { background: var(--danger); color: white; padding: 8px 12px; font-size: 14px; }
-        button:hover { opacity: 0.8; transform: translateY(-2px); }
-        hr { border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #fff; }
-        th, td { border: 1px solid #e2e8f0; padding: 12px; text-align: center; }
-        th { background: #f8fafc; color: var(--secondary); }
-        .table-container { max-height: 300px; overflow-y: auto; margin-top: 10px; border: 1px solid #e2e8f0; border-radius: 8px; }
-        .manual-box { background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px dashed #cbd5e1; margin-bottom: 15px; }
-        .flex-between { display: flex; justify-content: space-between; align-items: center; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>المستشار | منشئ ومعدل الاختبارات</title>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<link
+href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap"
+rel="stylesheet">
+
+<link
+rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+
+:root{
+    --primary:#2563eb;
+    --primary-dark:#1d4ed8;
+    --secondary:#475569;
+    --bg:#f1f5f9;
+    --card:#ffffff;
+    --accent:#10b981;
+    --danger:#ef4444;
+    --warning:#f59e0b;
+    --purple:#7c3aed;
+    --dark:#0f172a;
+    --border:#e2e8f0;
+}
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    font-family:'Cairo',sans-serif;
+    background:var(--bg);
+    color:#1e293b;
+    margin:0;
+    padding:20px;
+}
+
+.container{
+    max-width:1250px;
+    margin:auto;
+}
+
+.header{
+    text-align:center;
+    margin-bottom:30px;
+}
+
+.header h1{
+    color:var(--primary);
+    margin:0;
+    font-weight:800;
+}
+
+.header p{
+    color:#64748b;
+}
+
+.card{
+    background:var(--card);
+    padding:25px;
+    border-radius:18px;
+    box-shadow:0 10px 25px rgba(0,0,0,.05);
+    margin-bottom:25px;
+    border-top:5px solid var(--primary);
+}
+
+.card.edit-mode{
+    border-top-color:var(--warning);
+}
+
+.card-title{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+.grid-2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+.grid-4{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+}
+
+label{
+    font-weight:600;
+}
+
+input,
+select,
+textarea{
+    width:100%;
+    padding:12px;
+    margin-top:5px;
+    border:1px solid #cbd5e1;
+    border-radius:9px;
+    font-family:'Cairo';
+    box-sizing:border-box;
+    font-size:15px;
+    outline:none;
+    transition:.2s;
+}
+
+input:focus,
+select:focus,
+textarea:focus{
+    border-color:var(--primary);
+    box-shadow:0 0 0 3px rgba(37,99,235,.1);
+}
+
+button{
+    font-family:'Cairo';
+    font-weight:700;
+    cursor:pointer;
+    border:none;
+    border-radius:9px;
+    transition:.25s;
+    padding:11px 18px;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    justify-content:center;
+}
+
+button:hover{
+    opacity:.9;
+    transform:translateY(-1px);
+}
+
+.btn-primary{
+    background:var(--primary);
+    color:white;
+}
+
+.btn-primary:hover{
+    background:var(--primary-dark);
+}
+
+.btn-accent{
+    background:var(--accent);
+    color:white;
+}
+
+.btn-warning{
+    background:var(--warning);
+    color:white;
+}
+
+.btn-danger{
+    background:var(--danger);
+    color:white;
+    padding:8px 12px;
+    font-size:13px;
+}
+
+.btn-secondary{
+    background:#64748b;
+    color:white;
+}
+
+.btn-purple{
+    background:var(--purple);
+    color:white;
+}
+
+.btn-dark{
+    background:var(--dark);
+    color:white;
+}
+
+.btn-light{
+    background:#e2e8f0;
+    color:#334155;
+}
+
+hr{
+    border:0;
+    border-top:1px solid var(--border);
+    margin:25px 0;
+}
+
+.table-container{
+    max-height:430px;
+    overflow:auto;
+    margin-top:15px;
+    border:1px solid var(--border);
+    border-radius:10px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:#fff;
+}
+
+th,
+td{
+    border:1px solid var(--border);
+    padding:10px;
+    text-align:center;
+}
+
+th{
+    background:#f8fafc;
+    color:var(--secondary);
+    position:sticky;
+    top:0;
+    z-index:2;
+}
+
+.manual-box{
+    background:#f8fafc;
+    padding:18px;
+    border-radius:12px;
+    border:1px dashed #cbd5e1;
+    margin-bottom:15px;
+}
+
+.flex-between{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+.action-buttons{
+    display:flex;
+    gap:5px;
+    justify-content:center;
+    flex-wrap:wrap;
+}
+
+.order-buttons{
+    display:flex;
+    gap:4px;
+    justify-content:center;
+}
+
+.order-btn{
+    width:34px;
+    height:34px;
+    padding:0;
+    background:#e2e8f0;
+    color:#334155;
+}
+
+.order-btn:hover{
+    background:#cbd5e1;
+}
+
+.question-edit-box{
+    display:none;
+    background:#eff6ff;
+    border:2px solid #93c5fd;
+    padding:20px;
+    border-radius:14px;
+    margin-bottom:20px;
+}
+
+.question-edit-box.active{
+    display:block;
+}
+
+.student-edit-box{
+    display:none;
+    background:#ecfdf5;
+    border:2px solid #86efac;
+    padding:20px;
+    border-radius:14px;
+    margin-bottom:20px;
+}
+
+.student-edit-box.active{
+    display:block;
+}
+
+.edit-badge{
+    display:inline-block;
+    background:#2563eb;
+    color:#fff;
+    padding:4px 10px;
+    border-radius:20px;
+    font-size:12px;
+}
+
+.preview-box{
+    background:white;
+    border:1px solid #cbd5e1;
+    border-radius:10px;
+    padding:25px;
+}
+
+.export-actions{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:12px;
+}
+
+.reward-row{
+    display:flex;
+    gap:10px;
+    margin-top:10px;
+    align-items:center;
+}
+
+.reward-row input:first-child{
+    flex:1;
+}
+
+.reward-row input:nth-child(2){
+    flex:3;
+}
+
+.empty-row{
+    padding:25px!important;
+    color:#94a3b8;
+}
+
+.status-pill{
+    padding:4px 10px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:bold;
+}
+
+.status-open{
+    background:#dcfce7;
+    color:#166534;
+}
+
+.status-closed{
+    background:#fee2e2;
+    color:#991b1b;
+}
+
+.small-text{
+    font-size:13px;
+    color:#64748b;
+}
+
+.question-text-cell{
+    max-width:350px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.preview-question{
+    padding:18px;
+    border-bottom:1px solid #e2e8f0;
+}
+
+.preview-question:last-child{
+    border-bottom:none;
+}
+
+.preview-options{
+    margin-top:10px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+}
+
+.preview-option{
+    border:1px solid #cbd5e1;
+    padding:8px;
+    border-radius:7px;
+}
+
+.watermark{
+    position:absolute;
+    top:45%;
+    left:50%;
+    transform:translate(-50%,-50%) rotate(-30deg);
+    font-size:70px;
+    font-weight:800;
+    color:rgba(30,41,59,.08);
+    white-space:nowrap;
+    pointer-events:none;
+}
+
+.print-page{
+    position:relative;
+    background:white;
+    padding:30px;
+    width:794px;
+    min-height:1123px;
+    margin:auto;
+    color:#111827;
+}
+
+.print-header{
+    text-align:center;
+    border-bottom:2px solid #111827;
+    padding-bottom:15px;
+    margin-bottom:20px;
+}
+
+.print-header h1{
+    margin:0 0 8px;
+}
+
+.print-info{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    margin-bottom:20px;
+}
+
+.print-question{
+    margin-bottom:20px;
+    page-break-inside:avoid;
+}
+
+.print-question-title{
+    font-weight:700;
+    margin-bottom:8px;
+}
+
+.print-options{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+}
+
+.print-option{
+    padding:6px;
+}
+
+.correct-answer{
+    background:#dcfce7;
+    border:1px solid #86efac;
+    border-radius:5px;
+}
+
+.essay-line{
+    border-bottom:1px solid #64748b;
+    height:35px;
+    margin-top:5px;
+}
+
+.footer-print{
+    margin-top:30px;
+    text-align:center;
+    border-top:1px solid #cbd5e1;
+    padding-top:10px;
+    font-size:12px;
+    color:#64748b;
+}
+
+.hidden{
+    display:none!important;
+}
+
+@media(max-width:800px){
+
+    body{
+        padding:10px;
+    }
+
+    .grid-2,
+    .grid-4{
+        grid-template-columns:1fr;
+    }
+
+    .export-actions{
+        grid-template-columns:1fr;
+    }
+
+    .card{
+        padding:16px;
+    }
+
+    table{
+        min-width:700px;
+    }
+
+    .table-container{
+        overflow-x:auto;
+    }
+
+    .reward-row{
+        flex-wrap:wrap;
+    }
+
+}
+
+@media print{
+
+    body{
+        background:white;
+        padding:0;
+    }
+
+    body>*{
+        display:none!important;
+    }
+
+    #printContainer{
+        display:block!important;
+    }
+
+    .print-page{
+        width:100%;
+        min-height:auto;
+        box-shadow:none;
+        margin:0;
+    }
+
+}
+
+</style>
 </head>
+
 <body>
 
 <div class="container">
-    <div class="header">
-        <h1><i class="fas fa-hammer"></i> صانع ومعدل الاختبارات الشامل</h1>
-        <p>قم باختيار اختبار لتعديله أو إنشاء اختبار جديد بالكامل</p>
-    </div>
 
-    <!-- قائمة اختيار الاختبار -->
-    <div class="card edit-mode" style="padding: 15px 25px;">
-        <h3 style="margin-top: 0;"><i class="fas fa-edit"></i> اختيار وتعديل الاختبارات</h3>
-        <select id="examSelector" onchange="loadExamForEdit()" style="background: #fffbea; border-color: #fcd34d; font-weight: bold;">
-            <option value="">➕ إنشاء اختبار جديد فارغ ...</option>
-            <!-- سيتم تحميل الاختبارات هنا -->
-        </select>
-    </div>
+<!-- HEADER -->
 
-    <!-- 1. إعدادات الاختبار الأساسية -->
-    <div class="card">
-        <h3><i class="fas fa-cog"></i> 1. إعدادات الاختبار</h3>
-        <div class="grid-2">
-            <div><label>عنوان الاختبار:</label> <input type="text" id="qTitle" placeholder="مثال: اختبار اللغة العربية - الشهر الأول"></div>
-            <div><label>المدة (بالدقائق):</label> <input type="number" id="qTime" value="60"></div>
-        </div>
-        <div style="margin-top: 15px; display: flex; gap: 20px;">
-            <label><input type="checkbox" id="qRetake"> السماح للطالب بإعادة الاختبار</label>
-            <label><input type="checkbox" id="qShowRes" checked> إظهار النتيجة فوراً بعد التسليم</label>
-        </div>
-        
-        <hr>
-        <h4><i class="fas fa-gift"></i> هدايا الأوائل (تظهر تلقائياً)</h4>
-        <div id="rewardsArea"></div>
-        <button class="btn-primary" onclick="addRewardRow()" style="background:#64748b; padding:8px 15px; margin-top:10px;"><i class="fas fa-plus"></i> إضافة جائزة</button>
-    </div>
+<div class="header">
 
-    <!-- 2. إدارة الأسئلة -->
-    <div class="card">
-        <div class="flex-between">
-            <h3><i class="fas fa-question-circle"></i> 2. الأسئلة (<span id="qCountBadge" style="color:var(--primary)">0</span>)</h3>
-            <div>
-                <input type="file" id="fileQuestions" accept=".xlsx, .xls" style="display:none;" onchange="importQuestionsExcel(this)">
-                <button class="btn-accent" onclick="document.getElementById('fileQuestions').click()"><i class="fas fa-file-excel"></i> استيراد من إكسيل</button>
-            </div>
-        </div>
-        
-        <div class="manual-box">
-            <h4 style="margin-top:0;">إضافة سؤال يدوياً:</h4>
-            <div class="grid-2">
-                <div><label>نوع السؤال:</label> <select id="mqType" onchange="toggleMCQOpts()"><option value="mcq">اختر من متعدد</option><option value="essay">مقالى</option></select></div>
-                <div><label>الدرجة:</label> <input type="number" id="mqPoints" value="1"></div>
-            </div>
-            <label>نص السؤال:</label> <textarea id="mqText" rows="2"></textarea>
-            <label>رابط صورة للسؤال (اختياري):</label> <input type="text" id="mqImg" placeholder="https://...">
-            
-            <div id="mcqOptionsArea" class="grid-4" style="margin-top:10px;">
-                <input type="text" id="mqOpt1" placeholder="الخيار 1">
-                <input type="text" id="mqOpt2" placeholder="الخيار 2">
-                <input type="text" id="mqOpt3" placeholder="الخيار 3">
-                <input type="text" id="mqOpt4" placeholder="الخيار 4">
-                <select id="mqCorrect" style="grid-column: span 4;"><option value="0">الخيار 1 هو الصحيح</option><option value="1">الخيار 2 هو الصحيح</option><option value="2">الخيار 3 هو الصحيح</option><option value="3">الخيار 4 هو الصحيح</option></select>
-            </div>
-            <button class="btn-primary" onclick="addManualQuestion()" style="margin-top:15px; width:100%;"><i class="fas fa-plus"></i> أضف السؤال للقائمة</button>
-        </div>
+<h1>
+<i class="fas fa-hammer"></i>
+صانع ومعدل الاختبارات الشامل
+</h1>
 
-        <div class="table-container">
-            <table id="questionsTable">
-                <thead><tr><th>#</th><th>النوع</th><th>السؤال</th><th>الدرجة</th><th>إجراء</th></tr></thead>
-                <tbody id="questionsBody"></tbody>
-            </table>
-        </div>
-    </div>
+<p>
+إنشاء الاختبارات وإدارتها وترتيب الأسئلة وتعديلها وطباعة نسخ PDF
+</p>
 
-    <!-- 3. إدارة الطلاب -->
-    <div class="card">
-        <div class="flex-between">
-            <h3><i class="fas fa-users"></i> 3. الطلاب المسموح لهم (<span id="sCountBadge" style="color:var(--primary)">0</span>)</h3>
-            <div>
-                <input type="file" id="fileStudents" accept=".xlsx, .xls" style="display:none;" onchange="importStudentsExcel(this)">
-                <button class="btn-accent" onclick="document.getElementById('fileStudents').click()"><i class="fas fa-file-excel"></i> استيراد من إكسيل</button>
-            </div>
-        </div>
-
-        <div class="manual-box grid-4">
-            <input type="text" id="msName" placeholder="اسم الطالب">
-            <input type="text" id="msUser" placeholder="اليوزر (Username)">
-            <input type="text" id="msPass" placeholder="الباسورد (Password)">
-            <button class="btn-primary" onclick="addManualStudent()"><i class="fas fa-user-plus"></i> إضافة طالب</button>
-        </div>
-
-        <div class="table-container">
-            <table id="studentsTable">
-                <thead><tr><th>#</th><th>الاسم</th><th>اليوزر</th><th>الباسورد</th><th>إجراء</th></tr></thead>
-                <tbody id="studentsBody"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <button id="mainActionButton" class="btn-primary" style="width:100%; padding:20px; font-size:20px; margin-bottom:50px; background:#10b981;" onclick="finalizeAndUpload()">
-        <i class="fas fa-rocket"></i> اعتماد ورفع الاختبار
-    </button>
 </div>
 
+
+<!-- اختيار الاختبار -->
+
+<div class="card edit-mode">
+
+<div class="flex-between">
+
+<h3>
+<i class="fas fa-edit"></i>
+اختيار الاختبار
+</h3>
+
+<button
+class="btn-light"
+onclick="loadExamsList()">
+
+<i class="fas fa-sync"></i>
+تحديث القائمة
+
+</button>
+
+</div>
+
+<select
+id="examSelector"
+onchange="loadExamForEdit()"
+style="background:#fffbea;border-color:#fcd34d;font-weight:bold;">
+
+<option value="">
+➕ إنشاء اختبار جديد فارغ ...
+</option>
+
+</select>
+
+</div>
+
+
+<!-- إعدادات الاختبار -->
+
+<div class="card">
+
+<h3>
+<i class="fas fa-cog"></i>
+1. إعدادات الاختبار
+</h3>
+
+<div class="grid-2">
+
+<div>
+
+<label>عنوان الاختبار:</label>
+
+<input
+type="text"
+id="qTitle"
+placeholder="مثال: اختبار اللغة العربية - الشهر الأول">
+
+</div>
+
+<div>
+
+<label>المدة بالدقائق:</label>
+
+<input
+type="number"
+id="qTime"
+value="60"
+min="1">
+
+</div>
+
+</div>
+
+<div style="margin-top:15px;display:flex;gap:25px;flex-wrap:wrap;">
+
+<label>
+<input type="checkbox" id="qRetake">
+السماح بإعادة الاختبار
+</label>
+
+<label>
+<input type="checkbox" id="qShowRes" checked>
+إظهار النتيجة فوراً
+</label>
+
+</div>
+
+
+<hr>
+
+
+<h4>
+<i class="fas fa-gift"></i>
+هدايا الأوائل
+</h4>
+
+<div id="rewardsArea"></div>
+
+<button
+class="btn-secondary"
+onclick="addRewardRow()">
+
+<i class="fas fa-plus"></i>
+إضافة جائزة
+
+</button>
+
+</div>
+
+
+<!-- إدارة الأسئلة -->
+
+<div class="card">
+
+<div class="flex-between">
+
+<h3>
+
+<i class="fas fa-question-circle"></i>
+
+2. إدارة الأسئلة
+
+<span
+id="qCountBadge"
+style="color:var(--primary)">
+0
+</span>
+
+</h3>
+
+<div>
+
+<input
+type="file"
+id="fileQuestions"
+accept=".xlsx,.xls"
+style="display:none"
+onchange="importQuestionsExcel(this)">
+
+<button
+class="btn-accent"
+onclick="document.getElementById('fileQuestions').click()">
+
+<i class="fas fa-file-excel"></i>
+استيراد من Excel
+
+</button>
+
+</div>
+
+</div>
+
+
+<!-- محرر السؤال -->
+
+<div
+id="questionEditBox"
+class="question-edit-box">
+
+<div class="flex-between">
+
+<h4 style="margin:0">
+
+<i class="fas fa-pen"></i>
+محرر السؤال
+
+<span
+id="questionEditBadge"
+class="edit-badge hidden">
+تعديل السؤال
+</span>
+
+</h4>
+
+<button
+class="btn-light"
+onclick="cancelQuestionEdit()">
+
+<i class="fas fa-times"></i>
+إلغاء
+
+</button>
+
+</div>
+
+<hr>
+
+
+<div class="grid-2">
+
+<div>
+
+<label>نوع السؤال:</label>
+
+<select
+id="mqType"
+onchange="toggleMCQOpts()">
+
+<option value="mcq">
+اختر من متعدد
+</option>
+
+<option value="essay">
+مقالي
+</option>
+
+</select>
+
+</div>
+
+<div>
+
+<label>الدرجة:</label>
+
+<input
+type="number"
+id="mqPoints"
+value="1"
+min="1">
+
+</div>
+
+</div>
+
+
+<label>نص السؤال:</label>
+
+<textarea
+id="mqText"
+rows="3"
+placeholder="اكتب نص السؤال هنا...">
+</textarea>
+
+
+<label>رابط صورة السؤال:</label>
+
+<input
+type="text"
+id="mqImg"
+placeholder="https://...">
+
+
+<div
+id="mcqOptionsArea"
+class="grid-4"
+style="margin-top:10px;">
+
+<input
+type="text"
+id="mqOpt1"
+placeholder="الخيار 1">
+
+<input
+type="text"
+id="mqOpt2"
+placeholder="الخيار 2">
+
+<input
+type="text"
+id="mqOpt3"
+placeholder="الخيار 3">
+
+<input
+type="text"
+id="mqOpt4"
+placeholder="الخيار 4">
+
+<select
+id="mqCorrect"
+style="grid-column:span 4;">
+
+<option value="0">
+الخيار 1 هو الصحيح
+</option>
+
+<option value="1">
+الخيار 2 هو الصحيح
+</option>
+
+<option value="2">
+الخيار 3 هو الصحيح
+</option>
+
+<option value="3">
+الخيار 4 هو الصحيح
+</option>
+
+</select>
+
+</div>
+
+
+<div
+style="display:flex;gap:10px;margin-top:15px;">
+
+<button
+id="questionSaveButton"
+class="btn-primary"
+onclick="saveQuestion()"
+style="flex:1">
+
+<i class="fas fa-plus"></i>
+إضافة السؤال
+
+</button>
+
+<button
+class="btn-light"
+onclick="clearQuestionForm()">
+
+<i class="fas fa-eraser"></i>
+تفريغ
+
+</button>
+
+</div>
+
+</div>
+
+
+<!-- جدول الأسئلة -->
+
+<div class="table-container">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>#</th>
+
+<th>النوع</th>
+
+<th>السؤال</th>
+
+<th>الدرجة</th>
+
+<th>ترتيب</th>
+
+<th>إجراء</th>
+
+</tr>
+
+</thead>
+
+<tbody id="questionsBody"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+<!-- إدارة الطلاب -->
+
+<div class="card">
+
+<div class="flex-between">
+
+<h3>
+
+<i class="fas fa-users"></i>
+
+3. الطلاب المسموح لهم
+
+<span
+id="sCountBadge"
+style="color:var(--primary)">
+0
+</span>
+
+</h3>
+
+<div>
+
+<input
+type="file"
+id="fileStudents"
+accept=".xlsx,.xls"
+style="display:none"
+onchange="importStudentsExcel(this)">
+
+<button
+class="btn-accent"
+onclick="document.getElementById('fileStudents').click()">
+
+<i class="fas fa-file-excel"></i>
+استيراد من Excel
+
+</button>
+
+</div>
+
+</div>
+
+
+<!-- محرر الطالب -->
+
+<div
+id="studentEditBox"
+class="student-edit-box">
+
+<div class="flex-between">
+
+<h4 style="margin:0">
+
+<i class="fas fa-user-pen"></i>
+
+محرر بيانات الطالب
+
+<span
+id="studentEditBadge"
+class="edit-badge hidden"
+style="background:#059669">
+
+تعديل الطالب
+
+</span>
+
+</h4>
+
+<button
+class="btn-light"
+onclick="cancelStudentEdit()">
+
+<i class="fas fa-times"></i>
+إلغاء
+
+</button>
+
+</div>
+
+<hr>
+
+
+<div class="grid-4">
+
+<input
+type="text"
+id="msName"
+placeholder="اسم الطالب">
+
+<input
+type="text"
+id="msUser"
+placeholder="Username">
+
+<input
+type="text"
+id="msPass"
+placeholder="Password">
+
+<button
+id="studentSaveButton"
+class="btn-primary"
+onclick="saveStudent()">
+
+<i class="fas fa-user-plus"></i>
+إضافة طالب
+
+</button>
+
+</div>
+
+</div>
+
+
+<div class="table-container">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>#</th>
+<th>الاسم</th>
+<th>اليوزر</th>
+<th>الباسورد</th>
+<th>إجراء</th>
+
+</tr>
+
+</thead>
+
+<tbody id="studentsBody"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+<!-- التصدير -->
+
+<div class="card">
+
+<h3>
+
+<i class="fas fa-file-export"></i>
+4. الطباعة والتصدير
+
+</h3>
+
+<p class="small-text">
+
+يمكنك طباعة الاختبار مباشرة أو إنشاء نسخة PDF للطلاب.
+كما يمكنك إنشاء نسخة مجابة تظهر بها الإجابات الصحيحة مع علامة مائية "كنترول المستشار".
+
+</p>
+
+
+<div class="export-actions">
+
+<button
+class="btn-dark"
+onclick="printExam(false)">
+
+<i class="fas fa-print"></i>
+طباعة الاختبار
+
+</button>
+
+<button
+class="btn-primary"
+onclick="exportExamPDF(false)">
+
+<i class="fas fa-file-pdf"></i>
+PDF غير مجاب
+
+</button>
+
+<button
+class="btn-purple"
+onclick="exportExamPDF(true)">
+
+<i class="fas fa-file-circle-check"></i>
+PDF مجاب + علامة مائية
+
+</button>
+
+</div>
+
+</div>
+
+
+<!-- اعتماد -->
+
+<button
+id="mainActionButton"
+class="btn-accent"
+style="
+width:100%;
+padding:20px;
+font-size:20px;
+margin-bottom:50px;
+"
+onclick="finalizeAndUpload()">
+
+<i class="fas fa-rocket"></i>
+اعتماد ورفع الاختبار
+
+</button>
+
+</div>
+
+
+<!-- منطقة التصدير -->
+
+<div
+id="printContainer"
+style="display:none">
+</div>
+
+
 <script>
-    // إعدادات Firebase (استبدلها بالخاصة بك)
-    const firebaseConfig = { apiKey: "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws", authDomain: "zomaapp-744fc.firebaseapp.com", projectId: "zomaapp-744fc" };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
 
-    let finalQuestions = [];
-    let finalStudents = [];
-    let currentEditingExamId = null; // مُعرّف الاختبار الذي يتم تعديله (إن وجد)
+/* =========================================================
+   FIREBASE
+========================================================= */
 
-    // --- جلب قائمة الاختبارات وتعبئة الكومبو بوكس ---
-    async function loadExamsList() {
-        const snap = await db.collection("quizzes2").orderBy("createdAt", "desc").get();
-        const selector = document.getElementById('examSelector');
-        selector.innerHTML = '<option value="">➕ إنشاء اختبار جديد فارغ ...</option>';
-        snap.forEach(doc => {
-            const data = doc.data();
-            selector.innerHTML += `<option value="${doc.id}">${data.title} (${data.status === 'open' ? 'مفتوح' : 'مغلق'})</option>`;
-        });
-    }
-    window.onload = loadExamsList;
+const firebaseConfig = {
 
-    // --- تحميل بيانات الاختبار المحدد للتعديل ---
-    async function loadExamForEdit() {
-        const examId = document.getElementById('examSelector').value;
-        currentEditingExamId = examId || null;
-        
-        const btn = document.getElementById('mainActionButton');
+apiKey:"AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws",
 
-        if (!currentEditingExamId) {
-            // تفريغ الفورم في حال اختيار إنشاء جديد
-            resetForm();
-            btn.innerHTML = '<i class="fas fa-rocket"></i> اعتماد ورفع الاختبار الجديد';
-            btn.style.background = '#10b981';
-            return;
-        }
+authDomain:"zomaapp-744fc.firebaseapp.com",
 
-        Swal.fire({title: 'جاري سحب بيانات الاختبار...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
+projectId:"zomaapp-744fc"
 
-        try {
-            const doc = await db.collection("quizzes2").doc(currentEditingExamId).get();
-            if (doc.exists) {
-                const data = doc.data();
-                
-                // تعبئة البيانات الأساسية
-                document.getElementById('qTitle').value = data.title;
-                document.getElementById('qTime').value = data.duration;
-                document.getElementById('qRetake').checked = data.allowRetake || false;
-                document.getElementById('qShowRes').checked = data.showResults !== false; // الافتراضي ترو
+};
 
-                // تعبئة الجوائز
-                document.getElementById('rewardsArea').innerHTML = '';
-                if(data.rewards && data.rewards.length > 0) {
-                    data.rewards.forEach(r => addRewardRow(r.minScore, r.rewardText));
-                }
+firebase.initializeApp(firebaseConfig);
 
-                // تعبئة المصفوفات
-                finalQuestions = data.questions || [];
-                finalStudents = data.students || [];
+const db = firebase.firestore();
 
-                // عرض المصفوفات في الجداول
-                renderQuestions();
-                renderStudents();
 
-                btn.innerHTML = '<i class="fas fa-save"></i> حفظ التعديلات على الاختبار';
-                btn.style.background = 'var(--warning)';
-                Swal.close();
-            }
-        } catch (e) {
-            console.error(e);
-            Swal.fire('خطأ', 'فشل في تحميل بيانات الاختبار', 'error');
-        }
-    }
+/* =========================================================
+   VARIABLES
+========================================================= */
 
-    // دالة لتفريغ النموذج
-    function resetForm() {
-        document.getElementById('qTitle').value = '';
-        document.getElementById('qTime').value = '60';
-        document.getElementById('qRetake').checked = false;
-        document.getElementById('qShowRes').checked = true;
-        document.getElementById('rewardsArea').innerHTML = '';
-        finalQuestions = [];
-        finalStudents = [];
-        renderQuestions();
-        renderStudents();
-    }
+let finalQuestions = [];
 
-    // --- إدارة الجوائز ---
-    function addRewardRow(score = '', text = '') {
-        const div = document.createElement('div');
-        div.style.display = 'flex'; div.style.gap = '10px'; div.style.marginTop = '10px';
-        div.innerHTML = `<input type="number" placeholder="النسبة المئوية % (مثال 90)" class="r-score" style="flex:1;" value="${score}">
-                         <input type="text" placeholder="اسم الجائزة (مثال: درع التفوق)" class="r-text" style="flex:3;" value="${text}">
-                         <button class="btn-danger" onclick="this.parentElement.remove()"><i class="fas fa-trash"></i></button>`;
-        document.getElementById('rewardsArea').appendChild(div);
-    }
+let finalStudents = [];
 
-    // --- إدارة الأسئلة ---
-    function toggleMCQOpts() {
-        const isMCQ = document.getElementById('mqType').value === 'mcq';
-        document.getElementById('mcqOptionsArea').style.display = isMCQ ? 'grid' : 'none';
-    }
+let currentEditingExamId = null;
 
-    function addManualQuestion() {
-        const type = document.getElementById('mqType').value;
-        const text = document.getElementById('mqText').value;
-        const points = document.getElementById('mqPoints').value;
-        const imgUrl = document.getElementById('mqImg').value;
-        
-        if(!text) return Swal.fire('تنبيه', 'أدخل نص السؤال', 'warning');
-        
-        let qObj = { type: type, text: text, points: parseInt(points) || 1, imgUrl: imgUrl || null, options: [], correctIndex: 0 };
-        
-        if(type === 'mcq') {
-            qObj.options = [
-                document.getElementById('mqOpt1').value, document.getElementById('mqOpt2').value,
-                document.getElementById('mqOpt3').value, document.getElementById('mqOpt4').value
-            ].filter(Boolean);
-            if(qObj.options.length < 2) return Swal.fire('تنبيه', 'أدخل خيارين على الأقل', 'warning');
-            qObj.correctIndex = parseInt(document.getElementById('mqCorrect').value);
-        }
-        
-        finalQuestions.push(qObj);
-        renderQuestions();
-        document.getElementById('mqText').value = ''; 
-    }
+let editingQuestionIndex = -1;
 
-    async function importQuestionsExcel(input) {
-        const data = await readExcel(input.files[0]);
-        data.forEach(row => {
-            const type = row[0] || 'mcq';
-            let opts = type === 'mcq' ? [row[4], row[5], row[6], row[7]].filter(Boolean) : [];
-            finalQuestions.push({ type: type, points: parseInt(row[1])||1, text: row[2]||"", imgUrl: row[3]||null, options: opts, correctIndex: parseInt(row[8])||0 });
-        });
-        renderQuestions();
-        input.value = '';
-    }
+let editingStudentIndex = -1;
 
-    function renderQuestions() {
-        const tbody = document.getElementById('questionsBody'); tbody.innerHTML = '';
-        finalQuestions.forEach((q, i) => {
-            tbody.innerHTML += `<tr>
-                <td>${i+1}</td>
-                <td>${q.type === 'mcq' ? 'اختر' : 'مقالي'}</td>
-                <td>${q.text.substring(0,30)}...</td>
-                <td>${q.points}</td>
-                <td><button class="btn-danger" onclick="deleteQuestion(${i})"><i class="fas fa-trash"></i></button></td>
-            </tr>`;
-        });
-        document.getElementById('qCountBadge').innerText = finalQuestions.length;
-    }
-    function deleteQuestion(i) { finalQuestions.splice(i, 1); renderQuestions(); }
 
-    // --- إدارة الطلاب ---
-    function addManualStudent() {
-        const name = document.getElementById('msName').value;
-        const user = document.getElementById('msUser').value;
-        const pass = document.getElementById('msPass').value;
-        if(!name || !user || !pass) return Swal.fire('تنبيه', 'أكمل بيانات الطالب', 'warning');
-        
-        finalStudents.push({ name: name, username: user, password: pass });
-        renderStudents();
-        document.getElementById('msName').value = ''; document.getElementById('msUser').value = ''; document.getElementById('msPass').value = '';
-    }
+/* =========================================================
+   START
+========================================================= */
 
-    async function importStudentsExcel(input) {
-        const data = await readExcel(input.files[0]);
-        data.forEach(row => {
-            if(row[0] && row[1] && row[2]) finalStudents.push({ name: row[0], username: row[1].toString(), password: row[2].toString() });
-        });
-        renderStudents();
-        input.value = '';
-    }
+window.onload = function(){
 
-    function renderStudents() {
-        const tbody = document.getElementById('studentsBody'); tbody.innerHTML = '';
-        finalStudents.forEach((s, i) => {
-            tbody.innerHTML += `<tr>
-                <td>${i+1}</td><td>${s.name}</td><td>${s.username}</td><td>${s.password}</td>
-                <td><button class="btn-danger" onclick="deleteStudent(${i})"><i class="fas fa-trash"></i></button></td>
-            </tr>`;
-        });
-        document.getElementById('sCountBadge').innerText = finalStudents.length;
-    }
-    function deleteStudent(i) { finalStudents.splice(i, 1); renderStudents(); }
+loadExamsList();
 
-    // --- أدوات عامة والرفع أو التعديل النهائي ---
-    function readExcel(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, {type: 'array'});
-                const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                const json = XLSX.utils.sheet_to_json(sheet, {header: 1});
-                resolve(json.slice(1)); 
-            };
-            reader.readAsArrayBuffer(file);
-        });
-    }
+resetForm();
 
-    async function finalizeAndUpload() {
-        const title = document.getElementById('qTitle').value;
-        const time = document.getElementById('qTime').value;
-        if(!title) return Swal.fire('خطأ', 'يجب كتابة عنوان الاختبار', 'error');
-        if(finalQuestions.length === 0) return Swal.fire('خطأ', 'لم تقم بإضافة أي أسئلة!', 'error');
-        if(finalStudents.length === 0) return Swal.fire('خطأ', 'لم تقم بإضافة أي طلاب!', 'error');
+};
 
-        Swal.fire({title: currentEditingExamId ? 'جاري حفظ التعديلات...' : 'جاري إنشاء الاختبار...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
 
-        let rewards = [];
-        document.querySelectorAll('.r-score').forEach((el, idx) => {
-            let txt = document.querySelectorAll('.r-text')[idx].value;
-            if(el.value && txt) rewards.push({ minScore: parseInt(el.value), rewardText: txt });
-        });
+/* =========================================================
+   LOAD EXAMS
+========================================================= */
 
-        const examData = {
-            title: title,
-            duration: parseInt(time),
-            allowRetake: document.getElementById('qRetake').checked,
-            showResults: document.getElementById('qShowRes').checked,
-            questions: finalQuestions,
-            students: finalStudents,
-            rewards: rewards
-        };
+async function loadExamsList(){
 
-        try {
-            if (currentEditingExamId) {
-                // وضع التعديل (Update)
-                await db.collection("quizzes2").doc(currentEditingExamId).update(examData);
-                Swal.fire('نجاح!', 'تم حفظ التعديلات على الاختبار بنجاح.', 'success').then(() => location.reload());
-            } else {
-                // وضع إنشاء جديد (Create)
-                examData.status = 'open';
-                examData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-                await db.collection("quizzes2").add(examData);
-                Swal.fire('نجاح!', 'تم رفع الاختبار الجديد وهو الآن جاهز للطلاب.', 'success').then(() => location.reload());
-            }
-        } catch(e) { 
-            console.error(e); 
-            Swal.fire('خطأ', 'حدث خطأ أثناء حفظ البيانات', 'error'); 
-        }
-    }
+try{
+
+const snap = await db
+.collection("quizzes2")
+.orderBy("createdAt","desc")
+.get();
+
+const selector =
+document.getElementById("examSelector");
+
+selector.innerHTML =
+`
+<option value="">
+➕ إنشاء اختبار جديد فارغ ...
+</option>
+`;
+
+snap.forEach(doc=>{
+
+const data = doc.data();
+
+const status =
+data.status === "open"
+? "مفتوح"
+: "مغلق";
+
+selector.innerHTML += `
+
+<option value="${escapeHtml(doc.id)}">
+
+${escapeHtml(data.title || "اختبار بدون اسم")}
+ (${status})
+
+</option>
+
+`;
+
+});
+
+}catch(error){
+
+console.error(error);
+
+Swal.fire(
+"خطأ",
+"تعذر تحميل قائمة الاختبارات",
+"error"
+);
+
+}
+
+}
+
+
+/* =========================================================
+   LOAD EXAM
+========================================================= */
+
+async function loadExamForEdit(){
+
+const examId =
+document.getElementById("examSelector").value;
+
+currentEditingExamId =
+examId || null;
+
+const btn =
+document.getElementById("mainActionButton");
+
+
+if(!currentEditingExamId){
+
+resetForm();
+
+btn.innerHTML =
+`
+<i class="fas fa-rocket"></i>
+اعتماد ورفع الاختبار الجديد
+`;
+
+btn.className = "btn-accent";
+
+return;
+
+}
+
+
+Swal.fire({
+
+title:"جاري تحميل الاختبار...",
+
+allowOutsideClick:false,
+
+didOpen:()=>Swal.showLoading()
+
+});
+
+
+try{
+
+const doc =
+await db
+.collection("quizzes2")
+.doc(currentEditingExamId)
+.get();
+
+if(!doc.exists){
+
+Swal.fire(
+"خطأ",
+"الاختبار غير موجود",
+"error"
+);
+
+return;
+
+}
+
+const data = doc.data();
+
+
+document.getElementById("qTitle").value =
+data.title || "";
+
+document.getElementById("qTime").value =
+data.duration || 60;
+
+document.getElementById("qRetake").checked =
+data.allowRetake || false;
+
+document.getElementById("qShowRes").checked =
+data.showResults !== false;
+
+
+/* الجوائز */
+
+document.getElementById("rewardsArea").innerHTML = "";
+
+if(Array.isArray(data.rewards)){
+
+data.rewards.forEach(r=>{
+
+addRewardRow(
+r.minScore || "",
+r.rewardText || ""
+);
+
+});
+
+}
+
+
+/* الأسئلة */
+
+finalQuestions =
+Array.isArray(data.questions)
+? JSON.parse(JSON.stringify(data.questions))
+: [];
+
+
+/* الطلاب */
+
+finalStudents =
+Array.isArray(data.students)
+? JSON.parse(JSON.stringify(data.students))
+: [];
+
+
+renderQuestions();
+
+renderStudents();
+
+clearQuestionForm();
+
+clearStudentForm();
+
+
+btn.innerHTML =
+`
+<i class="fas fa-save"></i>
+حفظ التعديلات على الاختبار
+`;
+
+btn.className = "btn-warning";
+
+
+Swal.close();
+
+
+}catch(error){
+
+console.error(error);
+
+Swal.fire(
+"خطأ",
+"فشل تحميل بيانات الاختبار",
+"error"
+);
+
+}
+
+}
+
+
+/* =========================================================
+   RESET FORM
+========================================================= */
+
+function resetForm(){
+
+document.getElementById("qTitle").value = "";
+
+document.getElementById("qTime").value = 60;
+
+document.getElementById("qRetake").checked = false;
+
+document.getElementById("qShowRes").checked = true;
+
+document.getElementById("rewardsArea").innerHTML = "";
+
+finalQuestions = [];
+
+finalStudents = [];
+
+editingQuestionIndex = -1;
+
+editingStudentIndex = -1;
+
+renderQuestions();
+
+renderStudents();
+
+clearQuestionForm();
+
+clearStudentForm();
+
+}
+
+
+/* =========================================================
+   REWARDS
+========================================================= */
+
+function addRewardRow(score="",text=""){
+
+const div =
+document.createElement("div");
+
+div.className = "reward-row";
+
+div.innerHTML = `
+
+<input
+type="number"
+class="r-score"
+placeholder="النسبة %"
+value="${escapeHtml(score)}">
+
+<input
+type="text"
+class="r-text"
+placeholder="اسم الجائزة"
+value="${escapeHtml(text)}">
+
+<button
+class="btn-danger"
+onclick="this.parentElement.remove()">
+
+<i class="fas fa-trash"></i>
+
+</button>
+
+`;
+
+document
+.getElementById("rewardsArea")
+.appendChild(div);
+
+}
+
+
+/* =========================================================
+   QUESTION EDITOR
+========================================================= */
+
+function toggleMCQOpts(){
+
+const isMCQ =
+document.getElementById("mqType").value === "mcq";
+
+document.getElementById(
+"mcqOptionsArea"
+).style.display =
+isMCQ ? "grid" : "none";
+
+}
+
+
+/* ADD / UPDATE QUESTION */
+
+function saveQuestion(){
+
+const type =
+document.getElementById("mqType").value;
+
+const text =
+document.getElementById("mqText").value.trim();
+
+const points =
+parseInt(
+document.getElementById("mqPoints").value
+) || 1;
+
+const imgUrl =
+document.getElementById("mqImg").value.trim();
+
+
+if(!text){
+
+Swal.fire(
+"تنبيه",
+"اكتب نص السؤال",
+"warning"
+);
+
+return;
+
+}
+
+
+let qObj = {
+
+type:type,
+
+text:text,
+
+points:points,
+
+imgUrl:imgUrl || null,
+
+options:[],
+
+correctIndex:0
+
+};
+
+
+if(type === "mcq"){
+
+qObj.options = [
+
+document.getElementById("mqOpt1").value.trim(),
+
+document.getElementById("mqOpt2").value.trim(),
+
+document.getElementById("mqOpt3").value.trim(),
+
+document.getElementById("mqOpt4").value.trim()
+
+].filter(Boolean);
+
+
+if(qObj.options.length < 2){
+
+Swal.fire(
+"تنبيه",
+"أدخل خيارين على الأقل",
+"warning"
+);
+
+return;
+
+}
+
+
+qObj.correctIndex =
+parseInt(
+document.getElementById("mqCorrect").value
+) || 0;
+
+
+/*
+   منع رقم إجابة صحيحة خارج الخيارات
+*/
+
+if(qObj.correctIndex >= qObj.options.length){
+
+qObj.correctIndex = 0;
+
+}
+
+}
+
+
+/* UPDATE */
+
+if(editingQuestionIndex >= 0){
+
+finalQuestions[editingQuestionIndex] = qObj;
+
+Swal.fire({
+
+icon:"success",
+
+title:"تم تعديل السؤال",
+
+timer:900,
+
+showConfirmButton:false
+
+});
+
+}else{
+
+finalQuestions.push(qObj);
+
+Swal.fire({
+
+icon:"success",
+
+title:"تمت إضافة السؤال",
+
+timer:700,
+
+showConfirmButton:false
+
+});
+
+}
+
+
+/* مهم:
+   بعد الإضافة أو التعديل يتم تفريغ المحرر
+*/
+
+clearQuestionForm();
+
+renderQuestions();
+
+}
+
+
+/* =========================================================
+   EDIT QUESTION
+========================================================= */
+
+function editQuestion(index){
+
+const q = finalQuestions[index];
+
+if(!q) return;
+
+editingQuestionIndex = index;
+
+
+document
+.getElementById("questionEditBox")
+.classList.add("active");
+
+
+document
+.getElementById("questionEditBadge")
+.classList.remove("hidden");
+
+
+document
+.getElementById("questionSaveButton")
+.innerHTML =
+`
+<i class="fas fa-save"></i>
+حفظ تعديل السؤال
+`;
+
+document
+.getElementById("questionSaveButton")
+.className =
+"btn-warning";
+
+
+document.getElementById("mqType").value =
+q.type || "mcq";
+
+document.getElementById("mqPoints").value =
+q.points || 1;
+
+document.getElementById("mqText").value =
+q.text || "";
+
+document.getElementById("mqImg").value =
+q.imgUrl || "";
+
+
+const opts =
+q.options || [];
+
+
+document.getElementById("mqOpt1").value =
+opts[0] || "";
+
+document.getElementById("mqOpt2").value =
+opts[1] || "";
+
+document.getElementById("mqOpt3").value =
+opts[2] || "";
+
+document.getElementById("mqOpt4").value =
+opts[3] || "";
+
+
+document.getElementById("mqCorrect").value =
+q.correctIndex || 0;
+
+
+toggleMCQOpts();
+
+
+document
+.getElementById("questionEditBox")
+.scrollIntoView({
+
+behavior:"smooth",
+
+block:"center"
+
+});
+
+}
+
+
+/* =========================================================
+   CANCEL QUESTION
+========================================================= */
+
+function cancelQuestionEdit(){
+
+clearQuestionForm();
+
+}
+
+
+/* =========================================================
+   CLEAR QUESTION
+========================================================= */
+
+function clearQuestionForm(){
+
+editingQuestionIndex = -1;
+
+document.getElementById("mqType").value =
+"mcq";
+
+document.getElementById("mqPoints").value =
+"1";
+
+document.getElementById("mqText").value =
+"";
+
+document.getElementById("mqImg").value =
+"";
+
+document.getElementById("mqOpt1").value =
+"";
+
+document.getElementById("mqOpt2").value =
+"";
+
+document.getElementById("mqOpt3").value =
+"";
+
+document.getElementById("mqOpt4").value =
+"";
+
+document.getElementById("mqCorrect").value =
+"0";
+
+
+document
+.getElementById("questionEditBadge")
+.classList.add("hidden");
+
+
+document
+.getElementById("questionSaveButton")
+.className =
+"btn-primary";
+
+
+document
+.getElementById("questionSaveButton")
+.innerHTML =
+`
+<i class="fas fa-plus"></i>
+إضافة السؤال
+`;
+
+
+toggleMCQOpts();
+
+}
+
+
+/* =========================================================
+   DELETE QUESTION
+========================================================= */
+
+function deleteQuestion(index){
+
+Swal.fire({
+
+title:"حذف السؤال؟",
+
+text:"سيتم حذف السؤال من الاختبار.",
+
+icon:"warning",
+
+showCancelButton:true,
+
+confirmButtonText:"نعم، احذف",
+
+cancelButtonText:"إلغاء"
+
+}).then(result=>{
+
+if(result.isConfirmed){
+
+finalQuestions.splice(index,1);
+
+renderQuestions();
+
+}
+
+});
+
+}
+
+
+/* =========================================================
+   MOVE QUESTION
+========================================================= */
+
+function moveQuestion(index,direction){
+
+const newIndex =
+index + direction;
+
+if(
+newIndex < 0 ||
+newIndex >= finalQuestions.length
+){
+
+return;
+
+}
+
+
+[
+finalQuestions[index],
+finalQuestions[newIndex]
+] =
+[
+finalQuestions[newIndex],
+finalQuestions[index]
+];
+
+
+renderQuestions();
+
+}
+
+
+/* =========================================================
+   RENDER QUESTIONS
+========================================================= */
+
+function renderQuestions(){
+
+const tbody =
+document.getElementById("questionsBody");
+
+tbody.innerHTML = "";
+
+
+if(finalQuestions.length === 0){
+
+tbody.innerHTML = `
+
+<tr>
+
+<td
+colspan="6"
+class="empty-row">
+
+<i class="fas fa-inbox"></i>
+
+<br>
+
+لا توجد أسئلة حتى الآن
+
+</td>
+
+</tr>
+
+`;
+
+}else{
+
+finalQuestions.forEach((q,i)=>{
+
+const type =
+q.type === "mcq"
+? "اختر من متعدد"
+: "مقالي";
+
+
+const text =
+escapeHtml(q.text || "");
+
+
+tbody.innerHTML += `
+
+<tr>
+
+<td>
+
+<strong>${i+1}</strong>
+
+</td>
+
+<td>
+
+<span class="status-pill ${
+q.type === "mcq"
+? "status-open"
+: "status-closed"
+}">
+
+${type}
+
+</span>
+
+</td>
+
+<td
+class="question-text-cell"
+title="${text}">
+
+${text}
+
+</td>
+
+<td>
+
+${q.points || 1}
+
+</td>
+
+<td>
+
+<div class="order-buttons">
+
+<button
+class="order-btn"
+title="تحريك لأعلى"
+onclick="moveQuestion(${i},-1)"
+${i===0?"disabled":""}>
+
+<i class="fas fa-arrow-up"></i>
+
+</button>
+
+<button
+class="order-btn"
+title="تحريك لأسفل"
+onclick="moveQuestion(${i},1)"
+${i===finalQuestions.length-1?"disabled":""}>
+
+<i class="fas fa-arrow-down"></i>
+
+</button>
+
+</div>
+
+</td>
+
+<td>
+
+<div class="action-buttons">
+
+<button
+class="btn-primary"
+onclick="editQuestion(${i})">
+
+<i class="fas fa-pen"></i>
+تعديل
+
+</button>
+
+<button
+class="btn-danger"
+onclick="deleteQuestion(${i})">
+
+<i class="fas fa-trash"></i>
+
+</button>
+
+</div>
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+}
+
+
+document.getElementById(
+"qCountBadge"
+).innerText =
+finalQuestions.length;
+
+}
+
+
+/* =========================================================
+   EXCEL QUESTIONS
+========================================================= */
+
+async function importQuestionsExcel(input){
+
+if(!input.files[0]) return;
+
+try{
+
+const data =
+await readExcel(input.files[0]);
+
+
+data.forEach(row=>{
+
+const type =
+row[0] || "mcq";
+
+let opts =
+type === "mcq"
+? [
+row[4],
+row[5],
+row[6],
+row[7]
+].filter(Boolean)
+: [];
+
+
+finalQuestions.push({
+
+type:type,
+
+points:parseInt(row[1]) || 1,
+
+text:row[2] || "",
+
+imgUrl:row[3] || null,
+
+options:opts,
+
+correctIndex:parseInt(row[8]) || 0
+
+});
+
+});
+
+
+renderQuestions();
+
+
+}catch(error){
+
+console.error(error);
+
+Swal.fire(
+"خطأ",
+"تعذر استيراد الأسئلة",
+"error"
+);
+
+}
+
+
+input.value = "";
+
+}
+
+
+/* =========================================================
+   STUDENTS
+========================================================= */
+
+function saveStudent(){
+
+const name =
+document.getElementById("msName").value.trim();
+
+const user =
+document.getElementById("msUser").value.trim();
+
+const pass =
+document.getElementById("msPass").value.trim();
+
+
+if(!name || !user || !pass){
+
+Swal.fire(
+"تنبيه",
+"أكمل بيانات الطالب",
+"warning"
+);
+
+return;
+
+}
+
+
+const student = {
+
+name:name,
+
+username:user,
+
+password:pass
+
+};
+
+
+if(editingStudentIndex >= 0){
+
+finalStudents[editingStudentIndex] =
+student;
+
+
+Swal.fire({
+
+icon:"success",
+
+title:"تم تعديل الطالب",
+
+timer:900,
+
+showConfirmButton:false
+
+});
+
+}else{
+
+finalStudents.push(student);
+
+
+Swal.fire({
+
+icon:"success",
+
+title:"تمت إضافة الطالب",
+
+timer:700,
+
+showConfirmButton:false
+
+});
+
+}
+
+
+clearStudentForm();
+
+renderStudents();
+
+}
+
+
+/* =========================================================
+   EDIT STUDENT
+========================================================= */
+
+function editStudent(index){
+
+const s =
+finalStudents[index];
+
+if(!s) return;
+
+editingStudentIndex = index;
+
+
+document
+.getElementById("studentEditBox")
+.classList.add("active");
+
+
+document
+.getElementById("studentEditBadge")
+.classList.remove("hidden");
+
+
+document.getElementById("msName").value =
+s.name || "";
+
+document.getElementById("msUser").value =
+s.username || "";
+
+document.getElementById("msPass").value =
+s.password || "";
+
+
+document
+.getElementById("studentSaveButton")
+.className =
+"btn-warning";
+
+
+document
+.getElementById("studentSaveButton")
+.innerHTML =
+`
+<i class="fas fa-save"></i>
+حفظ التعديل
+`;
+
+
+document
+.getElementById("studentEditBox")
+.scrollIntoView({
+
+behavior:"smooth",
+
+block:"center"
+
+});
+
+}
+
+
+/* =========================================================
+   CLEAR STUDENT
+========================================================= */
+
+function clearStudentForm(){
+
+editingStudentIndex = -1;
+
+document.getElementById("msName").value = "";
+
+document.getElementById("msUser").value = "";
+
+document.getElementById("msPass").value = "";
+
+
+document
+.getElementById("studentEditBadge")
+.classList.add("hidden");
+
+
+document
+.getElementById("studentSaveButton")
+.className =
+"btn-primary";
+
+
+document
+.getElementById("studentSaveButton")
+.innerHTML =
+`
+<i class="fas fa-user-plus"></i>
+إضافة طالب
+`;
+
+}
+
+
+/* =========================================================
+   CANCEL STUDENT
+========================================================= */
+
+function cancelStudentEdit(){
+
+clearStudentForm();
+
+}
+
+
+/* =========================================================
+   DELETE STUDENT
+========================================================= */
+
+function deleteStudent(index){
+
+Swal.fire({
+
+title:"حذف الطالب؟",
+
+text:"سيتم حذفه من قائمة المسموح لهم.",
+
+icon:"warning",
+
+showCancelButton:true,
+
+confirmButtonText:"نعم، احذف",
+
+cancelButtonText:"إلغاء"
+
+}).then(result=>{
+
+if(result.isConfirmed){
+
+finalStudents.splice(index,1);
+
+renderStudents();
+
+}
+
+});
+
+}
+
+
+/* =========================================================
+   RENDER STUDENTS
+========================================================= */
+
+function renderStudents(){
+
+const tbody =
+document.getElementById("studentsBody");
+
+tbody.innerHTML = "";
+
+
+if(finalStudents.length === 0){
+
+tbody.innerHTML = `
+
+<tr>
+
+<td
+colspan="5"
+class="empty-row">
+
+<i class="fas fa-users-slash"></i>
+
+<br>
+
+لا يوجد طلاب
+
+</td>
+
+</tr>
+
+`;
+
+}else{
+
+finalStudents.forEach((s,i)=>{
+
+tbody.innerHTML += `
+
+<tr>
+
+<td>${i+1}</td>
+
+<td>${escapeHtml(s.name)}</td>
+
+<td>${escapeHtml(s.username)}</td>
+
+<td>
+<span style="letter-spacing:2px">
+••••••••
+</span>
+</td>
+
+<td>
+
+<div class="action-buttons">
+
+<button
+class="btn-primary"
+onclick="editStudent(${i})">
+
+<i class="fas fa-pen"></i>
+تعديل
+
+</button>
+
+<button
+class="btn-danger"
+onclick="deleteStudent(${i})">
+
+<i class="fas fa-trash"></i>
+
+</button>
+
+</div>
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+}
+
+
+document.getElementById(
+"sCountBadge"
+).innerText =
+finalStudents.length;
+
+}
+
+
+/* =========================================================
+   IMPORT STUDENTS
+========================================================= */
+
+async function importStudentsExcel(input){
+
+if(!input.files[0]) return;
+
+try{
+
+const data =
+await readExcel(input.files[0]);
+
+
+data.forEach(row=>{
+
+if(row[0] && row[1] && row[2]){
+
+finalStudents.push({
+
+name:String(row[0]),
+
+username:String(row[1]),
+
+password:String(row[2])
+
+});
+
+}
+
+});
+
+
+renderStudents();
+
+
+}catch(error){
+
+console.error(error);
+
+Swal.fire(
+"خطأ",
+"تعذر استيراد الطلاب",
+"error"
+);
+
+}
+
+
+input.value = "";
+
+}
+
+
+/* =========================================================
+   EXCEL READER
+========================================================= */
+
+function readExcel(file){
+
+return new Promise((resolve,reject)=>{
+
+const reader =
+new FileReader();
+
+reader.onload = e=>{
+
+try{
+
+const data =
+new Uint8Array(
+e.target.result
+);
+
+const workbook =
+XLSX.read(
+data,
+{type:"array"}
+);
+
+const sheet =
+workbook.Sheets[
+workbook.SheetNames[0]
+];
+
+const json =
+XLSX.utils.sheet_to_json(
+sheet,
+{header:1}
+);
+
+resolve(
+json.slice(1)
+);
+
+}catch(error){
+
+reject(error);
+
+}
+
+};
+
+reader.onerror = reject;
+
+reader.readAsArrayBuffer(file);
+
+});
+
+}
+
+
+/* =========================================================
+   FINAL SAVE
+========================================================= */
+
+async function finalizeAndUpload(){
+
+const title =
+document.getElementById("qTitle").value.trim();
+
+const time =
+parseInt(
+document.getElementById("qTime").value
+) || 60;
+
+
+if(!title){
+
+Swal.fire(
+"خطأ",
+"يجب كتابة عنوان الاختبار",
+"error"
+);
+
+return;
+
+}
+
+
+if(finalQuestions.length === 0){
+
+Swal.fire(
+"خطأ",
+"لم تقم بإضافة أي أسئلة",
+"error"
+);
+
+return;
+
+}
+
+
+if(finalStudents.length === 0){
+
+Swal.fire(
+"خطأ",
+"لم تقم بإضافة أي طلاب",
+"error"
+);
+
+return;
+
+}
+
+
+let rewards = [];
+
+
+document
+.querySelectorAll(".r-score")
+.forEach((el,index)=>{
+
+const txt =
+document
+.querySelectorAll(".r-text")[index]
+.value.trim();
+
+
+if(el.value && txt){
+
+rewards.push({
+
+minScore:parseInt(el.value),
+
+rewardText:txt
+
+});
+
+}
+
+});
+
+
+const examData = {
+
+title:title,
+
+duration:time,
+
+allowRetake:
+document.getElementById("qRetake").checked,
+
+showResults:
+document.getElementById("qShowRes").checked,
+
+questions:finalQuestions,
+
+students:finalStudents,
+
+rewards:rewards
+
+};
+
+
+Swal.fire({
+
+title:
+currentEditingExamId
+? "جاري حفظ التعديلات..."
+: "جاري إنشاء الاختبار...",
+
+allowOutsideClick:false,
+
+didOpen:()=>Swal.showLoading()
+
+});
+
+
+try{
+
+if(currentEditingExamId){
+
+await db
+.collection("quizzes2")
+.doc(currentEditingExamId)
+.update(examData);
+
+
+Swal.fire({
+
+icon:"success",
+
+title:"تم الحفظ بنجاح",
+
+text:"تم تحديث الاختبار.",
+
+confirmButtonText:"موافق"
+
+}).then(()=>{
+
+location.reload();
+
+});
+
+
+}else{
+
+examData.status = "open";
+
+examData.createdAt =
+firebase.firestore.FieldValue.serverTimestamp();
+
+
+await db
+.collection("quizzes2")
+.add(examData);
+
+
+Swal.fire({
+
+icon:"success",
+
+title:"تم إنشاء الاختبار",
+
+text:"الاختبار جاهز للطلاب.",
+
+confirmButtonText:"موافق"
+
+}).then(()=>{
+
+location.reload();
+
+});
+
+}
+
+}catch(error){
+
+console.error(error);
+
+Swal.fire(
+"خطأ",
+"حدث خطأ أثناء حفظ الاختبار",
+"error"
+);
+
+}
+
+}
+
+
+/* =========================================================
+   BUILD PRINT HTML
+========================================================= */
+
+function buildExamHTML(answered=false){
+
+const title =
+document.getElementById("qTitle").value.trim()
+|| "اختبار";
+
+
+const time =
+document.getElementById("qTime").value
+|| 60;
+
+
+let html = `
+
+<div class="print-page">
+
+${answered
+?
+`<div class="watermark">
+كنترول المستشار
+</div>`
+:""}
+
+<div class="print-header">
+
+<h1>
+${escapeHtml(title)}
+</h1>
+
+<div>
+المدة:
+<strong>${time}</strong>
+دقيقة
+</div>
+
+</div>
+
+
+<div class="print-info">
+
+<div>
+اسم الطالب:
+................................................
+</div>
+
+<div>
+الفصل:
+................................................
+</div>
+
+<div>
+التاريخ:
+................................................
+</div>
+
+<div>
+الدرجة:
+................. / ${getTotalPoints()}
+</div>
+
+</div>
+
+`;
+
+
+finalQuestions.forEach((q,index)=>{
+
+html += `
+
+<div class="print-question">
+
+<div class="print-question-title">
+
+${index+1})
+${escapeHtml(q.text || "")}
+
+<span style="font-weight:normal">
+(${q.points || 1} درجة)
+</span>
+
+</div>
+
+`;
+
+
+if(q.imgUrl){
+
+html += `
+
+<div style="margin:10px 0;text-align:center">
+
+<img
+src="${escapeHtml(q.imgUrl)}"
+style="max-width:100%;max-height:250px">
+
+</div>
+
+`;
+
+}
+
+
+if(q.type === "mcq"){
+
+html += `<div class="print-options">`;
+
+
+(q.options || []).forEach((option,optIndex)=>{
+
+const isCorrect =
+answered &&
+optIndex === q.correctIndex;
+
+
+html += `
+
+<div
+class="print-option ${
+isCorrect
+? "correct-answer"
+: ""
+}">
+
+${String.fromCharCode(65 + optIndex)})
+${escapeHtml(option)}
+
+${
+isCorrect
+?
+" ✓ الإجابة الصحيحة"
+:
+""
+}
+
+</div>
+
+`;
+
+});
+
+
+html += `</div>`;
+
+}else{
+
+html += `
+
+<div>
+
+<div class="essay-line"></div>
+<div class="essay-line"></div>
+<div class="essay-line"></div>
+
+</div>
+
+`;
+
+}
+
+
+html += `</div>`;
+
+});
+
+
+html += `
+
+<div class="footer-print">
+
+المستشار | كنترول الاختبارات
+
+</div>
+
+</div>
+
+`;
+
+
+return html;
+
+}
+
+
+/* =========================================================
+   TOTAL POINTS
+========================================================= */
+
+function getTotalPoints(){
+
+return finalQuestions.reduce(
+
+(sum,q)=>
+sum + (parseInt(q.points) || 1),
+
+0
+
+);
+
+}
+
+
+/* =========================================================
+   PRINT
+========================================================= */
+
+function printExam(answered=false){
+
+if(!validateExport()) return;
+
+
+const container =
+document.getElementById("printContainer");
+
+container.innerHTML =
+buildExamHTML(answered);
+
+
+container.style.display =
+"block";
+
+
+setTimeout(()=>{
+
+window.print();
+
+setTimeout(()=>{
+
+container.style.display =
+"none";
+
+container.innerHTML = "";
+
+},500);
+
+},300);
+
+}
+
+
+/* =========================================================
+   EXPORT PDF
+========================================================= */
+
+async function exportExamPDF(answered=false){
+
+if(!validateExport()) return;
+
+
+const container =
+document.getElementById("printContainer");
+
+
+container.innerHTML =
+buildExamHTML(answered);
+
+
+container.style.display =
+"block";
+
+
+Swal.fire({
+
+title:"جاري تجهيز ملف PDF...",
+
+text:"يرجى الانتظار",
+
+allowOutsideClick:false,
+
+didOpen:()=>Swal.showLoading()
+
+});
+
+
+try{
+
+const pages =
+container.querySelectorAll(".print-page");
+
+
+const page =
+pages[0];
+
+
+const canvas =
+await html2canvas(page,{
+
+scale:2,
+
+useCORS:true,
+
+backgroundColor:"#ffffff",
+
+logging:false
+
+});
+
+
+const imgData =
+canvas.toDataURL(
+"image/jpeg",
+0.95
+);
+
+
+const {
+jsPDF
+} = window.jspdf;
+
+
+const pdf =
+new jsPDF({
+
+orientation:"p",
+
+unit:"mm",
+
+format:"a4"
+
+});
+
+
+const pageWidth =
+210;
+
+const pageHeight =
+297;
+
+
+const imgWidth =
+pageWidth;
+
+const imgHeight =
+canvas.height *
+imgWidth /
+canvas.width;
+
+
+/*
+   إذا كان المحتوى أطول من صفحة،
+   يتم تقسيمه على صفحات.
+*/
+
+let heightLeft =
+imgHeight;
+
+let position = 0;
+
+
+pdf.addImage(
+
+imgData,
+
+"JPEG",
+
+0,
+
+position,
+
+imgWidth,
+
+imgHeight,
+
+undefined,
+
+"FAST"
+
+);
+
+
+heightLeft -= pageHeight;
+
+
+while(heightLeft > 0){
+
+position =
+heightLeft - imgHeight;
+
+pdf.addPage();
+
+pdf.addImage(
+
+imgData,
+
+"JPEG",
+
+0,
+
+position,
+
+imgWidth,
+
+imgHeight,
+
+undefined,
+
+"FAST"
+
+);
+
+heightLeft -= pageHeight;
+
+}
+
+
+const safeTitle =
+(document
+.getElementById("qTitle")
+.value
+.trim()
+|| "اختبار")
+.replace(/[\\/:*?"<>|]/g,"_");
+
+
+const fileName =
+answered
+?
+`${safeTitle} - نسخة مجابة - كنترول المستشار.pdf`
+:
+`${safeTitle} - نسخة غير مجابة.pdf`;
+
+
+pdf.save(fileName);
+
+
+Swal.fire({
+
+icon:"success",
+
+title:"تم التصدير",
+
+text:"تم إنشاء ملف PDF بنجاح.",
+
+confirmButtonText:"موافق"
+
+});
+
+
+}catch(error){
+
+console.error(error);
+
+Swal.fire(
+
+"خطأ",
+
+"حدث خطأ أثناء إنشاء PDF",
+
+"error"
+
+);
+
+}
+
+
+container.style.display =
+"none";
+
+container.innerHTML = "";
+
+}
+
+
+/* =========================================================
+   VALIDATE EXPORT
+========================================================= */
+
+function validateExport(){
+
+if(!document.getElementById("qTitle").value.trim()){
+
+Swal.fire(
+"تنبيه",
+"اكتب عنوان الاختبار أولاً",
+"warning"
+);
+
+return false;
+
+}
+
+
+if(finalQuestions.length === 0){
+
+Swal.fire(
+"تنبيه",
+"لا توجد أسئلة للتصدير",
+"warning"
+);
+
+return false;
+
+}
+
+
+return true;
+
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHtml(value){
+
+return String(value ?? "")
+
+.replace(/&/g,"&amp;")
+
+.replace(/</g,"&lt;")
+
+.replace(/>/g,"&gt;")
+
+.replace(/"/g,"&quot;")
+
+.replace(/'/g,"&#039;");
+
+}
+
 </script>
+
 </body>
-</html>
+        </html>
