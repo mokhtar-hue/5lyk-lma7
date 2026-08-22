@@ -88,7 +88,8 @@ body {
 
 button,
 select,
-input {
+input,
+textarea {
 
     font-family: 'Cairo', sans-serif;
 }
@@ -558,6 +559,45 @@ select:focus {
 
 
 /* ==================================================
+   ANSWERS EXPORT PANEL
+================================================== */
+
+.answers-export {
+
+    margin-top: 15px;
+
+    padding: 15px;
+
+    border-radius: 14px;
+
+    background: #ffffff;
+
+    border: 1px solid #dbeafe;
+}
+
+.answers-export-title {
+
+    font-size: 14px;
+
+    font-weight: 900;
+
+    color: #1e3a8a;
+
+    margin-bottom: 10px;
+}
+
+.answers-buttons {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(auto-fit, minmax(210px, 1fr));
+
+    gap: 10px;
+}
+
+
+/* ==================================================
    TOP N
 ================================================== */
 
@@ -822,13 +862,6 @@ tbody tr.selected {
     backdrop-filter: blur(5px);
 }
 
-
-/*
-   تعديل مهم:
-   النافذة أصبحت بارتفاع محدود
-   وبداخلها Scroll
-*/
-
 .modal-content {
 
     background: white;
@@ -849,8 +882,6 @@ tbody tr.selected {
     display: flex;
 
     flex-direction: column;
-
-    overflow: hidden;
 }
 
 .modal-header {
@@ -887,24 +918,121 @@ tbody tr.selected {
     color: #475569;
 
     font-size: 18px;
+}
+
+
+/* ==================================================
+   STUDENT CONTROL
+================================================== */
+
+.student-control-box {
+
+    background:
+        linear-gradient(
+            135deg,
+            #faf5ff,
+            #eff6ff
+        );
+
+    border: 1px solid #ddd6fe;
+
+    border-radius: 14px;
+
+    padding: 15px;
+
+    margin-bottom: 15px;
 
     flex-shrink: 0;
 }
 
+.student-control-grid {
 
-/*
-   Scroll الخاص بإجابات الطالب
-*/
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap: 12px;
+}
+
+.control-field label {
+
+    display: block;
+
+    font-size: 12px;
+
+    font-weight: 800;
+
+    color: #475569;
+
+    margin-bottom: 5px;
+}
+
+.control-field select {
+
+    padding: 10px 12px;
+}
+
+.danger-zone {
+
+    margin-top: 12px;
+
+    padding-top: 12px;
+
+    border-top: 1px solid #fecaca;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 10px;
+
+    flex-wrap: wrap;
+}
+
+.danger-text {
+
+    color: #991b1b;
+
+    font-size: 12px;
+
+    font-weight: 700;
+}
+
+.delete-student-btn {
+
+    background:
+        linear-gradient(
+            135deg,
+            #ef4444,
+            #991b1b
+        );
+
+    color: white;
+
+    padding: 10px 15px;
+
+    border-radius: 10px;
+
+    font-weight: 800;
+
+    font-size: 12px;
+}
+
+
+/* ==================================================
+   ANSWERS BOX
+================================================== */
 
 .answers-scroll {
 
     overflow-y: auto;
 
-    overflow-x: hidden;
+    max-height: 52vh;
 
-    max-height: 55vh;
-
-    padding: 5px 8px 10px 3px;
+    padding: 4px 7px 4px 2px;
 
     border: 1px solid #e2e8f0;
 
@@ -912,11 +1040,7 @@ tbody tr.selected {
 
     background: #f8fafc;
 
-    scrollbar-width: thin;
-
-    scrollbar-color:
-        #8b5cf6
-        #e2e8f0;
+    flex: 1;
 }
 
 .answers-scroll::-webkit-scrollbar {
@@ -933,11 +1057,7 @@ tbody tr.selected {
 
 .answers-scroll::-webkit-scrollbar-thumb {
 
-    background:
-        linear-gradient(
-            #8b5cf6,
-            #6d28d9
-        );
+    background: #94a3b8;
 
     border-radius: 10px;
 }
@@ -952,68 +1072,44 @@ tbody tr.selected {
 
     margin-bottom: 12px;
 
-    background: white;
+    background: #fff;
 }
 
-.answer-question {
-
-    font-size: 14px;
+.ans-question {
 
     font-weight: 900;
 
-    line-height: 1.8;
+    display: block;
+
+    margin-bottom: 7px;
 }
 
-.answer-student {
+.answer-line {
 
-    margin-top: 7px;
-
-    line-height: 1.8;
-}
-
-.answer-correct {
-
-    margin-top: 6px;
-
-    color: #059669;
-
-    font-weight: 800;
+    margin: 5px 0;
 
     line-height: 1.8;
 }
 
-.answer-meta {
+.answer-label {
 
-    margin-top: 8px;
-
-    padding: 8px;
-
-    background: #f8fafc;
-
-    border-radius: 8px;
-
-    font-size: 12px;
-}
-
-.answer-remark {
-
-    margin-top: 8px;
-
-    padding: 9px 11px;
-
-    background: #fff7ed;
-
-    border-right: 4px solid #f97316;
-
-    border-radius: 8px;
-
-    color: #9a3412;
+    color: #64748b;
 
     font-size: 12px;
 
     font-weight: 700;
+}
 
-    line-height: 1.7;
+.answer-value {
+
+    font-weight: 800;
+}
+
+.correct-answer {
+
+    color: #059669;
+
+    font-weight: 800;
 }
 
 .grading-inputs {
@@ -1038,35 +1134,14 @@ tbody tr.selected {
     outline: none;
 }
 
+.remark-input {
+
+    min-width: 0;
+}
+
 .modal-actions {
 
-    margin-top: 12px;
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(2, 1fr);
-
-    gap: 8px;
-
-    flex-shrink: 0;
-}
-
-.modal-actions .btn {
-
-    min-height: 42px;
-}
-
-.modal-save-actions {
-
-    margin-top: 10px;
-
-    display: grid;
-
-    grid-template-columns:
-        1fr 1fr;
-
-    gap: 10px;
+    margin-top: 15px;
 
     flex-shrink: 0;
 }
@@ -1111,7 +1186,6 @@ tbody tr.selected {
 .spinner {
 
     width: 45px;
-
     height: 45px;
 
     border: 4px solid #e2e8f0;
@@ -1180,8 +1254,16 @@ tbody tr.selected {
         grid-template-columns: 1fr 1fr;
     }
 
+    .answers-buttons {
+        grid-template-columns: 1fr;
+    }
+
     .grading-inputs {
         flex-direction: column;
+    }
+
+    .student-control-grid {
+        grid-template-columns: 1fr;
     }
 
     .modal {
@@ -1190,23 +1272,12 @@ tbody tr.selected {
 
     .modal-content {
         padding: 14px;
+
         max-height: 96vh;
     }
 
     .answers-scroll {
-        max-height: 52vh;
-    }
-
-    .modal-actions {
-
-        grid-template-columns:
-            1fr 1fr;
-    }
-
-    .modal-save-actions {
-
-        grid-template-columns:
-            1fr;
+        max-height: 48vh;
     }
 
     .top-controls .btn {
@@ -1217,7 +1288,7 @@ tbody tr.selected {
 
 
 /* ==================================================
-   PRINT
+   PRINT - RESULTS
 ================================================== */
 
 @media print {
@@ -1315,15 +1386,6 @@ tbody tr.selected {
         color: #374151;
 
         margin: 0;
-    }
-
-    .print-student {
-
-        font-size: 14px;
-
-        font-weight: 900;
-
-        margin-top: 7px;
     }
 
     .print-date {
@@ -1424,41 +1486,18 @@ tbody tr.selected {
         page-break-inside: avoid !important;
     }
 
-    .print-question {
+    .print-rank {
 
-        text-align: right !important;
+        font-weight: 900;
 
-        font-weight: 800 !important;
-
-        line-height: 1.7 !important;
+        font-size: 11px;
     }
 
-    .print-answer {
+    .print-name {
+
+        font-weight: 800;
 
         text-align: right !important;
-
-        line-height: 1.7 !important;
-    }
-
-    .print-correct {
-
-        color: #047857 !important;
-
-        font-weight: 800 !important;
-
-        text-align: right !important;
-    }
-
-    .print-remark {
-
-        color: #9a3412 !important;
-
-        background: #fff7ed !important;
-
-        font-weight: 700 !important;
-
-        text-align: right !important;
-        line-height: 1.7 !important;
     }
 
     .print-score {
@@ -1487,7 +1526,9 @@ tbody tr.selected {
 
     .print-clean {
 
-        font-weight: 700;
+        font-weight: 800;
+
+        color: #047857;
     }
 
     .print-cheat {
@@ -1519,6 +1560,160 @@ tbody tr.selected {
         display: none !important;
     }
 
+}
+
+
+/* ==================================================
+   PRINT - ANSWERS
+================================================== */
+
+.answer-print-header {
+
+    text-align: center;
+
+    border-bottom: 3px solid #111827;
+
+    padding-bottom: 12px;
+
+    margin-bottom: 15px;
+}
+
+.answer-print-title {
+
+    font-size: 21px;
+
+    font-weight: 900;
+
+    margin: 0 0 5px;
+}
+
+.answer-print-subtitle {
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    margin: 0;
+}
+
+.answer-student-card {
+
+    border: 1px solid #cbd5e1;
+
+    padding: 10px;
+
+    border-radius: 7px;
+
+    margin-bottom: 12px;
+
+    background: #f8fafc;
+}
+
+.answer-student-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 7px;
+}
+
+.answer-student-item {
+
+    font-size: 10px;
+}
+
+.answer-student-item strong {
+
+    display: block;
+
+    font-size: 11px;
+}
+
+.answer-print-question {
+
+    border: 1px solid #d1d5db;
+
+    border-right: 4px solid #7c3aed;
+
+    border-radius: 6px;
+
+    padding: 9px;
+
+    margin-bottom: 8px;
+
+    page-break-inside: avoid;
+}
+
+.answer-print-question.essay {
+
+    border-right-color: #2563eb;
+}
+
+.answer-print-question.correct {
+
+    border-right-color: #059669;
+}
+
+.answer-print-question.wrong {
+
+    border-right-color: #dc2626;
+}
+
+.answer-print-q {
+
+    font-size: 11px;
+
+    font-weight: 900;
+
+    margin-bottom: 5px;
+}
+
+.answer-print-line {
+
+    font-size: 10px;
+
+    line-height: 1.7;
+}
+
+.answer-print-label {
+
+    color: #64748b;
+
+    font-weight: 700;
+}
+
+.answer-print-remark {
+
+    margin-top: 6px;
+
+    padding: 6px;
+
+    border: 1px dashed #94a3b8;
+
+    background: #f8fafc;
+
+    border-radius: 5px;
+
+    font-size: 9px;
+}
+
+.answer-print-footer {
+
+    border-top: 1px solid #d1d5db;
+
+    margin-top: 12px;
+
+    padding-top: 7px;
+
+    font-size: 8px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    color: #64748b;
 }
 
 </style>
@@ -1792,42 +1987,66 @@ MAIN
             </button>
 
 
-            <!-- ==========================================
-            NEW ANSWERS EXPORT BUTTONS
-            =========================================== -->
-
-            <button
-                class="btn btn-purple"
-                onclick="exportAllAnswersPDF('mcq')">
-
-                <i class="fas fa-list-check"></i>
-
-                إجابات الكل اختياري PDF
-
-            </button>
+        </div>
 
 
-            <button
-                class="btn btn-blue"
-                onclick="exportAllAnswersPDF('essay')">
+        <!-- ==================================================
+        ANSWERS EXPORT
+        ================================================== -->
 
-                <i class="fas fa-pen-nib"></i>
+        <div class="answers-export">
 
-                إجابات الكل مقالي PDF
+            <div class="answers-export-title">
 
-            </button>
+                <i class="fas fa-file-pen"></i>
 
+                طباعة إجابات الطلاب
 
-            <button
-                class="btn btn-gray"
-                onclick="exportAllAnswersPDF('all')">
+            </div>
 
-                <i class="fas fa-file-lines"></i>
+            <div class="answers-buttons">
 
-                إجابات الكل كاملة PDF
+                <button
+                    class="btn btn-purple"
+                    onclick="exportSelectedAnswersPDF()">
 
-            </button>
+                    <i class="fas fa-user-check"></i>
 
+                    إجابات المحددين PDF
+
+                </button>
+
+                <button
+                    class="btn btn-blue"
+                    onclick="exportSelectedEssayPDF()">
+
+                    <i class="fas fa-align-right"></i>
+
+                    إجابات المقالي للمحددين PDF
+
+                </button>
+
+                <button
+                    class="btn btn-green"
+                    onclick="exportAllAnswersPDF()">
+
+                    <i class="fas fa-users"></i>
+
+                    إجابات الكل PDF
+
+                </button>
+
+                <button
+                    class="btn btn-orange"
+                    onclick="exportAllEssayPDF()">
+
+                    <i class="fas fa-file-signature"></i>
+
+                    إجابات الكل مقالي PDF
+
+                </button>
+
+            </div>
 
         </div>
 
@@ -1909,6 +2128,7 @@ MAIN
 
 
             </div>
+
 
         </div>
 
@@ -2042,90 +2262,121 @@ MODAL
 
 
         <!-- ==================================================
+        STUDENT CONTROL
+        ================================================== -->
+
+        <div class="student-control-box">
+
+            <div class="student-control-grid">
+
+                <div class="control-field">
+
+                    <label>
+
+                        <i class="fas fa-user-check"></i>
+
+                        حالة التصحيح
+
+                    </label>
+
+                    <select id="gradeStatus">
+
+                        <option value="true">
+                            مكتمل - تم التصحيح
+                        </option>
+
+                        <option value="false">
+                            بحاجة لتصحيح
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="control-field">
+
+                    <label>
+
+                        <i class="fas fa-shield-halved"></i>
+
+                        حالة الغش
+
+                    </label>
+
+                    <select id="cheatStatus">
+
+                        <option value="false">
+                            سليم
+                        </option>
+
+                        <option value="true">
+                            غشاش
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            <div class="danger-zone">
+
+                <div class="danger-text">
+
+                    <i class="fas fa-triangle-exclamation"></i>
+
+                    حذف الطالب سيحذف نتيجة الاختبار الخاصة به نهائياً.
+
+                </div>
+
+                <button
+                    class="delete-student-btn"
+                    onclick="deleteActiveStudent()">
+
+                    <i class="fas fa-trash"></i>
+
+                    حذف الطالب
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- ==================================================
         ANSWERS SCROLL
         ================================================== -->
 
         <div
-            class="answers-scroll"
-            id="answersContainer">
+            id="answersContainer"
+            class="answers-scroll">
 
         </div>
 
-
-        <!-- ==================================================
-        PRINT ANSWERS OF CURRENT STUDENT
-        ================================================== -->
 
         <div class="modal-actions">
 
             <button
-                onclick="printActiveStudentAnswers('all')"
-                class="btn btn-purple">
-
-                <i class="fas fa-file-pdf"></i>
-
-                طباعة كل الإجابات PDF
-
-            </button>
-
-
-            <button
-                onclick="printActiveStudentAnswers('mcq')"
-                class="btn btn-blue">
-
-                <i class="fas fa-list-check"></i>
-
-                طباعة الاختياري PDF
-
-            </button>
-
-
-            <button
-                onclick="printActiveStudentAnswers('essay')"
-                class="btn btn-orange">
-
-                <i class="fas fa-pen-nib"></i>
-
-                طباعة المقالي PDF
-
-            </button>
-
-
-            <button
-                onclick="closeModal()"
-                class="btn btn-gray">
-
-                <i class="fas fa-xmark"></i>
-
-                إغلاق
-
-            </button>
-
-        </div>
-
-
-        <!-- ==================================================
-        SAVE
-        ================================================== -->
-
-        <div class="modal-save-actions">
-
-            <button
                 onclick="saveManualGrades()"
-                class="btn btn-green">
+                class="btn btn-purple"
+                style="width:100%;">
 
                 <i class="fas fa-check"></i>
 
-                حفظ واعتماد الدرجة
+                حفظ واعتماد الدرجة والحالة
 
             </button>
 
 
             <button
                 onclick="closeModal()"
-                class="btn btn-gray">
+                class="btn btn-gray"
+                style="width:100%; margin-top:10px;">
 
-                إغلاق بدون حفظ
+                إغلاق
 
             </button>
 
@@ -2160,7 +2411,9 @@ LOADING
 
 
         <strong id="loadingText">
+
             جاري تجهيز الملف...
+
         </strong>
 
 
@@ -2178,7 +2431,7 @@ FIREBASE
 const firebaseConfig = {
 
     apiKey:
-        "AIzaSyCMbOFexmm8qEl6rti_ybAL-my9bDC5Ws",
+        "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws",
 
     authDomain:
         "zomaapp-744fc.firebaseapp.com",
@@ -2212,6 +2465,7 @@ DATE
 ================================================== */
 
 document.getElementById("currentDate").innerText =
+
     new Date().toLocaleDateString(
         "ar-EG",
         {
@@ -2488,11 +2742,13 @@ function renderTable() {
 
             const percentage =
                 maxScore > 0
-                    ? (
+                    ?
+                    (
                         (score / maxScore) *
                         100
                     ).toFixed(1)
-                    : "0.0";
+                    :
+                    "0.0";
 
 
             let rankDisplay =
@@ -2518,49 +2774,57 @@ function renderTable() {
             const status =
                 d.isGraded
 
-                    ? `
-                        <span class="status status-ok">
+                    ?
 
-                            <i class="fas fa-check"></i>
+                    `
+                    <span class="status status-ok">
 
-                            مكتمل
+                        <i class="fas fa-check"></i>
 
-                        </span>
-                      `
+                        مكتمل
 
-                    : `
-                        <span class="status status-wait">
+                    </span>
+                    `
 
-                            <i class="fas fa-clock"></i>
+                    :
 
-                            بحاجة لتصحيح
+                    `
+                    <span class="status status-wait">
 
-                        </span>
-                      `;
+                        <i class="fas fa-clock"></i>
+
+                        بحاجة لتصحيح
+
+                    </span>
+                    `;
 
 
             const cheat =
                 d.cheatAttempt
 
-                    ? `
-                        <span class="cheat">
+                    ?
 
-                            <i class="fas fa-triangle-exclamation"></i>
+                    `
+                    <span class="cheat">
 
-                            محاولة غش
+                        <i class="fas fa-triangle-exclamation"></i>
 
-                        </span>
-                      `
+                        غشاش
 
-                    : `
-                        <span class="clean">
+                    </span>
+                    `
 
-                            <i class="fas fa-shield-check"></i>
+                    :
 
-                            سليم
+                    `
+                    <span class="clean">
 
-                        </span>
-                      `;
+                        <i class="fas fa-shield-halved"></i>
+
+                        سليم
+
+                    </span>
+                    `;
 
 
             const tr =
@@ -2711,18 +2975,21 @@ function updateStats() {
 
     const highest =
         total
-            ? Math.max(
+            ?
+            Math.max(
                 ...currentResults.map(
                     r =>
                         Number(r.score) || 0
                 )
             )
-            : 0;
+            :
+            0;
 
 
     const average =
         total
-            ? (
+            ?
+            (
                 currentResults.reduce(
                     (sum, r) =>
                         sum +
@@ -2733,7 +3000,8 @@ function updateStats() {
                     0
                 ) / total
             ).toFixed(1)
-            : 0;
+            :
+            0;
 
 
     const graded =
@@ -2982,7 +3250,8 @@ function buildExcelData(
 
             const percentage =
                 max > 0
-                    ? Number(
+                    ?
+                    Number(
                         (
                             (
                                 score /
@@ -2990,7 +3259,8 @@ function buildExcelData(
                             ) * 100
                         ).toFixed(2)
                     )
-                    : 0;
+                    :
+                    0;
 
 
             return {
@@ -3015,13 +3285,17 @@ function buildExcelData(
 
                 "حالة التصحيح":
                     r.isGraded
-                        ? "مكتمل"
-                        : "بحاجة لتصحيح",
+                        ?
+                        "مكتمل"
+                        :
+                        "بحاجة لتصحيح",
 
                 "حالة الغش":
                     r.cheatAttempt
-                        ? "محاولة غش"
-                        : "سليم"
+                        ?
+                        "غشاش"
+                        :
+                        "سليم"
 
             };
 
@@ -3314,19 +3588,22 @@ function buildPrintReport(
 
     const highest =
         total
-            ? Math.max(
+            ?
+            Math.max(
                 ...results.map(
                     r =>
                         Number(r.score) ||
                         0
                 )
             )
-            : 0;
+            :
+            0;
 
 
     const average =
         total
-            ? (
+            ?
+            (
                 results.reduce(
                     (sum, r) =>
                         sum +
@@ -3337,7 +3614,8 @@ function buildPrintReport(
                     0
                 ) / total
             ).toFixed(1)
-            : 0;
+            :
+            0;
 
 
     let mainTitle =
@@ -3386,11 +3664,13 @@ function buildPrintReport(
 
             const percentage =
                 max > 0
-                    ? (
+                    ?
+                    (
                         (score / max) *
                         100
                     ).toFixed(1)
-                    : "0.0";
+                    :
+                    "0.0";
 
 
             let rankText =
@@ -3410,33 +3690,41 @@ function buildPrintReport(
             const statusHTML =
                 r.isGraded
 
-                    ? `
-                        <span class="print-status-ok">
-                            مكتمل
-                        </span>
-                      `
+                    ?
 
-                    : `
-                        <span class="print-status-wait">
-                            بحاجة للتصحيح
-                        </span>
-                      `;
+                    `
+                    <span class="print-status-ok">
+                        مكتمل
+                    </span>
+                    `
+
+                    :
+
+                    `
+                    <span class="print-status-wait">
+                        بحاجة للتصحيح
+                    </span>
+                    `;
 
 
             const cheatHTML =
                 r.cheatAttempt
 
-                    ? `
-                        <span class="print-cheat">
-                            محاولة غش
-                        </span>
-                      `
+                    ?
 
-                    : `
-                        <span class="print-clean">
-                            سليم
-                        </span>
-                      `;
+                    `
+                    <span class="print-cheat">
+                        غشاش
+                    </span>
+                    `
+
+                    :
+
+                    `
+                    <span class="print-clean">
+                        سليم
+                    </span>
+                    `;
 
 
             rows += `
@@ -3616,14 +3904,14 @@ function buildPrintReport(
                         </th>
 
 
-                        <th style="width:30%">
+                        <th style="width:28%">
 
                             اسم الطالب
 
                         </th>
 
 
-                        <th style="width:15%">
+                        <th style="width:14%">
 
                             الكود / اليوزر
 
@@ -3644,14 +3932,14 @@ function buildPrintReport(
                         </th>
 
 
-                        <th style="width:12%">
+                        <th style="width:13%">
 
                             الحالة
 
                         </th>
 
 
-                        <th style="width:10%">
+                        <th style="width:12%">
 
                             الغش
 
@@ -3750,7 +4038,6 @@ function exportPDF(
 
                 window.print();
 
-
                 setTimeout(
                     () => {
 
@@ -3760,7 +4047,6 @@ function exportPDF(
                     },
                     1000
                 );
-
 
             },
             300
@@ -3808,15 +4094,11 @@ function exportAllPDF() {
     }
 
 
-    const title =
-        getExamTitle();
-
-
     exportPDF(
 
         currentResults,
 
-        `نتائج_${safeFilename(title)}.pdf`,
+        `نتائج_${safeFilename(getExamTitle())}.pdf`,
 
         "all"
 
@@ -3848,15 +4130,11 @@ function exportSelectedPDF() {
     }
 
 
-    const title =
-        getExamTitle();
-
-
     exportPDF(
 
         results,
 
-        `نتائج_محددة_${safeFilename(title)}.pdf`,
+        `نتائج_محددة_${safeFilename(getExamTitle())}.pdf`,
 
         "selected"
 
@@ -3924,904 +4202,15 @@ function exportTopPDF() {
         );
 
 
-    const title =
-        getExamTitle();
-
-
     exportPDF(
 
         results,
 
-        `الأوائل_${count}_${safeFilename(title)}.pdf`,
+        `الأوائل_${count}_${safeFilename(getExamTitle())}.pdf`,
 
         "top"
 
     );
-
-}
-
-
-/* ==================================================
-ANSWER TYPE
-================================================== */
-
-function isEssayAnswer(ans) {
-
-    return String(
-        ans?.type || ""
-    ).toLowerCase() === "essay";
-
-}
-
-
-function isMcqAnswer(ans) {
-
-    const type =
-        String(
-            ans?.type || ""
-        ).toLowerCase();
-
-    return (
-        type === "mcq" ||
-        type === "choice" ||
-        type === "multiple-choice" ||
-        type === "multiplechoice"
-    );
-
-}
-
-
-/* ==================================================
-ANSWER TYPE LABEL
-================================================== */
-
-function getAnswerTypeLabel(ans) {
-
-    if (isEssayAnswer(ans))
-        return "مقالي";
-
-    if (isMcqAnswer(ans))
-        return "اختياري";
-
-    return ans?.type || "سؤال";
-
-}
-
-
-/* ==================================================
-ACTIVE STUDENT ANSWERS
-================================================== */
-
-function getActiveResult() {
-
-    return currentResults.find(
-        r =>
-            r.id === activeResultId
-    );
-
-}
-
-
-/* ==================================================
-FILTER ANSWERS
-================================================== */
-
-function filterAnswers(
-    answers,
-    type
-) {
-
-    if (!Array.isArray(answers))
-        return [];
-
-
-    if (type === "all")
-        return answers;
-
-
-    if (type === "essay") {
-
-        return answers.filter(
-            ans =>
-                isEssayAnswer(ans)
-        );
-
-    }
-
-
-    if (type === "mcq") {
-
-        return answers.filter(
-            ans =>
-                isMcqAnswer(ans)
-        );
-
-    }
-
-
-    return answers;
-
-}
-
-
-/* ==================================================
-ANSWER REPORT TITLE
-================================================== */
-
-function getAnswerReportTitle(
-    type
-) {
-
-    if (type === "mcq")
-        return "إجابات الأسئلة الاختيارية";
-
-    if (type === "essay")
-        return "إجابات الأسئلة المقالية";
-
-    return "إجابات الاختبار كاملة";
-
-}
-
-
-/* ==================================================
-BUILD ANSWERS PRINT REPORT
-================================================== */
-
-function buildAnswersPrintReport(
-    results,
-    type,
-    singleStudent = false
-) {
-
-    const title =
-        getExamTitle();
-
-
-    const now =
-        new Date().toLocaleString(
-            "ar-EG",
-            {
-                dateStyle: "medium",
-                timeStyle: "short"
-            }
-        );
-
-
-    const reportTitle =
-        getAnswerReportTitle(type);
-
-
-    let totalQuestions = 0;
-
-
-    results.forEach(
-        result => {
-
-            totalQuestions +=
-                filterAnswers(
-                    result.answers || [],
-                    type
-                ).length;
-
-        }
-    );
-
-
-    let studentBlocks = "";
-
-
-    results.forEach(
-        (result, studentIndex) => {
-
-            const answers =
-                filterAnswers(
-                    result.answers || [],
-                    type
-                );
-
-
-            if (!answers.length)
-                return;
-
-
-            const score =
-                Number(result.score) || 0;
-
-
-            const maxScore =
-                Number(result.maxScore) || 0;
-
-
-            let answerRows = "";
-
-
-            answers.forEach(
-                (ans, index) => {
-
-                    const earned =
-                        Number(
-                            ans.pointsEarned
-                        ) || 0;
-
-
-                    const max =
-                        Number(
-                            ans.maxPoints
-                        ) || 0;
-
-
-                    const studentAnswer =
-                        ans.studentAns ||
-                        "-";
-
-
-                    const correctAnswer =
-                        ans.correctAns ||
-                        "-";
-
-
-                    const remark =
-                        ans.remark ||
-                        "";
-
-
-                    let status = "";
-
-
-                    if (
-                        isMcqAnswer(ans)
-                    ) {
-
-                        if (
-                            ans.isCorrect === true
-                        ) {
-
-                            status = `
-                                <span
-                                    class="print-status-ok">
-                                    صحيحة
-                                </span>
-                            `;
-
-                        } else {
-
-                            status = `
-                                <span
-                                    class="print-status-wait">
-                                    خاطئة
-                                </span>
-                            `;
-
-                        }
-
-                    } else {
-
-                        status = `
-                            <span
-                                style="font-weight:800;">
-                                تمت المراجعة
-                            </span>
-                        `;
-
-                    }
-
-
-                    answerRows += `
-
-                        <tr>
-
-                            <td style="width:5%;">
-
-                                ${index + 1}
-
-                            </td>
-
-
-                            <td class="print-question"
-                                style="width:27%;">
-
-                                ${escapeHtml(
-                                    ans.text ||
-                                    "بدون نص للسؤال"
-                                )}
-
-                            </td>
-
-
-                            <td class="print-answer"
-                                style="width:23%;">
-
-                                ${escapeHtml(
-                                    studentAnswer
-                                )}
-
-                            </td>
-
-
-                            ${
-                                isMcqAnswer(ans)
-
-                                ?
-
-                                `
-
-                                <td
-                                    class="print-correct"
-                                    style="width:18%;">
-
-                                    ${escapeHtml(
-                                        correctAnswer
-                                    )}
-
-                                </td>
-
-                                `
-
-                                :
-
-                                `
-
-                                <td
-                                    class="print-correct"
-                                    style="width:18%;">
-
-                                    —
-
-                                </td>
-
-                                `
-                            }
-
-
-                            <td
-                                class="print-score"
-                                style="width:9%;">
-
-                                ${earned}
-                                /
-                                ${max}
-
-                            </td>
-
-
-                            <td
-                                style="width:8%;">
-
-                                ${status}
-
-                            </td>
-
-
-                            <td
-                                class="print-remark"
-                                style="width:10%;">
-
-                                ${escapeHtml(
-                                    remark ||
-                                    "لا يوجد تعقيب"
-                                )}
-
-                            </td>
-
-                        </tr>
-
-                    `;
-
-                }
-            );
-
-
-            studentBlocks += `
-
-                <div
-                    class="print-student-block"
-                    style="
-                        margin-bottom:25px;
-                        page-break-inside:avoid;
-                    "
-                >
-
-                    <div
-                        style="
-                            border:2px solid #111827;
-                            padding:9px;
-                            margin-bottom:8px;
-                            border-radius:5px;
-                        "
-                    >
-
-                        <strong
-                            style="
-                                font-size:14px;
-                            "
-                        >
-
-                            الطالب:
-                            ${escapeHtml(
-                                result.name ||
-                                "-"
-                            )}
-
-                        </strong>
-
-
-                        <span
-                            style="
-                                margin-right:25px;
-                                direction:ltr;
-                                display:inline-block;
-                            "
-                        >
-
-                            اليوزر:
-                            ${escapeHtml(
-                                result.username ||
-                                "-"
-                            )}
-
-                        </span>
-
-
-                        <span
-                            style="
-                                margin-right:25px;
-                            "
-                        >
-
-                            الدرجة:
-                            ${score}
-                            /
-                            ${maxScore}
-
-                        </span>
-
-                    </div>
-
-
-                    <table
-                        class="print-table"
-                    >
-
-                        <thead>
-
-                            <tr>
-
-                                <th style="width:5%;">
-
-                                    م
-
-                                </th>
-
-
-                                <th style="width:27%;">
-
-                                    السؤال
-
-                                </th>
-
-
-                                <th style="width:23%;">
-
-                                    إجابة الطالب
-
-                                </th>
-
-
-                                <th style="width:18%;">
-
-                                    الإجابة الصحيحة
-
-                                </th>
-
-
-                                <th style="width:9%;">
-
-                                    الدرجة
-
-                                </th>
-
-
-                                <th style="width:8%;">
-
-                                    الحالة
-
-                                </th>
-
-
-                                <th style="width:10%;">
-
-                                    التعقيب
-
-                                </th>
-
-                            </tr>
-
-                        </thead>
-
-
-                        <tbody>
-
-                            ${answerRows}
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-            `;
-
-        }
-    );
-
-
-    if (!studentBlocks) {
-
-        studentBlocks = `
-
-            <div
-                style="
-                    text-align:center;
-                    padding:40px;
-                    font-size:16px;
-                    font-weight:800;
-                "
-            >
-
-                لا توجد إجابات من النوع المحدد.
-
-            </div>
-
-        `;
-
-    }
-
-
-    return `
-
-        <div class="print-container">
-
-            <div class="print-header">
-
-                <h1 class="print-title">
-
-                    ${escapeHtml(
-                        reportTitle
-                    )}
-
-                </h1>
-
-
-                <p class="print-subtitle">
-
-                    ${singleStudent
-                        ? "تقرير إجابات الطالب"
-                        : "تقرير إجابات الطلاب"}
-
-                </p>
-
-
-                <p class="print-exam">
-
-                    الاختبار:
-                    ${escapeHtml(title)}
-
-                </p>
-
-
-                <div class="print-date">
-
-                    تاريخ الإصدار:
-                    ${escapeHtml(now)}
-
-                </div>
-
-            </div>
-
-
-            <div class="print-stats">
-
-                <div class="print-stat">
-
-                    <strong>
-
-                        ${results.length}
-
-                    </strong>
-
-                    <span>
-
-                        عدد الطلاب
-
-                    </span>
-
-                </div>
-
-
-                <div class="print-stat">
-
-                    <strong>
-
-                        ${totalQuestions}
-
-                    </strong>
-
-                    <span>
-
-                        إجمالي الإجابات
-
-                    </span>
-
-                </div>
-
-
-                <div class="print-stat">
-
-                    <strong>
-
-                        ${
-                            type === "mcq"
-                                ? "اختياري"
-                                : (
-                                    type === "essay"
-                                        ? "مقالي"
-                                        : "كامل"
-                                )
-                        }
-
-                    </strong>
-
-                    <span>
-
-                        نوع التقرير
-
-                    </span>
-
-                </div>
-
-            </div>
-
-
-            ${studentBlocks}
-
-
-            <div class="print-footer">
-
-                <span>
-
-                    نظام المستشار - كنترول النتائج
-
-                </span>
-
-
-                <span>
-
-                    ${escapeHtml(now)}
-
-                </span>
-
-            </div>
-
-        </div>
-
-    `;
-
-}
-
-
-/* ==================================================
-PRINT ACTIVE STUDENT ANSWERS
-================================================== */
-
-function printActiveStudentAnswers(
-    type
-) {
-
-    const result =
-        getActiveResult();
-
-
-    if (!result) {
-
-        Swal.fire(
-            "تنبيه",
-            "لم يتم تحديد طالب",
-            "warning"
-        );
-
-        return;
-
-    }
-
-
-    const answers =
-        filterAnswers(
-            result.answers || [],
-            type
-        );
-
-
-    if (!answers.length) {
-
-        Swal.fire(
-            "تنبيه",
-            "لا توجد إجابات من النوع المحدد لهذا الطالب",
-            "warning"
-        );
-
-        return;
-
-    }
-
-
-    try {
-
-        showLoading(
-            "جاري تجهيز إجابات الطالب..."
-        );
-
-
-        const printArea =
-            document.getElementById(
-                "printReport"
-            );
-
-
-        printArea.innerHTML =
-            buildAnswersPrintReport(
-                [result],
-                type,
-                true
-            );
-
-
-        setTimeout(
-            () => {
-
-                hideLoading();
-
-                window.print();
-
-
-                setTimeout(
-                    () => {
-
-                        printArea.innerHTML =
-                            "";
-
-                    },
-                    1000
-                );
-
-            },
-            300
-        );
-
-
-    } catch (error) {
-
-        hideLoading();
-
-        console.error(error);
-
-
-        Swal.fire(
-            "خطأ",
-            "تعذر تجهيز إجابات الطالب: " +
-            error.message,
-            "error"
-        );
-
-    }
-
-}
-
-
-/* ==================================================
-PRINT ALL STUDENTS ANSWERS
-================================================== */
-
-function exportAllAnswersPDF(
-    type
-) {
-
-    if (
-        !currentResults.length
-    ) {
-
-        Swal.fire(
-            "تنبيه",
-            "اختر اختباراً أولاً",
-            "warning"
-        );
-
-        return;
-
-    }
-
-
-    const hasAnswers =
-        currentResults.some(
-            result =>
-                filterAnswers(
-                    result.answers || [],
-                    type
-                ).length > 0
-        );
-
-
-    if (!hasAnswers) {
-
-        Swal.fire(
-            "تنبيه",
-            "لا توجد إجابات من النوع المحدد",
-            "warning"
-        );
-
-        return;
-
-    }
-
-
-    try {
-
-        showLoading(
-            "جاري تجهيز إجابات جميع الطلاب..."
-        );
-
-
-        const printArea =
-            document.getElementById(
-                "printReport"
-            );
-
-
-        printArea.innerHTML =
-            buildAnswersPrintReport(
-                currentResults,
-                type,
-                false
-            );
-
-
-        setTimeout(
-            () => {
-
-                hideLoading();
-
-                window.print();
-
-
-                setTimeout(
-                    () => {
-
-                        printArea.innerHTML =
-                            "";
-
-                    },
-                    1000
-                );
-
-            },
-            400
-        );
-
-
-    } catch (error) {
-
-        hideLoading();
-
-        console.error(error);
-
-
-        Swal.fire(
-            "خطأ",
-            "تعذر تجهيز إجابات الطلاب: " +
-            error.message,
-            "error"
-        );
-
-    }
 
 }
 
@@ -4988,118 +4377,41 @@ function openGrading(
         "بدون اسم";
 
 
+    document.getElementById(
+        "gradeStatus"
+    ).value =
+        String(
+            res.isGraded !== false
+        );
+
+
+    document.getElementById(
+        "cheatStatus"
+    ).value =
+        String(
+            res.cheatAttempt === true
+        );
+
+
     let html = "";
 
 
-    const answers =
-        Array.isArray(res.answers)
-            ? res.answers
-            : [];
-
-
-    if (!answers.length) {
-
-        html = `
-
-            <div
-                style="
-                    text-align:center;
-                    padding:40px 20px;
-                    color:#64748b;
-                "
-            >
-
-                <i
-                    class="fas fa-inbox"
-                    style="
-                        font-size:45px;
-                        opacity:.4;
-                    "
-                ></i>
-
-                <div
-                    style="
-                        margin-top:10px;
-                        font-weight:800;
-                    "
-                >
-
-                    لا توجد إجابات لهذا الطالب
-
-                </div>
-
-            </div>
-
-        `;
-
-    }
-
-
-    answers.forEach(
+    (res.answers || []).forEach(
         (ans, i) => {
 
 
             const borderColor =
-                isEssayAnswer(ans)
+                ans.type === "essay"
 
                     ? "#3b82f6"
 
-                    : (
+                    :
+
+                    (
                         ans.isCorrect
                             ? "#10b981"
                             : "#ef4444"
                     );
-
-
-            const typeLabel =
-                getAnswerTypeLabel(ans);
-
-
-            const answerTypeBadge =
-                isEssayAnswer(ans)
-
-                    ?
-
-                    `
-                        <span
-                            style="
-                                display:inline-block;
-                                background:#dbeafe;
-                                color:#1d4ed8;
-                                padding:4px 8px;
-                                border-radius:999px;
-                                font-size:10px;
-                                font-weight:900;
-                                margin-right:7px;
-                            "
-                        >
-                            مقالي
-                        </span>
-                    `
-
-                    :
-
-                    `
-                        <span
-                            style="
-                                display:inline-block;
-                                background:#d1fae5;
-                                color:#047857;
-                                padding:4px 8px;
-                                border-radius:999px;
-                                font-size:10px;
-                                font-weight:900;
-                                margin-right:7px;
-                            "
-                        >
-                            اختياري
-                        </span>
-                    `;
-
-
-            const remark =
-                ans.remark ||
-                "";
 
 
             html += `
@@ -5113,43 +4425,28 @@ function openGrading(
                     "
                 >
 
-                    <div
-                        class="answer-question"
-                    >
 
-                        <span>
+                    <span class="ans-question">
 
-                            س${i + 1}:
-
-                        </span>
-
-
-                        ${answerTypeBadge}
+                        س${i + 1}:
 
                         ${escapeHtml(
                             ans.text ||
                             ""
                         )}
 
-                    </div>
+                    </span>
 
 
-                    <div
-                        class="answer-student"
-                    >
+                    <div class="answer-line">
 
-                        <span
-                            style="
-                                color:#64748b;
-                            "
-                        >
+                        <span class="answer-label">
 
                             إجابة الطالب:
 
                         </span>
 
-
-                        <strong>
+                        <strong class="answer-value">
 
                             ${escapeHtml(
                                 ans.studentAns ||
@@ -5162,26 +4459,28 @@ function openGrading(
 
 
                     ${
-                        isMcqAnswer(ans)
+                        ans.type === "mcq"
 
                         ?
 
                         `
 
-                        <div
-                            class="answer-correct"
-                        >
+                        <div class="answer-line">
 
-                            <i
-                                class="fas fa-circle-check"
-                            ></i>
+                            <span class="answer-label">
 
-                            الإجابة الصحيحة:
+                                الإجابة الصحيحة:
 
-                            ${escapeHtml(
-                                ans.correctAns ||
-                                "-"
-                            )}
+                            </span>
+
+                            <strong class="correct-answer">
+
+                                ${escapeHtml(
+                                    ans.correctAns ||
+                                    "-"
+                                )}
+
+                            </strong>
 
                         </div>
 
@@ -5191,68 +4490,20 @@ function openGrading(
 
                         `
 
-                        <div
-                            style="
-                                margin-top:7px;
-                                color:#2563eb;
-                                font-weight:800;
-                                font-size:12px;
-                            "
-                        >
+                        <div class="answer-line">
 
-                            <i
-                                class="fas fa-pen-nib"
-                            ></i>
+                            <span
+                                class="answer-label"
+                                style="color:#2563eb">
 
-                            سؤال مقالي - يحتاج تصحيح يدوي
+                                سؤال مقالي
+
+                            </span>
 
                         </div>
 
                         `
                     }
-
-
-                    <div
-                        class="answer-meta"
-                    >
-
-                        <strong>
-
-                            نوع السؤال:
-
-                        </strong>
-
-                        ${escapeHtml(typeLabel)}
-
-                        &nbsp;&nbsp; | &nbsp;&nbsp;
-
-                        <strong>
-
-                            الدرجة القصوى:
-
-                        </strong>
-
-                        ${
-                            Number(
-                                ans.maxPoints
-                            ) || 0
-                        }
-
-                        &nbsp;&nbsp; | &nbsp;&nbsp;
-
-                        <strong>
-
-                            الدرجة الحالية:
-
-                        </strong>
-
-                        ${
-                            Number(
-                                ans.pointsEarned
-                            ) || 0
-                        }
-
-                    </div>
 
 
                     <div
@@ -5276,7 +4527,7 @@ function openGrading(
                             min="0"
                             placeholder="الدرجة"
                             ${
-                                isMcqAnswer(ans)
+                                ans.type === "mcq"
                                 ?
                                 'readonly style="background:#e2e8f0"'
                                 :
@@ -5287,9 +4538,11 @@ function openGrading(
 
                         <input
                             type="text"
+                            class="remark-input"
                             id="rem_${i}"
                             value="${escapeHtml(
-                                remark
+                                ans.remark ||
+                                ""
                             )}"
                             placeholder="تعقيب / ملاحظة للمستشار"
                         >
@@ -5298,44 +4551,31 @@ function openGrading(
                     </div>
 
 
-                    ${
-                        remark
-
-                        ?
-
-                        `
-
-                        <div
-                            class="answer-remark"
-                        >
-
-                            <i
-                                class="fas fa-comment-dots"
-                            ></i>
-
-                            التعقيب الحالي:
-
-                            ${escapeHtml(
-                                remark
-                            )}
-
-                        </div>
-
-                        `
-
-                        :
-
-                        ""
-
-                    }
-
-
                 </div>
 
             `;
 
         }
     );
+
+
+    if (!(res.answers || []).length) {
+
+        html = `
+
+            <div class="empty">
+
+                <i class="fas fa-file-circle-xmark"></i>
+
+                <div>
+                    لا توجد إجابات محفوظة لهذا الطالب
+                </div>
+
+            </div>
+
+        `;
+
+    }
 
 
     document.getElementById(
@@ -5348,16 +4588,6 @@ function openGrading(
         "gradeModal"
     ).style.display =
         "flex";
-
-
-    /*
-     * نعيد Scroll لأعلى
-     * عند فتح طالب جديد
-     */
-
-    document.getElementById(
-        "answersContainer"
-    ).scrollTop = 0;
 
 }
 
@@ -5411,23 +4641,6 @@ async function saveManualGrades() {
                 ) || 0;
 
 
-            /*
-             * الاختياري لا يتم تغيير درجته
-             * من نافذة التصحيح
-             */
-
-            if (
-                isMcqAnswer(ans)
-            ) {
-
-                pts =
-                    Number(
-                        ans.pointsEarned
-                    ) || 0;
-
-            }
-
-
             if (pts > max) {
 
                 pts = max;
@@ -5448,166 +4661,3 @@ async function saveManualGrades() {
 
             ans.remark =
                 remark?.value ||
-                "";
-
-
-            newScore += pts;
-
-        }
-    );
-
-
-    try {
-
-        showLoading(
-            "جاري حفظ الدرجات..."
-        );
-
-
-        await db
-            .collection("results2")
-            .doc(activeResultId)
-            .update({
-
-                score:
-                    newScore,
-
-                isGraded:
-                    true,
-
-                answers:
-                    res.answers
-
-            });
-
-
-        hideLoading();
-
-
-        await Swal.fire({
-
-            icon: "success",
-
-            title: "تم الحفظ",
-
-            text:
-                "تم حفظ الدرجات والتعقيبات بنجاح",
-
-            timer: 1500,
-
-            showConfirmButton: false
-
-        });
-
-
-        closeModal();
-
-
-        fetchResults();
-
-
-    } catch (error) {
-
-        hideLoading();
-
-
-        console.error(error);
-
-
-        Swal.fire(
-            "خطأ",
-            "تعذر حفظ الدرجات: " +
-            error.message,
-            "error"
-        );
-
-    }
-
-}
-
-
-/* ==================================================
-CLOSE MODAL
-================================================== */
-
-function closeModal() {
-
-    document.getElementById(
-        "gradeModal"
-    ).style.display =
-        "none";
-
-}
-
-
-/* ==================================================
-CLICK OUTSIDE MODAL
-================================================== */
-
-document.getElementById(
-    "gradeModal"
-).addEventListener(
-    "click",
-    function(e) {
-
-        if (
-            e.target === this
-        ) {
-
-            closeModal();
-
-        }
-
-    }
-);
-
-
-/* ==================================================
-ESC KEY
-================================================== */
-
-document.addEventListener(
-    "keydown",
-    function(e) {
-
-        if (
-            e.key === "Escape"
-        ) {
-
-            closeModal();
-
-        }
-
-    }
-);
-
-
-/* ==================================================
-AFTER PRINT
-================================================== */
-
-window.addEventListener(
-    "afterprint",
-    function() {
-
-        const printArea =
-            document.getElementById(
-                "printReport"
-            );
-
-
-        if (printArea) {
-
-            printArea.innerHTML =
-                "";
-
-        }
-
-    }
-);
-
-</script>
-
-</body>
-
-                                </html>
