@@ -10,26 +10,28 @@
 
 <title>المستشار | منشئ ومعدل الاختبارات</title>
 
-<!-- =========================================================
-     LIBRARIES
-========================================================= -->
-
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
+<!-- Excel -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
+<!-- SweetAlert -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+<!-- HTML2Canvas -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
+<!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
+<!-- Font -->
 <link
 href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap"
 rel="stylesheet">
 
+<!-- Font Awesome -->
 <link
 rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -37,169 +39,113 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
 
 <style>
 
-/* =========================================================
-   ROOT
-========================================================= */
-
 :root{
 
     --primary:#2563eb;
     --primary-dark:#1d4ed8;
-
     --secondary:#475569;
-
     --bg:#f1f5f9;
-
     --card:#ffffff;
-
     --accent:#10b981;
-
     --danger:#ef4444;
-
     --warning:#f59e0b;
-
     --purple:#7c3aed;
-
     --dark:#0f172a;
-
     --border:#e2e8f0;
-
-    --success-light:#dcfce7;
-
-    --blue-light:#eff6ff;
-
-    --green-light:#ecfdf5;
 
 }
 
-
-/* =========================================================
-   GENERAL
-========================================================= */
-
 *{
+
     box-sizing:border-box;
+
 }
 
 body{
 
     font-family:'Cairo',sans-serif;
-
     background:var(--bg);
-
     color:#1e293b;
-
     margin:0;
-
     padding:20px;
+
 }
 
 .container{
 
     max-width:1250px;
-
     margin:auto;
+
 }
-
-
-/* =========================================================
-   HEADER
-========================================================= */
 
 .header{
 
     text-align:center;
-
     margin-bottom:30px;
+
 }
 
 .header h1{
 
     color:var(--primary);
-
     margin:0;
-
     font-weight:800;
+
 }
 
 .header p{
 
     color:#64748b;
 
-    margin-top:5px;
 }
-
-
-/* =========================================================
-   CARDS
-========================================================= */
 
 .card{
 
     background:var(--card);
-
     padding:25px;
-
     border-radius:18px;
-
-    box-shadow:
-        0 10px 25px rgba(0,0,0,.05);
-
+    box-shadow:0 10px 25px rgba(0,0,0,.05);
     margin-bottom:25px;
-
     border-top:5px solid var(--primary);
+
 }
 
 .card.edit-mode{
 
     border-top-color:var(--warning);
+
 }
 
+.card-title{
 
-/* =========================================================
-   LAYOUT
-========================================================= */
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+
+}
 
 .grid-2{
 
     display:grid;
-
     grid-template-columns:1fr 1fr;
-
     gap:20px;
+
 }
 
 .grid-4{
 
     display:grid;
-
-    grid-template-columns:
-        repeat(4,1fr);
-
-    gap:10px;
-}
-
-.flex-between{
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
-
+    grid-template-columns:repeat(4,1fr);
     gap:10px;
 
-    flex-wrap:wrap;
 }
-
-
-/* =========================================================
-   INPUTS
-========================================================= */
 
 label{
 
     font-weight:600;
+
 }
 
 input,
@@ -207,788 +153,650 @@ select,
 textarea{
 
     width:100%;
-
     padding:12px;
-
     margin-top:5px;
-
-    border:
-        1px solid #cbd5e1;
-
+    border:1px solid #cbd5e1;
     border-radius:9px;
-
     font-family:'Cairo';
-
+    box-sizing:border-box;
     font-size:15px;
-
     outline:none;
-
     transition:.2s;
+
 }
 
 input:focus,
 select:focus,
 textarea:focus{
 
-    border-color:
-        var(--primary);
+    border-color:var(--primary);
+    box-shadow:0 0 0 3px rgba(37,99,235,.1);
 
-    box-shadow:
-        0 0 0 3px
-        rgba(37,99,235,.1);
 }
-
-
-/* =========================================================
-   BUTTONS
-========================================================= */
 
 button{
 
     font-family:'Cairo';
-
     font-weight:700;
-
     cursor:pointer;
-
     border:none;
-
     border-radius:9px;
-
     transition:.25s;
-
     padding:11px 18px;
-
     display:inline-flex;
-
     align-items:center;
-
     gap:8px;
-
     justify-content:center;
+
 }
 
 button:hover{
 
     opacity:.9;
+    transform:translateY(-1px);
 
-    transform:
-        translateY(-1px);
 }
 
 button:disabled{
 
     opacity:.45;
-
     cursor:not-allowed;
-
     transform:none;
+
 }
 
 .btn-primary{
 
-    background:
-        var(--primary);
-
+    background:var(--primary);
     color:white;
+
 }
 
 .btn-primary:hover{
 
-    background:
-        var(--primary-dark);
+    background:var(--primary-dark);
+
 }
 
 .btn-accent{
 
-    background:
-        var(--accent);
-
+    background:var(--accent);
     color:white;
+
 }
 
 .btn-warning{
 
-    background:
-        var(--warning);
-
+    background:var(--warning);
     color:white;
+
 }
 
 .btn-danger{
 
-    background:
-        var(--danger);
-
+    background:var(--danger);
     color:white;
-
     padding:8px 12px;
-
     font-size:13px;
+
 }
 
 .btn-secondary{
 
     background:#64748b;
-
     color:white;
+
 }
 
 .btn-purple{
 
-    background:
-        var(--purple);
-
+    background:var(--purple);
     color:white;
+
 }
 
 .btn-dark{
 
-    background:
-        var(--dark);
-
+    background:var(--dark);
     color:white;
+
 }
 
 .btn-light{
 
     background:#e2e8f0;
-
     color:#334155;
+
 }
 
-.btn-green-dark{
+.btn-info{
 
-    background:#059669;
-
+    background:#0891b2;
     color:white;
+
 }
 
+.btn-orange{
 
-/* =========================================================
-   OTHER
-========================================================= */
+    background:#ea580c;
+    color:white;
+
+}
 
 hr{
 
     border:0;
-
-    border-top:
-        1px solid var(--border);
-
+    border-top:1px solid var(--border);
     margin:25px 0;
-}
 
-.manual-box{
-
-    background:#f8fafc;
-
-    padding:18px;
-
-    border-radius:12px;
-
-    border:
-        1px dashed #cbd5e1;
-
-    margin-bottom:15px;
 }
 
 .table-container{
 
     max-height:430px;
-
     overflow:auto;
-
     margin-top:15px;
-
-    border:
-        1px solid var(--border);
-
+    border:1px solid var(--border);
     border-radius:10px;
+
 }
 
 table{
 
     width:100%;
-
     border-collapse:collapse;
-
     background:#fff;
+
 }
 
 th,
 td{
 
-    border:
-        1px solid var(--border);
-
+    border:1px solid var(--border);
     padding:10px;
-
     text-align:center;
+
 }
 
 th{
 
     background:#f8fafc;
-
-    color:
-        var(--secondary);
-
+    color:var(--secondary);
     position:sticky;
-
     top:0;
-
     z-index:2;
+
+}
+
+.manual-box{
+
+    background:#f8fafc;
+    padding:18px;
+    border-radius:12px;
+    border:1px dashed #cbd5e1;
+    margin-bottom:15px;
+
+}
+
+.flex-between{
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+
 }
 
 .action-buttons{
 
     display:flex;
-
     gap:5px;
-
     justify-content:center;
-
     flex-wrap:wrap;
+
 }
 
 .order-buttons{
 
     display:flex;
-
     gap:4px;
-
     justify-content:center;
+
 }
 
 .order-btn{
 
-    width:35px;
-
-    height:35px;
-
+    width:34px;
+    height:34px;
     padding:0;
-
     background:#e2e8f0;
-
     color:#334155;
+
 }
 
 .order-btn:hover{
 
     background:#cbd5e1;
+
 }
-
-
-/* =========================================================
-   QUESTION EDITOR
-========================================================= */
 
 .question-edit-box{
 
     display:none;
-
-    background:
-        var(--blue-light);
-
-    border:
-        2px solid #93c5fd;
-
+    background:#eff6ff;
+    border:2px solid #93c5fd;
     padding:20px;
-
     border-radius:14px;
-
     margin-bottom:20px;
+
 }
 
 .question-edit-box.active{
 
     display:block;
+
 }
-
-
-/* =========================================================
-   STUDENT EDITOR
-========================================================= */
 
 .student-edit-box{
 
     display:none;
-
-    background:
-        var(--green-light);
-
-    border:
-        2px solid #86efac;
-
+    background:#ecfdf5;
+    border:2px solid #86efac;
     padding:20px;
-
     border-radius:14px;
-
     margin-bottom:20px;
+
 }
 
 .student-edit-box.active{
 
     display:block;
+
 }
-
-
-/* =========================================================
-   BADGES
-========================================================= */
 
 .edit-badge{
 
     display:inline-block;
-
     background:#2563eb;
-
     color:#fff;
-
     padding:4px 10px;
-
     border-radius:20px;
-
-    font-size:12px;
-}
-
-.status-pill{
-
-    padding:
-        4px 10px;
-
-    border-radius:
-        20px;
-
     font-size:12px;
 
-    font-weight:bold;
 }
 
-.status-open{
+.preview-box{
 
-    background:
-        #dcfce7;
+    background:white;
+    border:1px solid #cbd5e1;
+    border-radius:10px;
+    padding:25px;
 
-    color:
-        #166534;
 }
-
-.status-closed{
-
-    background:
-        #fee2e2;
-
-    color:
-        #991b1b;
-}
-
-
-/* =========================================================
-   EXPORT BUTTONS
-========================================================= */
 
 .export-actions{
 
     display:grid;
-
-    grid-template-columns:
-        repeat(3,1fr);
-
+    grid-template-columns:repeat(4,1fr);
     gap:12px;
 
-    margin-top:15px;
 }
-
-.export-users-actions{
-
-    display:grid;
-
-    grid-template-columns:
-        repeat(2,1fr);
-
-    gap:12px;
-
-    margin-top:12px;
-}
-
-
-/* =========================================================
-   REWARDS
-========================================================= */
 
 .reward-row{
 
     display:flex;
-
     gap:10px;
-
     margin-top:10px;
-
     align-items:center;
+
 }
 
+.reward-row input:first-child{
 
-/* =========================================================
-   QUESTION TABLE
-========================================================= */
+    flex:1;
 
-.question-text-cell{
+}
 
-    max-width:350px;
+.reward-row input:nth-child(2){
 
-    overflow:hidden;
+    flex:3;
 
-    text-overflow:ellipsis;
-
-    white-space:nowrap;
 }
 
 .empty-row{
 
-    padding:
-        30px !important;
-
+    padding:25px!important;
     color:#94a3b8;
+
 }
 
+.status-pill{
 
-/* =========================================================
-   WATERMARK
-========================================================= */
+    padding:4px 10px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:bold;
+
+}
+
+.status-open{
+
+    background:#dcfce7;
+    color:#166534;
+
+}
+
+.status-closed{
+
+    background:#fee2e2;
+    color:#991b1b;
+
+}
+
+.small-text{
+
+    font-size:13px;
+    color:#64748b;
+
+}
+
+.question-text-cell{
+
+    max-width:350px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+
+}
+
+.preview-question{
+
+    padding:18px;
+    border-bottom:1px solid #e2e8f0;
+
+}
+
+.preview-question:last-child{
+
+    border-bottom:none;
+
+}
+
+.preview-options{
+
+    margin-top:10px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+
+}
+
+.preview-option{
+
+    border:1px solid #cbd5e1;
+    padding:8px;
+    border-radius:7px;
+
+}
 
 .watermark{
 
     position:absolute;
-
     top:45%;
-
     left:50%;
-
-    transform:
-        translate(-50%,-50%)
-        rotate(-30deg);
-
-    font-size:65px;
-
+    transform:translate(-50%,-50%) rotate(-30deg);
+    font-size:70px;
     font-weight:800;
-
-    color:
-        rgba(30,41,59,.09);
-
+    color:rgba(30,41,59,.08);
     white-space:nowrap;
-
     pointer-events:none;
 
-    z-index:1;
 }
-
-
-/* =========================================================
-   PRINT PAGE
-========================================================= */
 
 .print-page{
 
     position:relative;
-
     background:white;
-
-    padding:35px;
-
+    padding:30px;
     width:794px;
-
     min-height:1123px;
-
     margin:auto;
-
     color:#111827;
+
 }
 
 .print-header{
 
     text-align:center;
-
-    border-bottom:
-        2px solid #111827;
-
+    border-bottom:2px solid #111827;
     padding-bottom:15px;
-
     margin-bottom:20px;
+
 }
 
 .print-header h1{
 
-    margin:
-        0 0 8px;
+    margin:0 0 8px;
 
-    font-size:24px;
 }
 
 .print-info{
 
     display:grid;
-
-    grid-template-columns:
-        1fr 1fr;
-
-    gap:10px;
-
+    grid-template-columns:1fr 1fr;
+    gap:8px;
     margin-bottom:20px;
 
-    font-size:14px;
 }
 
 .print-question{
 
-    margin-bottom:22px;
-
+    margin-bottom:20px;
     page-break-inside:avoid;
 
-    position:relative;
-
-    z-index:2;
 }
 
 .print-question-title{
 
     font-weight:700;
-
     margin-bottom:8px;
 
-    line-height:1.8;
 }
 
 .print-options{
 
     display:grid;
-
-    grid-template-columns:
-        1fr 1fr;
-
+    grid-template-columns:1fr 1fr;
     gap:8px;
+
 }
 
 .print-option{
 
-    padding:8px;
+    padding:6px;
 
-    border:
-        1px solid transparent;
-
-    border-radius:5px;
 }
 
 .correct-answer{
 
     background:#dcfce7;
+    border:1px solid #86efac;
+    border-radius:5px;
 
-    border:
-        1px solid #86efac;
 }
 
 .essay-line{
 
-    border-bottom:
-        1px solid #64748b;
-
+    border-bottom:1px solid #64748b;
     height:35px;
-
     margin-top:5px;
+
 }
 
 .footer-print{
 
     margin-top:30px;
-
     text-align:center;
-
-    border-top:
-        1px solid #cbd5e1;
-
+    border-top:1px solid #cbd5e1;
     padding-top:10px;
-
     font-size:12px;
-
     color:#64748b;
+
 }
 
-
-/* =========================================================
-   USERS PRINT
-========================================================= */
-
-.users-print-page{
+.users-pdf-page{
 
     position:relative;
-
     background:#fff;
-
+    padding:30px;
     width:794px;
-
     min-height:1123px;
-
-    padding:35px;
-
     margin:auto;
-
     color:#111827;
+
 }
 
-.users-print-header{
+.users-pdf-header{
 
     text-align:center;
-
-    border-bottom:
-        2px solid #111827;
-
+    border-bottom:2px solid #111827;
     padding-bottom:15px;
-
     margin-bottom:20px;
+
 }
 
-.users-print-table{
+.users-pdf-table{
 
     width:100%;
-
     border-collapse:collapse;
 
-    font-size:13px;
 }
 
-.users-print-table th,
-.users-print-table td{
+.users-pdf-table th,
+.users-pdf-table td{
 
-    border:
-        1px solid #333;
+    border:1px solid #64748b;
+    padding:9px;
+    text-align:center;
 
-    padding:8px;
+}
+
+.users-pdf-table th{
+
+    background:#e2e8f0;
+    color:#111827;
+    position:static;
+
+}
+
+.users-pdf-footer{
 
     text-align:center;
+    margin-top:25px;
+    font-size:12px;
+    color:#64748b;
+
 }
 
-.users-print-table th{
+.pdf-page-break{
 
-    background:#f1f5f9;
+    page-break-after:always;
 
-    position:static;
 }
-
-.users-watermark{
-
-    position:absolute;
-
-    top:50%;
-
-    left:50%;
-
-    transform:
-        translate(-50%,-50%)
-        rotate(-30deg);
-
-    font-size:55px;
-
-    font-weight:800;
-
-    color:
-        rgba(30,41,59,.07);
-
-    white-space:nowrap;
-
-    pointer-events:none;
-}
-
-
-/* =========================================================
-   HIDDEN
-========================================================= */
 
 .hidden{
 
-    display:none !important;
+    display:none!important;
+
 }
 
+@media(max-width:900px){
 
-/* =========================================================
-   MOBILE
-========================================================= */
+    .export-actions{
+
+        grid-template-columns:1fr 1fr;
+
+    }
+
+}
 
 @media(max-width:800px){
 
     body{
 
         padding:10px;
+
     }
 
     .grid-2,
     .grid-4{
 
         grid-template-columns:1fr;
+
     }
 
-    .export-actions,
-    .export-users-actions{
+    .export-actions{
 
         grid-template-columns:1fr;
+
     }
 
     .card{
 
         padding:16px;
+
     }
 
     table{
 
-        min-width:720px;
+        min-width:700px;
+
     }
 
     .table-container{
 
         overflow-x:auto;
+
     }
 
     .reward-row{
 
         flex-wrap:wrap;
+
     }
 
 }
-
-
-/* =========================================================
-   PRINT
-========================================================= */
 
 @media print{
 
     body{
 
         background:white;
-
         padding:0;
+
     }
 
-    body > *{
+    body>*{
 
-        display:none !important;
+        display:none!important;
+
     }
 
     #printContainer{
 
-        display:block !important;
+        display:block!important;
+
     }
 
     .print-page,
-    .users-print-page{
+    .users-pdf-page{
 
         width:100%;
-
         min-height:auto;
-
+        box-shadow:none;
         margin:0;
 
-        box-shadow:none;
     }
 
 }
@@ -1004,9 +812,9 @@ th{
 <div class="container">
 
 
-<!-- =========================================================
-     HEADER
-========================================================= -->
+<!-- =====================================================
+HEADER
+===================================================== -->
 
 <div class="header">
 
@@ -1027,9 +835,9 @@ th{
 </div>
 
 
-<!-- =========================================================
-     EXAM SELECTOR
-========================================================= -->
+<!-- =====================================================
+اختيار الاختبار
+===================================================== -->
 
 <div class="card edit-mode">
 
@@ -1076,9 +884,9 @@ font-weight:bold;
 </div>
 
 
-<!-- =========================================================
-     EXAM SETTINGS
-========================================================= -->
+<!-- =====================================================
+إعدادات الاختبار
+===================================================== -->
 
 <div class="card">
 
@@ -1092,7 +900,6 @@ font-weight:bold;
 
 
 <div class="grid-2">
-
 
 <div>
 
@@ -1125,7 +932,6 @@ value="60"
 min="1">
 
 </div>
-
 
 </div>
 
@@ -1191,15 +997,13 @@ onclick="addRewardRow()">
 </div>
 
 
-<!-- =========================================================
-     QUESTIONS
-========================================================= -->
+<!-- =====================================================
+إدارة الأسئلة
+===================================================== -->
 
 <div class="card">
 
-
 <div class="flex-between">
-
 
 <h3>
 
@@ -1225,37 +1029,17 @@ gap:8px;
 flex-wrap:wrap;
 ">
 
-
-<!-- Manual question -->
-
-<button
-class="btn-primary"
-onclick="openNewQuestionEditor()">
-
-<i class="fas fa-plus"></i>
-
-إضافة سؤال يدوي
-
-</button>
-
-
-<!-- Excel -->
-
 <input
 type="file"
 id="fileQuestions"
-accept=".xlsx,.xls"
+accept=".xlsx,.xls,.csv"
 style="display:none"
 onchange="importQuestionsExcel(this)">
 
 
 <button
 class="btn-accent"
-onclick="
-document
-.getElementById('fileQuestions')
-.click()
-">
+onclick="document.getElementById('fileQuestions').click()">
 
 <i class="fas fa-file-excel"></i>
 
@@ -1264,27 +1048,43 @@ document
 </button>
 
 
-</div>
+<button
+class="btn-primary"
+onclick="openQuestionEditor()">
+
+<i class="fas fa-plus-circle"></i>
+
+إضافة سؤال يدوي
+
+</button>
 
 </div>
 
+</div>
 
-<!-- QUESTION EDITOR -->
+
+<p class="small-text">
+
+يمكنك الآن إضافة الأسئلة يدويًا مباشرة، أو استيرادها من Excel ثم تعديلها يدويًا.
+
+</p>
+
+
+<!-- =====================================================
+محرر السؤال
+===================================================== -->
 
 <div
 id="questionEditBox"
 class="question-edit-box">
 
-
 <div class="flex-between">
-
 
 <h4 style="margin:0">
 
 <i class="fas fa-pen"></i>
 
 محرر السؤال
-
 
 <span
 id="questionEditBadge"
@@ -1307,7 +1107,6 @@ onclick="cancelQuestionEdit()">
 
 </button>
 
-
 </div>
 
 
@@ -1315,7 +1114,6 @@ onclick="cancelQuestionEdit()">
 
 
 <div class="grid-2">
-
 
 <div>
 
@@ -1362,7 +1160,6 @@ min="1">
 
 </div>
 
-
 </div>
 
 
@@ -1395,24 +1192,20 @@ id="mcqOptionsArea"
 class="grid-4"
 style="margin-top:10px;">
 
-
 <input
 type="text"
 id="mqOpt1"
 placeholder="الخيار 1">
-
 
 <input
 type="text"
 id="mqOpt2"
 placeholder="الخيار 2">
 
-
 <input
 type="text"
 id="mqOpt3"
 placeholder="الخيار 3">
-
 
 <input
 type="text"
@@ -1450,7 +1243,6 @@ style="grid-column:span 4;">
 
 </select>
 
-
 </div>
 
 
@@ -1460,7 +1252,6 @@ display:flex;
 gap:10px;
 margin-top:15px;
 ">
-
 
 <button
 id="questionSaveButton"
@@ -1485,14 +1276,14 @@ onclick="clearQuestionForm()">
 
 </button>
 
+</div>
 
 </div>
 
 
-</div>
-
-
-<!-- QUESTIONS TABLE -->
+<!-- =====================================================
+جدول الأسئلة
+===================================================== -->
 
 <div class="table-container">
 
@@ -1518,29 +1309,22 @@ onclick="clearQuestionForm()">
 
 </thead>
 
-
-<tbody
-id="questionsBody">
-
-</tbody>
+<tbody id="questionsBody"></tbody>
 
 </table>
 
 </div>
 
-
 </div>
 
 
-<!-- =========================================================
-     STUDENTS
-========================================================= -->
+<!-- =====================================================
+إدارة الطلاب
+===================================================== -->
 
 <div class="card">
 
-
 <div class="flex-between">
-
 
 <h3>
 
@@ -1566,33 +1350,17 @@ gap:8px;
 flex-wrap:wrap;
 ">
 
-
-<button
-class="btn-primary"
-onclick="openNewStudentEditor()">
-
-<i class="fas fa-user-plus"></i>
-
-إضافة طالب يدوي
-
-</button>
-
-
 <input
 type="file"
 id="fileStudents"
-accept=".xlsx,.xls"
+accept=".xlsx,.xls,.csv"
 style="display:none"
 onchange="importStudentsExcel(this)">
 
 
 <button
 class="btn-accent"
-onclick="
-document
-.getElementById('fileStudents')
-.click()
-">
+onclick="document.getElementById('fileStudents').click()">
 
 <i class="fas fa-file-excel"></i>
 
@@ -1601,27 +1369,54 @@ document
 </button>
 
 
-</div>
+<button
+class="btn-primary"
+onclick="openStudentEditor()">
+
+<i class="fas fa-user-plus"></i>
+
+إضافة طالب يدوي
+
+</button>
+
+
+<button
+class="btn-purple"
+onclick="exportUsersPDF()">
+
+<i class="fas fa-file-pdf"></i>
+
+تصدير المستخدمين PDF
+
+</button>
 
 </div>
 
+</div>
 
-<!-- STUDENT EDITOR -->
+
+<p class="small-text">
+
+يمكنك إضافة الطلاب يدويًا أو استيرادهم من Excel، ثم تصدير قائمة المستخدمين كاملة إلى PDF.
+
+</p>
+
+
+<!-- =====================================================
+محرر الطالب
+===================================================== -->
 
 <div
 id="studentEditBox"
 class="student-edit-box">
 
-
 <div class="flex-between">
-
 
 <h4 style="margin:0">
 
 <i class="fas fa-user-pen"></i>
 
 محرر بيانات الطالب
-
 
 <span
 id="studentEditBadge"
@@ -1645,7 +1440,6 @@ onclick="cancelStudentEdit()">
 
 </button>
 
-
 </div>
 
 
@@ -1653,7 +1447,6 @@ onclick="cancelStudentEdit()">
 
 
 <div class="grid-4">
-
 
 <input
 type="text"
@@ -1684,14 +1477,14 @@ onclick="saveStudent()">
 
 </button>
 
+</div>
 
 </div>
 
 
-</div>
-
-
-<!-- STUDENTS TABLE -->
+<!-- =====================================================
+جدول الطلاب
+===================================================== -->
 
 <div class="table-container">
 
@@ -1715,26 +1508,20 @@ onclick="saveStudent()">
 
 </thead>
 
-
-<tbody
-id="studentsBody">
-
-</tbody>
+<tbody id="studentsBody"></tbody>
 
 </table>
 
 </div>
 
-
 </div>
 
 
-<!-- =========================================================
-     EXPORT EXAM
-========================================================= -->
+<!-- =====================================================
+التصدير
+===================================================== -->
 
 <div class="card">
-
 
 <h3>
 
@@ -1747,9 +1534,9 @@ id="studentsBody">
 
 <p class="small-text">
 
-يمكنك طباعة الاختبار مباشرة أو تصديره إلى PDF.
-النسخة المجابة تظهر الإجابات الصحيحة مع علامة مائية
-"كنترول المستشار".
+يمكنك طباعة الاختبار مباشرة أو إنشاء نسخة PDF للطلاب.
+
+كما يمكنك إنشاء نسخة مجابة تظهر بها الإجابات الصحيحة مع علامة مائية "كنترول المستشار".
 
 </p>
 
@@ -1790,91 +1577,24 @@ PDF مجاب + علامة مائية
 </button>
 
 
-</div>
-
-
-<hr>
-
-
-<h4>
-
-<i class="fas fa-users"></i>
-
-تصدير قائمة المستخدمين
-
-</h4>
-
-
-<p class="small-text">
-
-يتم إنشاء كشف مرتب يحتوي على اسم الطالب واليوزر.
-يمكنك اختيار إظهار كلمات المرور في الكشف الورقي.
-
-</p>
-
-
-<div
-style="
-display:flex;
-gap:10px;
-align-items:center;
-flex-wrap:wrap;
-margin-bottom:10px;
-">
-
-
-<label
-style="
-display:flex;
-align-items:center;
-gap:5px;
-">
-
-<input
-type="checkbox"
-id="showPasswordsInUsersPDF">
-
-إظهار كلمات المرور في الكشف
-
-</label>
-
-</div>
-
-
-<div class="export-users-actions">
-
-
 <button
-class="btn-dark"
-onclick="printUsersList()">
-
-<i class="fas fa-print"></i>
-
-طباعة قائمة المستخدمين
-
-</button>
-
-
-<button
-class="btn-purple"
+class="btn-info"
 onclick="exportUsersPDF()">
 
-<i class="fas fa-file-pdf"></i>
+<i class="fas fa-users"></i>
 
 PDF قائمة المستخدمين
 
 </button>
 
+</div>
 
 </div>
 
 
-</div>
-
-
-<!-- =========================================================
-     SAVE
-========================================================= -->
+<!-- =====================================================
+اعتماد
+===================================================== -->
 
 <button
 id="mainActionButton"
@@ -1887,10 +1607,9 @@ margin-bottom:50px;
 "
 onclick="finalizeAndUpload()">
 
-
 <i class="fas fa-rocket"></i>
 
-اعتماد ورفع الاختبار
+اعتماد ورفع الاختبار الجديد
 
 </button>
 
@@ -1898,13 +1617,14 @@ onclick="finalizeAndUpload()">
 </div>
 
 
-<!-- =========================================================
-     PRINT CONTAINER
-========================================================= -->
+<!-- =====================================================
+منطقة التصدير
+===================================================== -->
 
 <div
 id="printContainer"
 style="display:none">
+
 </div>
 
 
@@ -1912,31 +1632,27 @@ style="display:none">
 
 
 /* =========================================================
-   FIREBASE
+FIREBASE
 ========================================================= */
 
 const firebaseConfig = {
 
-    apiKey:
-        "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws",
+apiKey:"AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws",
 
-    authDomain:
-        "zomaapp-744fc.firebaseapp.com",
+authDomain:"zomaapp-744fc.firebaseapp.com",
 
-    projectId:
-        "zomaapp-744fc"
+projectId:"zomaapp-744fc"
 
 };
 
 
 firebase.initializeApp(firebaseConfig);
 
-const db =
-    firebase.firestore();
+const db = firebase.firestore();
 
 
 /* =========================================================
-   VARIABLES
+VARIABLES
 ========================================================= */
 
 let finalQuestions = [];
@@ -1951,1525 +1667,3106 @@ let editingStudentIndex = -1;
 
 
 /* =========================================================
-   START
+START
 ========================================================= */
 
 window.onload = function(){
 
-    loadExamsList();
+loadExamsList();
 
-    resetForm();
+resetForm();
 
 };
 
 
 /* =========================================================
-   LOAD EXAMS
+LOAD EXAMS
 ========================================================= */
 
 async function loadExamsList(){
 
-    try{
+try{
 
-        const snap =
-            await db
-                .collection("quizzes2")
-                .orderBy("createdAt","desc")
-                .get();
-
-
-        const selector =
-            document.getElementById(
-                "examSelector"
-            );
+const snap = await db
+.collection("quizzes2")
+.orderBy("createdAt","desc")
+.get();
 
 
-        selector.innerHTML = `
-            <option value="">
-                ➕ إنشاء اختبار جديد فارغ ...
-            </option>
-        `;
+const selector =
+document.getElementById("examSelector");
 
 
-        snap.forEach(doc=>{
-
-            const data =
-                doc.data();
-
-
-            const status =
-                data.status === "open"
-                ? "مفتوح"
-                : "مغلق";
+selector.innerHTML = `
+<option value="">
+➕ إنشاء اختبار جديد فارغ ...
+</option>
+`;
 
 
-            const option =
-                document.createElement("option");
+snap.forEach(doc=>{
+
+const data = doc.data();
+
+const status =
+data.status === "open"
+? "مفتوح"
+: "مغلق";
 
 
-            option.value =
-                doc.id;
+selector.innerHTML += `
+
+<option value="${escapeHtml(doc.id)}">
+
+${escapeHtml(data.title || "اختبار بدون اسم")}
+
+ (${status})
+
+</option>
+
+`;
+
+});
 
 
-            option.textContent =
-                `${data.title || "اختبار بدون اسم"} (${status})`;
+}catch(error){
 
+console.error(error);
 
-            selector.appendChild(option);
+Swal.fire(
+"خطأ",
+"تعذر تحميل قائمة الاختبارات",
+"error"
+);
 
-        });
-
-
-    }catch(error){
-
-        console.error(error);
-
-
-        Swal.fire(
-            "خطأ",
-            "تعذر تحميل قائمة الاختبارات",
-            "error"
-        );
-
-    }
+}
 
 }
 
 
 /* =========================================================
-   LOAD EXAM
+LOAD EXAM
 ========================================================= */
 
 async function loadExamForEdit(){
 
-    const examId =
-        document
-            .getElementById("examSelector")
-            .value;
+const examId =
+document.getElementById("examSelector").value;
 
 
-    currentEditingExamId =
-        examId || null;
+currentEditingExamId =
+examId || null;
 
 
-    const btn =
-        document.getElementById(
-            "mainActionButton"
-        );
+const btn =
+document.getElementById("mainActionButton");
 
 
-    if(!currentEditingExamId){
+if(!currentEditingExamId){
 
-        resetForm();
+resetForm();
 
+btn.innerHTML = `
+<i class="fas fa-rocket"></i>
+اعتماد ورفع الاختبار الجديد
+`;
 
-        btn.innerHTML = `
-            <i class="fas fa-rocket"></i>
-            اعتماد ورفع الاختبار الجديد
-        `;
+btn.className = "btn-accent";
 
+return;
 
-        btn.className =
-            "btn-accent";
+}
 
 
-        return;
+Swal.fire({
 
-    }
+title:"جاري تحميل الاختبار...",
 
+allowOutsideClick:false,
 
-    Swal.fire({
+didOpen:()=>Swal.showLoading()
 
-        title:
-            "جاري تحميل الاختبار...",
+});
 
-        allowOutsideClick:false,
 
-        didOpen:()=>{
-            Swal.showLoading();
-        }
+try{
 
-    });
+const doc =
+await db
+.collection("quizzes2")
+.doc(currentEditingExamId)
+.get();
 
 
-    try{
+if(!doc.exists){
 
-        const doc =
-            await db
-                .collection("quizzes2")
-                .doc(currentEditingExamId)
-                .get();
+Swal.fire(
+"خطأ",
+"الاختبار غير موجود",
+"error"
+);
 
+return;
 
-        if(!doc.exists){
+}
 
-            Swal.fire(
-                "خطأ",
-                "الاختبار غير موجود",
-                "error"
-            );
 
-            return;
+const data = doc.data();
 
-        }
 
+document.getElementById("qTitle").value =
+data.title || "";
 
-        const data =
-            doc.data();
 
+document.getElementById("qTime").value =
+data.duration || 60;
 
-        document
-            .getElementById("qTitle")
-            .value =
-                data.title || "";
 
+document.getElementById("qRetake").checked =
+data.allowRetake || false;
 
-        document
-            .getElementById("qTime")
-            .value =
-                data.duration || 60;
 
+document.getElementById("qShowRes").checked =
+data.showResults !== false;
 
-        document
-            .getElementById("qRetake")
-            .checked =
-                data.allowRetake || false;
 
+/* الجوائز */
 
-        document
-            .getElementById("qShowRes")
-            .checked =
-                data.showResults !== false;
+document.getElementById("rewardsArea").innerHTML = "";
 
 
-        /* REWARDS */
+if(Array.isArray(data.rewards)){
 
-        document
-            .getElementById("rewardsArea")
-            .innerHTML = "";
+data.rewards.forEach(r=>{
 
+addRewardRow(
+r.minScore ?? "",
+r.rewardText ?? ""
+);
 
-        if(Array.isArray(data.rewards)){
+});
 
-            data.rewards.forEach(r=>{
+}
 
-                addRewardRow(
-                    r.minScore || "",
-                    r.rewardText || ""
-                );
 
-            });
+/* الأسئلة */
 
-        }
+finalQuestions =
+Array.isArray(data.questions)
+? JSON.parse(JSON.stringify(data.questions))
+: [];
 
 
-        /* QUESTIONS */
+/* الطلاب */
 
-        finalQuestions =
-            Array.isArray(data.questions)
-            ?
-            JSON.parse(
-                JSON.stringify(data.questions)
-            )
-            :
-            [];
+finalStudents =
+Array.isArray(data.students)
+? JSON.parse(JSON.stringify(data.students))
+: [];
 
 
-        /* STUDENTS */
+renderQuestions();
 
-        finalStudents =
-            Array.isArray(data.students)
-            ?
-            JSON.parse(
-                JSON.stringify(data.students)
-            )
-            :
-            [];
+renderStudents();
 
+clearQuestionForm();
 
-        renderQuestions();
+clearStudentForm();
 
-        renderStudents();
 
+btn.innerHTML = `
+<i class="fas fa-save"></i>
+حفظ التعديلات على الاختبار
+`;
 
-        clearQuestionForm();
+btn.className = "btn-warning";
 
-        clearStudentForm();
 
+Swal.close();
 
-        btn.innerHTML = `
-            <i class="fas fa-save"></i>
-            حفظ التعديلات على الاختبار
-        `;
 
+}catch(error){
 
-        btn.className =
-            "btn-warning";
+console.error(error);
 
+Swal.fire(
+"خطأ",
+"فشل تحميل بيانات الاختبار",
+"error"
+);
 
-        Swal.close();
-
-
-    }catch(error){
-
-        console.error(error);
-
-
-        Swal.fire(
-            "خطأ",
-            "فشل تحميل بيانات الاختبار",
-            "error"
-        );
-
-    }
+}
 
 }
 
 
 /* =========================================================
-   RESET
+RESET FORM
 ========================================================= */
 
 function resetForm(){
 
-    document
-        .getElementById("qTitle")
-        .value = "";
+document.getElementById("qTitle").value = "";
 
+document.getElementById("qTime").value = 60;
 
-    document
-        .getElementById("qTime")
-        .value = 60;
+document.getElementById("qRetake").checked = false;
 
+document.getElementById("qShowRes").checked = true;
 
-    document
-        .getElementById("qRetake")
-        .checked = false;
+document.getElementById("rewardsArea").innerHTML = "";
 
+finalQuestions = [];
 
-    document
-        .getElementById("qShowRes")
-        .checked = true;
+finalStudents = [];
 
+editingQuestionIndex = -1;
 
-    document
-        .getElementById("rewardsArea")
-        .innerHTML = "";
+editingStudentIndex = -1;
 
+renderQuestions();
 
-    finalQuestions = [];
+renderStudents();
 
-    finalStudents = [];
+clearQuestionForm();
 
+clearStudentForm();
 
-    editingQuestionIndex = -1;
+document.getElementById("questionEditBox")
+.classList.remove("active");
 
-    editingStudentIndex = -1;
-
-
-    renderQuestions();
-
-    renderStudents();
-
-
-    clearQuestionForm();
-
-    clearStudentForm();
+document.getElementById("studentEditBox")
+.classList.remove("active");
 
 }
 
 
 /* =========================================================
-   REWARDS
+REWARDS
 ========================================================= */
 
-function addRewardRow(score="", text=""){
+function addRewardRow(score="",text=""){
 
-    const div =
-        document.createElement("div");
+const div =
+document.createElement("div");
 
-
-    div.className =
-        "reward-row";
+div.className = "reward-row";
 
 
-    div.innerHTML = `
+div.innerHTML = `
 
-        <input
-            type="number"
-            class="r-score"
-            placeholder="النسبة %"
-            value="${escapeHtml(score)}">
+<input
+type="number"
+class="r-score"
+placeholder="النسبة %"
+value="${escapeHtml(score)}">
 
+<input
+type="text"
+class="r-text"
+placeholder="اسم الجائزة"
+value="${escapeHtml(text)}">
 
-        <input
-            type="text"
-            class="r-text"
-            placeholder="اسم الجائزة"
-            value="${escapeHtml(text)}">
+<button
+class="btn-danger"
+onclick="this.parentElement.remove()">
 
+<i class="fas fa-trash"></i>
 
-        <button
-            class="btn-danger"
-            onclick="this.parentElement.remove()">
+</button>
 
-            <i class="fas fa-trash"></i>
-
-        </button>
-
-    `;
+`;
 
 
-    document
-        .getElementById("rewardsArea")
-        .appendChild(div);
+document
+.getElementById("rewardsArea")
+.appendChild(div);
 
 }
 
 
 /* =========================================================
-   OPEN NEW QUESTION EDITOR
+OPEN QUESTION EDITOR
 ========================================================= */
 
-function openNewQuestionEditor(){
+function openQuestionEditor(){
 
-    clearQuestionForm();
-
-
-    document
-        .getElementById("questionEditBox")
-        .classList.add("active");
+document
+.getElementById("questionEditBox")
+.classList.add("active");
 
 
-    document
-        .getElementById("mqText")
-        .focus();
+editingQuestionIndex = -1;
 
 
-    document
-        .getElementById("questionEditBox")
-        .scrollIntoView({
+document
+.getElementById("questionEditBadge")
+.classList.add("hidden");
 
-            behavior:"smooth",
 
-            block:"center"
+document
+.getElementById("questionSaveButton")
+.className =
+"btn-primary";
 
-        });
+
+document
+.getElementById("questionSaveButton")
+.innerHTML = `
+<i class="fas fa-plus"></i>
+إضافة السؤال
+`;
+
+
+clearQuestionForm(false);
+
+
+setTimeout(()=>{
+
+document
+.getElementById("mqText")
+.focus();
+
+document
+.getElementById("questionEditBox")
+.scrollIntoView({
+behavior:"smooth",
+block:"center"
+});
+
+},100);
 
 }
 
 
 /* =========================================================
-   QUESTION TYPE
+QUESTION EDITOR
 ========================================================= */
 
 function toggleMCQOpts(){
 
-    const isMCQ =
-        document
-            .getElementById("mqType")
-            .value === "mcq";
+const isMCQ =
+document.getElementById("mqType").value === "mcq";
 
 
-    document
-        .getElementById("mcqOptionsArea")
-        .style.display =
-            isMCQ
-            ? "grid"
-            : "none";
+document.getElementById(
+"mcqOptionsArea"
+).style.display =
+isMCQ ? "grid" : "none";
 
 }
 
 
 /* =========================================================
-   SAVE QUESTION
+ADD / UPDATE QUESTION
 ========================================================= */
 
 function saveQuestion(){
 
-    const type =
-        document
-            .getElementById("mqType")
-            .value;
+const type =
+document.getElementById("mqType").value;
 
 
-    const text =
-        document
-            .getElementById("mqText")
-            .value
-            .trim();
+const text =
+document
+.getElementById("mqText")
+.value
+.trim();
 
 
-    const points =
-        parseInt(
-            document
-                .getElementById("mqPoints")
-                .value
-        ) || 1;
+const points =
+parseInt(
+document.getElementById("mqPoints").value
+) || 1;
 
 
-    const imgUrl =
-        document
-            .getElementById("mqImg")
-            .value
-            .trim();
+const imgUrl =
+document
+.getElementById("mqImg")
+.value
+.trim();
 
 
-    if(!text){
+if(!text){
 
-        Swal.fire(
-            "تنبيه",
-            "اكتب نص السؤال",
-            "warning"
-        );
+Swal.fire(
+"تنبيه",
+"اكتب نص السؤال",
+"warning"
+);
 
-        return;
+return;
 
-    }
+}
 
 
-    let qObj = {
+let qObj = {
 
-        type:type,
+type:type,
 
-        text:text,
+text:text,
 
-        points:points,
+points:points,
 
-        imgUrl:
-            imgUrl || null,
+imgUrl:imgUrl || null,
 
-        options:[],
+options:[],
 
-        correctIndex:0
+correctIndex:0
 
-    };
+};
 
 
-    /* MCQ */
+if(type === "mcq"){
 
-    if(type === "mcq"){
+qObj.options = [
 
-        qObj.options = [
+getCleanCell(
+document.getElementById("mqOpt1").value
+),
 
-            document
-                .getElementById("mqOpt1")
-                .value
-                .trim(),
+getCleanCell(
+document.getElementById("mqOpt2").value
+),
 
-            document
-                .getElementById("mqOpt2")
-                .value
-                .trim(),
+getCleanCell(
+document.getElementById("mqOpt3").value
+),
 
-            document
-                .getElementById("mqOpt3")
-                .value
-                .trim(),
+getCleanCell(
+document.getElementById("mqOpt4").value
+)
 
-            document
-                .getElementById("mqOpt4")
-                .value
-                .trim()
+].filter(Boolean);
 
-        ].filter(Boolean);
 
+if(qObj.options.length < 2){
 
-        if(qObj.options.length < 2){
+Swal.fire(
+"تنبيه",
+"أدخل خيارين على الأقل",
+"warning"
+);
 
-            Swal.fire(
-                "تنبيه",
-                "أدخل خيارين على الأقل",
-                "warning"
-            );
+return;
 
-            return;
+}
 
-        }
 
+qObj.correctIndex =
+parseInt(
+document.getElementById("mqCorrect").value
+);
 
-        qObj.correctIndex =
-            parseInt(
-                document
-                    .getElementById("mqCorrect")
-                    .value
-            ) || 0;
 
+if(
+isNaN(qObj.correctIndex) ||
+qObj.correctIndex < 0 ||
+qObj.correctIndex >= qObj.options.length
+){
 
-        if(
-            qObj.correctIndex >=
-            qObj.options.length
-        ){
+qObj.correctIndex = 0;
 
-            qObj.correctIndex = 0;
+}
 
-        }
+}
 
-    }
 
+/* UPDATE */
 
-    /* UPDATE */
+if(editingQuestionIndex >= 0){
 
-    if(editingQuestionIndex >= 0){
+finalQuestions[editingQuestionIndex] = qObj;
 
-        finalQuestions[
-            editingQuestionIndex
-        ] = qObj;
 
+Swal.fire({
 
-        Swal.fire({
+icon:"success",
 
-            icon:"success",
+title:"تم تعديل السؤال",
 
-            title:
-                "تم تعديل السؤال",
+timer:900,
 
-            timer:900,
+showConfirmButton:false
 
-            showConfirmButton:false
+});
 
-        });
 
-    }
+}else{
 
+finalQuestions.push(qObj);
 
-    /* ADD */
 
-    else{
+Swal.fire({
 
-        finalQuestions.push(qObj);
+icon:"success",
 
+title:"تمت إضافة السؤال",
 
-        Swal.fire({
+timer:700,
 
-            icon:"success",
+showConfirmButton:false
 
-            title:
-                "تمت إضافة السؤال",
+});
 
-            timer:700,
+}
 
-            showConfirmButton:false
 
-        });
+clearQuestionForm();
 
-    }
-
-
-    /*
-       مهم:
-       بعد الإضافة أو التعديل
-       يتم تفريغ النموذج
-    */
-
-    clearQuestionForm();
-
-    renderQuestions();
+renderQuestions();
 
 }
 
 
 /* =========================================================
-   EDIT QUESTION
+EDIT QUESTION
 ========================================================= */
 
 function editQuestion(index){
 
-    const q =
-        finalQuestions[index];
+const q = finalQuestions[index];
+
+if(!q) return;
 
 
-    if(!q) return;
+editingQuestionIndex = index;
 
 
-    editingQuestionIndex =
-        index;
+document
+.getElementById("questionEditBox")
+.classList.add("active");
 
 
-    document
-        .getElementById("questionEditBox")
-        .classList.add("active");
+document
+.getElementById("questionEditBadge")
+.classList.remove("hidden");
 
 
-    document
-        .getElementById("questionEditBadge")
-        .classList.remove("hidden");
+document
+.getElementById("questionSaveButton")
+.innerHTML = `
+<i class="fas fa-save"></i>
+حفظ تعديل السؤال
+`;
 
 
-    document
-        .getElementById("questionSaveButton")
-        .innerHTML = `
-            <i class="fas fa-save"></i>
-            حفظ تعديل السؤال
-        `;
+document
+.getElementById("questionSaveButton")
+.className =
+"btn-warning";
 
 
-    document
-        .getElementById("questionSaveButton")
-        .className =
-            "btn-warning";
+document.getElementById("mqType").value =
+q.type || "mcq";
 
 
-    document
-        .getElementById("mqType")
-        .value =
-            q.type || "mcq";
+document.getElementById("mqPoints").value =
+q.points || 1;
 
 
-    document
-        .getElementById("mqPoints")
-        .value =
-            q.points || 1;
+document.getElementById("mqText").value =
+q.text || "";
 
 
-    document
-        .getElementById("mqText")
-        .value =
-            q.text || "";
+document.getElementById("mqImg").value =
+q.imgUrl || "";
 
 
-    document
-        .getElementById("mqImg")
-        .value =
-            q.imgUrl || "";
+const opts =
+Array.isArray(q.options)
+? q.options
+: [];
 
 
-    const opts =
-        Array.isArray(q.options)
-        ? q.options
-        : [];
+document.getElementById("mqOpt1").value =
+opts[0] || "";
 
 
-    document
-        .getElementById("mqOpt1")
-        .value =
-            opts[0] || "";
+document.getElementById("mqOpt2").value =
+opts[1] || "";
 
 
-    document
-        .getElementById("mqOpt2")
-        .value =
-            opts[1] || "";
+document.getElementById("mqOpt3").value =
+opts[2] || "";
 
 
-    document
-        .getElementById("mqOpt3")
-        .value =
-            opts[2] || "";
+document.getElementById("mqOpt4").value =
+opts[3] || "";
 
 
-    document
-        .getElementById("mqOpt4")
-        .value =
-            opts[3] || "";
+document.getElementById("mqCorrect").value =
+Number.isInteger(q.correctIndex)
+? q.correctIndex
+: 0;
 
 
-    document
-        .getElementById("mqCorrect")
-        .value =
-            q.correctIndex || 0;
+toggleMCQOpts();
 
 
-    toggleMCQOpts();
+document
+.getElementById("questionEditBox")
+.scrollIntoView({
 
+behavior:"smooth",
 
-    document
-        .getElementById("questionEditBox")
-        .scrollIntoView({
+block:"center"
 
-            behavior:"smooth",
-
-            block:"center"
-
-        });
+});
 
 }
 
 
 /* =========================================================
-   CLEAR QUESTION
-========================================================= */
-
-function clearQuestionForm(){
-
-    editingQuestionIndex = -1;
-
-
-    document
-        .getElementById("mqType")
-        .value =
-            "mcq";
-
-
-    document
-        .getElementById("mqPoints")
-        .value =
-            "1";
-
-
-    document
-        .getElementById("mqText")
-        .value =
-            "";
-
-
-    document
-        .getElementById("mqImg")
-        .value =
-            "";
-
-
-    document
-        .getElementById("mqOpt1")
-        .value =
-            "";
-
-
-    document
-        .getElementById("mqOpt2")
-        .value =
-            "";
-
-
-    document
-        .getElementById("mqOpt3")
-        .value =
-            "";
-
-
-    document
-        .getElementById("mqOpt4")
-        .value =
-            "";
-
-
-    document
-        .getElementById("mqCorrect")
-        .value =
-            "0";
-
-
-    document
-        .getElementById("questionEditBadge")
-        .classList.add("hidden");
-
-
-    document
-        .getElementById("questionSaveButton")
-        .className =
-            "btn-primary";
-
-
-    document
-        .getElementById("questionSaveButton")
-        .innerHTML = `
-            <i class="fas fa-plus"></i>
-            إضافة السؤال
-        `;
-
-
-    toggleMCQOpts();
-
-}
-
-
-/* =========================================================
-   CANCEL QUESTION
+CANCEL QUESTION
 ========================================================= */
 
 function cancelQuestionEdit(){
 
-    clearQuestionForm();
+clearQuestionForm();
 
-
-    document
-        .getElementById("questionEditBox")
-        .classList.remove("active");
+document
+.getElementById("questionEditBox")
+.classList.remove("active");
 
 }
 
 
 /* =========================================================
-   DELETE QUESTION
+CLEAR QUESTION
+========================================================= */
+
+function clearQuestionForm(closeBox=true){
+
+editingQuestionIndex = -1;
+
+
+document.getElementById("mqType").value =
+"mcq";
+
+
+document.getElementById("mqPoints").value =
+"1";
+
+
+document.getElementById("mqText").value =
+"";
+
+
+document.getElementById("mqImg").value =
+"";
+
+
+document.getElementById("mqOpt1").value =
+"";
+
+
+document.getElementById("mqOpt2").value =
+"";
+
+
+document.getElementById("mqOpt3").value =
+"";
+
+
+document.getElementById("mqOpt4").value =
+"";
+
+
+document.getElementById("mqCorrect").value =
+"0";
+
+
+document
+.getElementById("questionEditBadge")
+.classList.add("hidden");
+
+
+document
+.getElementById("questionSaveButton")
+.className =
+"btn-primary";
+
+
+document
+.getElementById("questionSaveButton")
+.innerHTML = `
+<i class="fas fa-plus"></i>
+إضافة السؤال
+`;
+
+
+toggleMCQOpts();
+
+
+if(closeBox){
+
+document
+.getElementById("questionEditBox")
+.classList.remove("active");
+
+}
+
+}
+
+
+/* =========================================================
+DELETE QUESTION
 ========================================================= */
 
 function deleteQuestion(index){
 
-    Swal.fire({
+Swal.fire({
 
-        title:
-            "حذف السؤال؟",
+title:"حذف السؤال؟",
 
-        text:
-            "سيتم حذف السؤال من الاختبار.",
+text:"سيتم حذف السؤال من الاختبار.",
 
-        icon:
-            "warning",
+icon:"warning",
 
-        showCancelButton:
-            true,
+showCancelButton:true,
 
-        confirmButtonText:
-            "نعم، احذف",
+confirmButtonText:"نعم، احذف",
 
-        cancelButtonText:
-            "إلغاء"
+cancelButtonText:"إلغاء"
 
-    }).then(result=>{
+}).then(result=>{
 
-        if(result.isConfirmed){
+if(result.isConfirmed){
 
-            finalQuestions.splice(
-                index,
-                1
-            );
+finalQuestions.splice(index,1);
 
+renderQuestions();
 
-            /*
-               إذا كان السؤال المحذوف
-               هو السؤال الجاري تعديله
-            */
+}
 
-            if(
-                editingQuestionIndex === index
-            ){
-
-                clearQuestionForm();
-
-            }
-
-
-            renderQuestions();
-
-        }
-
-    });
+});
 
 }
 
 
 /* =========================================================
-   MOVE QUESTION
+MOVE QUESTION
 ========================================================= */
 
 function moveQuestion(index,direction){
 
-    const newIndex =
-        index + direction;
+const newIndex =
+index + direction;
 
 
-    if(
-        newIndex < 0 ||
-        newIndex >= finalQuestions.length
-    ){
+if(
+newIndex < 0 ||
+newIndex >= finalQuestions.length
+){
 
-        return;
+return;
 
-    }
-
-
-    const temp =
-        finalQuestions[index];
+}
 
 
-    finalQuestions[index] =
-        finalQuestions[newIndex];
+[
+finalQuestions[index],
+finalQuestions[newIndex]
+] =
+[
+finalQuestions[newIndex],
+finalQuestions[index]
+];
 
 
-    finalQuestions[newIndex] =
-        temp;
-
-
-    /*
-       لو فيه سؤال مفتوح للتعديل
-       نحافظ على الفهرس الصحيح
-    */
-
-    if(editingQuestionIndex === index){
-
-        editingQuestionIndex =
-            newIndex;
-
-    }
-
-    else if(
-        editingQuestionIndex === newIndex
-    ){
-
-        editingQuestionIndex =
-            index;
-
-    }
-
-
-    renderQuestions();
+renderQuestions();
 
 }
 
 
 /* =========================================================
-   RENDER QUESTIONS
+RENDER QUESTIONS
 ========================================================= */
 
 function renderQuestions(){
 
-    const tbody =
-        document
-            .getElementById("questionsBody");
+const tbody =
+document.getElementById("questionsBody");
 
 
-    tbody.innerHTML = "";
+tbody.innerHTML = "";
 
 
-    if(finalQuestions.length === 0){
+if(finalQuestions.length === 0){
 
-        tbody.innerHTML = `
+tbody.innerHTML = `
 
-            <tr>
+<tr>
 
-                <td
-                    colspan="6"
-                    class="empty-row">
+<td
+colspan="6"
+class="empty-row">
 
-                    <i
-                        class="fas fa-inbox">
-                    </i>
+<i class="fas fa-inbox"></i>
 
-                    <br>
+<br>
 
-                    لا توجد أسئلة حتى الآن
+لا توجد أسئلة حتى الآن
 
-                    <br><br>
+<br>
 
-                    اضغط
-                    <strong>
-                        "إضافة سؤال يدوي"
-                    </strong>
-                    لبدء إنشاء الأسئلة
+<button
+class="btn-primary"
+style="margin-top:10px"
+onclick="openQuestionEditor()">
 
-                </td>
+<i class="fas fa-plus"></i>
 
-            </tr>
+إضافة أول سؤال
 
-        `;
+</button>
 
-    }
+</td>
 
-    else{
+</tr>
 
-        finalQuestions.forEach(
-            (q,i)=>{
+`;
 
-                const type =
-                    q.type === "mcq"
-                    ?
-                    "اختر من متعدد"
-                    :
-                    "مقالي";
+}else{
 
+finalQuestions.forEach((q,i)=>{
 
-                const text =
-                    escapeHtml(
-                        q.text || ""
-                    );
+const type =
+q.type === "mcq"
+? "اختر من متعدد"
+: "مقالي";
 
 
-                tbody.innerHTML += `
+const text =
+escapeHtml(q.text || "");
 
-                    <tr>
 
-                        <td>
+tbody.innerHTML += `
 
-                            <strong>
-                                ${i+1}
-                            </strong>
+<tr>
 
-                        </td>
+<td>
 
+<strong>${i+1}</strong>
 
-                        <td>
+</td>
 
-                            <span
-                                class="status-pill ${
-                                    q.type === "mcq"
-                                    ?
-                                    "status-open"
-                                    :
-                                    "status-closed"
-                                }">
 
-                                ${type}
+<td>
 
-                            </span>
+<span class="status-pill ${
+q.type === "mcq"
+? "status-open"
+: "status-closed"
+}">
 
-                        </td>
+${type}
 
+</span>
 
-                        <td
-                            class="question-text-cell"
-                            title="${text}">
+</td>
 
-                            ${text}
 
-                        </td>
+<td
+class="question-text-cell"
+title="${text}">
 
+${text}
 
-                        <td>
+</td>
 
-                            ${q.points || 1}
 
-                        </td>
+<td>
 
+${q.points || 1}
 
-                        <td>
+</td>
 
-                            <div
-                                class="order-buttons">
 
+<td>
 
-                                <button
-                                    class="order-btn"
-                                    title="تحريك لأعلى"
-                                    onclick="
-                                        moveQuestion(
-                                            ${i},
-                                            -1
-                                        )
-                                    "
-                                    ${
-                                        i === 0
-                                        ?
-                                        "disabled"
-                                        :
-                                        ""
-                                    }>
+<div class="order-buttons">
 
-                                    <i
-                                        class="fas fa-arrow-up">
-                                    </i>
+<button
+class="order-btn"
+title="تحريك لأعلى"
+onclick="moveQuestion(${i},-1)"
+${i===0?"disabled":""}>
 
-                                </button>
+<i class="fas fa-arrow-up"></i>
 
+</button>
 
-                                <button
-                                    class="order-btn"
-                                    title="تحريك لأسفل"
-                                    onclick="
-                                        moveQuestion(
-                                            ${i},
-                                            1
-                                        )
-                                    "
-                                    ${
-                                        i ===
-                                        finalQuestions.length - 1
-                                        ?
-                                        "disabled"
-                                        :
-                                        ""
-                                    }>
 
-                                    <i
-                                        class="fas fa-arrow-down">
-                                    </i>
+<button
+class="order-btn"
+title="تحريك لأسفل"
+onclick="moveQuestion(${i},1)"
+${i===finalQuestions.length-1?"disabled":""}>
 
-                                </button>
+<i class="fas fa-arrow-down"></i>
 
+</button>
 
-                            </div>
+</div>
 
-                        </td>
+</td>
 
 
-                        <td>
+<td>
 
-                            <div
-                                class="action-buttons">
+<div class="action-buttons">
 
+<button
+class="btn-primary"
+onclick="editQuestion(${i})">
 
-                                <button
-                                    class="btn-primary"
-                                    onclick="
-                                        editQuestion(${i})
-                                    ">
+<i class="fas fa-pen"></i>
 
-                                    <i
-                                        class="fas fa-pen">
-                                    </i>
+تعديل
 
-                                    تعديل
+</button>
 
-                                </button>
 
+<button
+class="btn-danger"
+onclick="deleteQuestion(${i})">
 
-                                <button
-                                    class="btn-danger"
-                                    onclick="
-                                        deleteQuestion(${i})
-                                    ">
+<i class="fas fa-trash"></i>
 
-                                    <i
-                                        class="fas fa-trash">
-                                    </i>
+</button>
 
-                                </button>
+</div>
 
+</td>
 
-                            </div>
+</tr>
 
-                        </td>
+`;
 
-                    </tr>
+});
 
-                `;
+}
 
-            }
-        );
 
-    }
-
-
-    document
-        .getElementById("qCountBadge")
-        .innerText =
-            finalQuestions.length;
+document.getElementById(
+"qCountBadge"
+).innerText =
+finalQuestions.length;
 
 }
 
 
 /* =========================================================
-   IMPORT QUESTIONS
+EXCEL QUESTIONS
 ========================================================= */
 
 async function importQuestionsExcel(input){
 
-    if(!input.files[0]) return;
+if(!input.files[0]) return;
 
 
-    try{
+try{
 
-        const data =
-            await readExcel(
-                input.files[0]
-            );
+const data =
+await readExcel(input.files[0]);
 
 
-        let added = 0;
+let imported = 0;
 
 
-        data.forEach(row=>{
+data.forEach(row=>{
 
-            const type =
-                row[0] || "mcq";
-
-
-            let opts =
-                type === "mcq"
-                ?
-                [
-                    row[4],
-                    row[5],
-                    row[6],
-                    row[7]
-                ].filter(Boolean)
-                :
-                [];
+if(!row || row.length === 0) return;
 
 
-            const q = {
-
-                type:type,
-
-                points:
-                    parseInt(row[1]) || 1,
-
-                text:
-                    row[2] || "",
-
-                imgUrl:
-                    row[3] || null,
-
-                options:
-                    opts,
-
-                correctIndex:
-                    parseInt(row[8]) || 0
-
-            };
+const type =
+String(
+getCleanCell(row[0])
+|| "mcq"
+)
+.toLowerCase()
+.trim();
 
 
-            if(q.text){
-
-                finalQuestions.push(q);
-
-                added++;
-
-            }
-
-        });
+const normalizedType =
+(
+type === "essay" ||
+type === "مقالي"
+)
+? "essay"
+: "mcq";
 
 
-        renderQuestions();
+const text =
+getCleanCell(row[2]);
 
 
-        Swal.fire({
-
-            icon:"success",
-
-            title:"تم الاستيراد",
-
-            text:
-                `تمت إضافة ${added} سؤال.`,
-
-            timer:1500,
-
-            showConfirmButton:false
-
-        });
+if(!text) return;
 
 
-    }catch(error){
+let opts =
+normalizedType === "mcq"
+? [
 
-        console.error(error);
+getCleanCell(row[4]),
+getCleanCell(row[5]),
+getCleanCell(row[6]),
+getCleanCell(row[7])
+
+].filter(Boolean)
+: [];
 
 
-        Swal.fire(
-            "خطأ",
-            "تعذر استيراد الأسئلة",
-            "error"
-        );
-
-    }
+let correctIndex =
+parseInt(
+getCleanCell(row[8])
+);
 
 
-    input.value = "";
+if(isNaN(correctIndex))
+correctIndex = 0;
+
+
+if(
+correctIndex < 0 ||
+correctIndex >= opts.length
+){
+
+correctIndex = 0;
+
+}
+
+
+finalQuestions.push({
+
+type:normalizedType,
+
+points:
+parseInt(
+getCleanCell(row[1])
+) || 1,
+
+text:text,
+
+imgUrl:
+getCleanCell(row[3]) || null,
+
+options:opts,
+
+correctIndex:correctIndex
+
+});
+
+
+imported++;
+
+});
+
+
+renderQuestions();
+
+
+Swal.fire({
+
+icon:"success",
+
+title:"تم الاستيراد",
+
+text:`تمت إضافة ${imported} سؤال من ملف Excel.`,
+
+confirmButtonText:"موافق"
+
+});
+
+
+}catch(error){
+
+console.error(error);
+
+Swal.fire(
+"خطأ",
+"تعذر استيراد الأسئلة. تأكد من ترتيب الأعمدة.",
+"error"
+);
+
+}
+
+
+input.value = "";
 
 }
 
 
 /* =========================================================
-   OPEN NEW STUDENT
+STUDENTS
 ========================================================= */
 
-function openNewStudentEditor(){
+function openStudentEditor(){
 
-    clearStudentForm();
-
-
-    document
-        .getElementById("studentEditBox")
-        .classList.add("active");
+document
+.getElementById("studentEditBox")
+.classList.add("active");
 
 
-    document
-        .getElementById("msName")
-        .focus();
+editingStudentIndex = -1;
 
 
-    document
-        .getElementById("studentEditBox")
-        .scrollIntoView({
+document
+.getElementById("studentEditBadge")
+.classList.add("hidden");
 
-            behavior:"smooth",
 
-            block:"center"
+document
+.getElementById("studentSaveButton")
+.className =
+"btn-primary";
 
-        });
+
+document
+.getElementById("studentSaveButton")
+.innerHTML = `
+<i class="fas fa-user-plus"></i>
+إضافة طالب
+`;
+
+
+clearStudentForm(false);
+
+
+setTimeout(()=>{
+
+document
+.getElementById("msName")
+.focus();
+
+
+document
+.getElementById("studentEditBox")
+.scrollIntoView({
+
+behavior:"smooth",
+
+block:"center"
+
+});
+
+},100);
 
 }
 
-
-/* =========================================================
-   SAVE STUDENT
-========================================================= */
 
 function saveStudent(){
 
-    const name =
-        document
-            .getElementById("msName")
-            .value
-            .trim();
+const name =
+getCleanCell(
+document.getElementById("msName").value
+);
 
 
-    const user =
-        document
-            .getElementById("msUser")
-            .value
-            .trim();
+const user =
+getCleanCell(
+document.getElementById("msUser").value
+);
 
 
-    const pass =
-        document
-            .getElementById("msPass")
-            .value
-            .trim();
+const pass =
+getCleanCell(
+document.getElementById("msPass").value
+);
 
 
-    if(
-        !name ||
-        !user ||
-        !pass
-    ){
+if(!name || !user || !pass){
 
-        Swal.fire(
-            "تنبيه",
-            "أكمل بيانات الطالب",
-            "warning"
-        );
+Swal.fire(
+"تنبيه",
+"أكمل بيانات الطالب",
+"warning"
+);
 
-        return;
+return;
 
-    }
+}
 
 
-    const student = {
+/* منع تكرار اليوزر */
 
-        name:name,
-
-        username:user,
-
-        password:pass
-
-    };
-
-
-    if(editingStudentIndex >= 0){
-
-        finalStudents[
-            editingStudentIndex
-        ] = student;
+const duplicate =
+finalStudents.some(
+(s,index)=>
+index !== editingStudentIndex &&
+String(s.username || "").trim().toLowerCase()
+===
+user.toLowerCase()
+);
 
 
-        Swal.fire({
+if(duplicate){
 
-            icon:"success",
+Swal.fire(
+"تنبيه",
+"اسم المستخدم موجود بالفعل.",
+"warning"
+);
 
-            title:
-                "تم تعديل الطالب",
+return;
 
-            timer:900,
-
-            showConfirmButton:false
-
-        });
-
-    }
-
-    else{
-
-        /*
-           منع تكرار Username
-        */
-
-        const duplicate =
-            finalStudents.some(
-                (s,index)=>
-                    s.username === user &&
-                    index !== editingStudentIndex
-            );
+}
 
 
-        if(duplicate){
+const student = {
 
-            Swal.fire(
-                "تنبيه",
-                "هذا الـ Username موجود بالفعل.",
-                "warning"
-            );
+name:name,
 
-            return;
+username:user,
 
-        }
+password:pass
+
+};
 
 
-        finalStudents.push(student);
+if(editingStudentIndex >= 0){
+
+finalStudents[editingStudentIndex] =
+student;
 
 
-        Swal.fire({
+Swal.fire({
 
-            icon:"success",
+icon:"success",
 
-            title:
-                "تمت إضافة الطالب",
+title:"تم تعديل الطالب",
 
-            timer:700,
+timer:900,
 
-            showConfirmButton:false
+showConfirmButton:false
 
-        });
+});
 
-    }
+}else{
+
+finalStudents.push(student);
 
 
-    clearStudentForm();
+Swal.fire({
 
-    renderStudents();
+icon:"success",
+
+title:"تمت إضافة الطالب",
+
+timer:700,
+
+showConfirmButton:false
+
+});
+
+}
+
+
+clearStudentForm();
+
+renderStudents();
 
 }
 
 
 /* =========================================================
-   EDIT STUDENT
+EDIT STUDENT
 ========================================================= */
 
 function editStudent(index){
 
-    const s =
-        finalStudents[index];
+const s =
+finalStudents[index];
 
 
-    if(!s) return;
+if(!s) return;
 
 
-    editingStudentIndex =
-        index;
+editingStudentIndex = index;
 
 
-    document
-        .getElementById("studentEditBox")
-        .classList.add("active");
+document
+.getElementById("studentEditBox")
+.classList.add("active");
 
 
-    document
-        .getElementById("studentEditBadge")
-        .classList.remove("hidden");
+document
+.getElementById("studentEditBadge")
+.classList.remove("hidden");
 
 
-    document
-        .getElementById("msName")
-        .value =
-            s.name || "";
+document.getElementById("msName").value =
+s.name || "";
 
 
-    document
-        .getElementById("msUser")
-        .value =
-            s.username || "";
+document.getElementById("msUser").value =
+s.username || "";
 
 
-    document
-        .getElementById("msPass")
-        .value =
-            s.password || "";
+document.getElementById("msPass").value =
+s.password || "";
 
 
-    document
-        .getElementById("studentSaveButton")
-        .className =
-            "btn-warning";
+document
+.getElementById("studentSaveButton")
+.className =
+"btn-warning";
 
 
-    document
-        .getElementById("studentSaveButton")
-        .innerHTML = `
-            <i class="fas fa-save"></i>
-            حفظ التعديل
-        `;
+document
+.getElementById("studentSaveButton")
+.innerHTML = `
+<i class="fas fa-save"></i>
+حفظ التعديل
+`;
 
 
-    document
-        .getElementById("studentEditBox")
-        .scrollIntoView({
+document
+.getElementById("studentEditBox")
+.scrollIntoView({
 
-            behavior:"smooth",
+behavior:"smooth",
+
+block:"center"
+
+});
+
+}
+
+
+/* =========================================================
+CLEAR STUDENT
+========================================================= */
+
+function clearStudentForm(closeBox=true){
+
+editingStudentIndex = -1;
+
+
+document.getElementById("msName").value = "";
+
+document.getElementById("msUser").value = "";
+
+document.getElementById("msPass").value = "";
+
+
+document
+.getElementById("studentEditBadge")
+.classList.add("hidden");
+
+
+document
+.getElementById("studentSaveButton")
+.className =
+"btn-primary";
+
+
+document
+.getElementById("studentSaveButton")
+.innerHTML = `
+<i class="fas fa-user-plus"></i>
+إضافة طالب
+`;
+
+
+if(closeBox){
+
+document
+.getElementById("studentEditBox")
+.classList.remove("active");
+
+}
+
+}
+
+
+/* =========================================================
+CANCEL STUDENT
+========================================================= */
+
+function cancelStudentEdit(){
+
+clearStudentForm();
+
+}
+
+
+/* =========================================================
+DELETE STUDENT
+========================================================= */
+
+function deleteStudent(index){
+
+Swal.fire({
+
+title:"حذف الطالب؟",
+
+text:"سيتم حذفه من قائمة المسموح لهم.",
+
+icon:"warning",
+
+showCancelButton:true,
+
+confirmButtonText:"نعم، احذف",
+
+cancelButtonText:"إلغاء"
+
+}).then(result=>{
+
+if(result.isConfirmed){
+
+finalStudents.splice(index,1);
+
+renderStudents();
+
+}
+
+});
+
+}
+
+
+/* =========================================================
+RENDER STUDENTS
+========================================================= */
+
+function renderStudents(){
+
+const tbody =
+document.getElementById("studentsBody");
+
+
+tbody.innerHTML = "";
+
+
+if(finalStudents.length === 0){
+
+tbody.innerHTML = `
+
+<tr>
+
+<td
+colspan="5"
+class="empty-row">
+
+<i class="fas fa-users-slash"></i>
+
+<br>
+
+لا يوجد طلاب
+
+<br>
+
+<button
+class="btn-primary"
+style="margin-top:10px"
+onclick="openStudentEditor()">
+
+<i class="fas fa-user-plus"></i>
+
+إضافة أول طالب
+
+</button>
+
+</td>
+
+</tr>
+
+`;
+
+}else{
+
+finalStudents.forEach((s,i)=>{
+
+tbody.innerHTML += `
+
+<tr>
+
+<td>
+
+${i+1}
+
+</td>
+
+
+<td>
+
+${escapeHtml(s.name || "")}
+
+</td>
+
+
+<td>
+
+${escapeHtml(s.username || "")}
+
+</td>
+
+
+<td>
+
+<span style="letter-spacing:2px">
+
+••••••••
+
+</span>
+
+</td>
+
+
+<td>
+
+<div class="action-buttons">
+
+<button
+class="btn-primary"
+onclick="editStudent(${i})">
+
+<i class="fas fa-pen"></i>
+
+تعديل
+
+</button>
+
+
+<button
+class="btn-danger"
+onclick="deleteStudent(${i})">
+
+<i class="fas fa-trash"></i>
+
+</button>
+
+</div>
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+}
+
+
+document.getElementById(
+"sCountBadge"
+).innerText =
+finalStudents.length;
+
+}
+
+
+/* =========================================================
+IMPORT STUDENTS
+========================================================= */
+
+async function importStudentsExcel(input){
+
+if(!input.files[0]) return;
+
+
+try{
+
+const data =
+await readExcel(input.files[0]);
+
+
+let imported = 0;
+
+let skipped = 0;
+
+
+data.forEach(row=>{
+
+if(!row || row.length < 3){
+
+skipped++;
+
+return;
+
+}
+
+
+const name =
+getCleanCell(row[0]);
+
+
+const user =
+getCleanCell(row[1]);
+
+
+const pass =
+getCleanCell(row[2]);
+
+
+if(name && user && pass){
+
+/* منع تكرار المستخدم */
+
+const exists =
+finalStudents.some(
+s =>
+String(s.username || "")
+.trim()
+.toLowerCase()
+===
+user.toLowerCase()
+);
+
+
+if(!exists){
+
+finalStudents.push({
+
+name:name,
+
+username:user,
+
+password:pass
+
+});
+
+imported++;
+
+}else{
+
+skipped++;
+
+}
+
+}else{
+
+skipped++;
+
+}
+
+});
+
+
+renderStudents();
+
+
+Swal.fire({
+
+icon:"success",
+
+title:"تم استيراد الطلاب",
+
+html:`
+
+<div style="line-height:2">
+
+تمت إضافة:
+<strong>${imported}</strong>
+طالب
+
+<br>
+
+تم تخطي:
+<strong>${skipped}</strong>
+صف
+
+</div>
+
+`,
+
+confirmButtonText:"موافق"
+
+});
+
+
+}catch(error){
+
+console.error(error);
+
+Swal.fire(
+"خطأ",
+"تعذر استيراد الطلاب. تأكد من ترتيب الأعمدة.",
+"error"
+);
+
+}
+
+
+input.value = "";
+
+}
+
+
+/* =========================================================
+EXCEL READER
+========================================================= */
+
+function readExcel(file){
+
+return new Promise((resolve,reject)=>{
+
+const reader =
+new FileReader();
+
+
+reader.onload = e=>{
+
+try{
+
+const data =
+new Uint8Array(
+e.target.result
+);
+
+
+const workbook =
+XLSX.read(
+data,
+{
+type:"array",
+cellDates:false,
+raw:true
+}
+);
+
+
+if(
+!workbook.SheetNames ||
+workbook.SheetNames.length === 0
+){
+
+resolve([]);
+
+return;
+
+}
+
+
+const sheet =
+workbook.Sheets[
+workbook.SheetNames[0]
+];
+
+
+const json =
+XLSX.utils.sheet_to_json(
+sheet,
+{
+header:1,
+defval:"",
+raw:true,
+blankrows:false
+}
+);
+
+
+/*
+   أول صف هو صف العناوين
+*/
+
+const rows =
+json.slice(1).map(row=>{
+
+return Array.from(
+{
+length:Math.max(row.length,9)
+},
+(_,i)=>
+getCleanCell(row[i])
+);
+
+});
+
+
+resolve(rows);
+
+
+}catch(error){
+
+reject(error);
+
+}
+
+};
+
+
+reader.onerror = reject;
+
+
+reader.readAsArrayBuffer(file);
+
+});
+
+}
+
+
+/* =========================================================
+FINAL SAVE
+========================================================= */
+
+async function finalizeAndUpload(){
+
+const title =
+document
+.getElementById("qTitle")
+.value
+.trim();
+
+
+const time =
+parseInt(
+document.getElementById("qTime").value
+) || 60;
+
+
+if(!title){
+
+Swal.fire(
+"خطأ",
+"يجب كتابة عنوان الاختبار",
+"error"
+);
+
+return;
+
+}
+
+
+if(finalQuestions.length === 0){
+
+Swal.fire(
+"خطأ",
+"لم تقم بإضافة أي أسئلة",
+"error"
+);
+
+return;
+
+}
+
+
+if(finalStudents.length === 0){
+
+Swal.fire(
+"خطأ",
+"لم تقم بإضافة أي طلاب",
+"error"
+);
+
+return;
+
+}
+
+
+let rewards = [];
+
+
+document
+.querySelectorAll(".r-score")
+.forEach((el,index)=>{
+
+const texts =
+document.querySelectorAll(".r-text");
+
+
+const txt =
+texts[index]
+? texts[index].value.trim()
+: "";
+
+
+if(el.value && txt){
+
+rewards.push({
+
+minScore:
+parseInt(el.value) || 0,
+
+rewardText:txt
+
+});
+
+}
+
+});
+
+
+const examData = {
+
+title:title,
+
+duration:time,
+
+allowRetake:
+document.getElementById("qRetake").checked,
+
+showResults:
+document.getElementById("qShowRes").checked,
+
+questions:
+JSON.parse(
+JSON.stringify(finalQuestions)
+),
+
+students:
+JSON.parse(
+JSON.stringify(finalStudents)
+),
+
+rewards:rewards
+
+};
+
+
+Swal.fire({
+
+title:
+currentEditingExamId
+? "جاري حفظ التعديلات..."
+: "جاري إنشاء الاختبار...",
+
+allowOutsideClick:false,
+
+didOpen:()=>Swal.showLoading()
+
+});
+
+
+try{
+
+if(currentEditingExamId){
+
+await db
+.collection("quizzes2")
+.doc(currentEditingExamId)
+.update(examData);
+
+
+Swal.fire({
+
+icon:"success",
+
+title:"تم الحفظ بنجاح",
+
+text:"تم تحديث الاختبار.",
+
+confirmButtonText:"موافق"
+
+}).then(()=>{
+
+location.reload();
+
+});
+
+
+}else{
+
+examData.status = "open";
+
+examData.createdAt =
+firebase.firestore.FieldValue.serverTimestamp();
+
+
+await db
+.collection("quizzes2")
+.add(examData);
+
+
+Swal.fire({
+
+icon:"success",
+
+title:"تم إنشاء الاختبار",
+
+text:"الاختبار جاهز للطلاب.",
+
+confirmButtonText:"موافق"
+
+}).then(()=>{
+
+location.reload();
+
+});
+
+}
+
+}catch(error){
+
+console.error(error);
+
+Swal.fire(
+"خطأ",
+"حدث خطأ أثناء حفظ الاختبار",
+"error"
+);
+
+}
+
+}
+
+
+/* =========================================================
+BUILD EXAM HTML
+========================================================= */
+
+function buildExamHTML(answered=false){
+
+const title =
+document
+.getElementById("qTitle")
+.value
+.trim()
+|| "اختبار";
+
+
+const time =
+document
+.getElementById("qTime")
+.value
+|| 60;
+
+
+let html = `
+
+<div class="print-page">
+
+${
+answered
+?
+`
+<div class="watermark">
+كنترول المستشار
+</div>
+`
+:
+""
+}
+
+
+<div class="print-header">
+
+<h1>
+
+${escapeHtml(title)}
+
+</h1>
+
+
+<div>
+
+المدة:
+
+<strong>
+
+${escapeHtml(time)}
+
+</strong>
+
+دقيقة
+
+</div>
+
+</div>
+
+
+<div class="print-info">
+
+<div>
+
+اسم الطالب:
+
+....................................................
+
+</div>
+
+
+<div>
+
+الفصل:
+
+....................................................
+
+</div>
+
+
+<div>
+
+التاريخ:
+
+....................................................
+
+</div>
+
+
+<div>
+
+الدرجة:
+
+................. / ${getTotalPoints()}
+
+</div>
+
+</div>
+
+`;
+
+
+finalQuestions.forEach((q,index)=>{
+
+html += `
+
+<div class="print-question">
+
+<div class="print-question-title">
+
+${index+1})
+
+${escapeHtml(q.text || "")}
+
+<span style="font-weight:normal">
+
+(${q.points || 1} درجة)
+
+</span>
+
+</div>
+
+`;
+
+
+if(q.imgUrl){
+
+html += `
+
+<div
+style="
+margin:10px 0;
+text-align:center;
+">
+
+<img
+src="${escapeHtml(q.imgUrl)}"
+style="
+max-width:100%;
+max-height:250px;
+">
+
+</div>
+
+`;
+
+}
+
+
+if(q.type === "mcq"){
+
+html += `<div class="print-options">`;
+
+
+(q.options || []).forEach((option,optIndex)=>{
+
+const isCorrect =
+answered &&
+optIndex === q.correctIndex;
+
+
+html += `
+
+<div
+class="print-option ${
+isCorrect
+? "correct-answer"
+: ""
+}">
+
+${String.fromCharCode(65 + optIndex)})
+
+${escapeHtml(option)}
+
+${
+isCorrect
+? " ✓ الإجابة الصحيحة"
+: ""
+}
+
+</div>
+
+`;
+
+});
+
+
+html += `</div>`;
+
+}else{
+
+html += `
+
+<div>
+
+<div class="essay-line"></div>
+
+<div class="essay-line"></div>
+
+<div class="essay-line"></div>
+
+</div>
+
+`;
+
+}
+
+
+html += `</div>`;
+
+});
+
+
+html += `
+
+<div class="footer-print">
+
+المستشار | كنترول الاختبارات
+
+</div>
+
+</div>
+
+`;
+
+
+return html;
+
+}
+
+
+/* =========================================================
+TOTAL POINTS
+========================================================= */
+
+function getTotalPoints(){
+
+return finalQuestions.reduce(
+
+(sum,q)=>
+sum +
+(parseInt(q.points) || 1),
+
+0
+
+);
+
+}
+
+
+/* =========================================================
+PRINT EXAM
+========================================================= */
+
+function printExam(answered=false){
+
+if(!validateExport()) return;
+
+
+const container =
+document.getElementById("printContainer");
+
+
+container.innerHTML =
+buildExamHTML(answered);
+
+
+container.style.display =
+"block";
+
+
+setTimeout(()=>{
+
+window.print();
+
+
+setTimeout(()=>{
+
+container.style.display =
+"none";
+
+container.innerHTML = "";
+
+},700);
+
+},300);
+
+}
+
+
+/* =========================================================
+EXPORT EXAM PDF
+========================================================= */
+
+async function exportExamPDF(answered=false){
+
+if(!validateExport()) return;
+
+
+const container =
+document.getElementById("printContainer");
+
+
+container.innerHTML =
+buildExamHTML(answered);
+
+
+container.style.display =
+"block";
+
+
+Swal.fire({
+
+title:"جاري تجهيز ملف PDF...",
+
+text:"يرجى الانتظار",
+
+allowOutsideClick:false,
+
+didOpen:()=>Swal.showLoading()
+
+});
+
+
+try{
+
+const page =
+container.querySelector(".print-page");
+
+
+if(!page){
+
+throw new Error("PDF page not found");
+
+}
+
+
+const canvas =
+await html2canvas(page,{
+
+scale:2,
+
+useCORS:true,
+
+allowTaint:false,
+
+backgroundColor:"#ffffff",
+
+logging:false
+
+});
+
+
+const imgData =
+canvas.toDataURL(
+"image/jpeg",
+0.95
+);
+
+
+const {jsPDF} =
+window.jspdf;
+
+
+const pdf =
+new jsPDF({
+
+orientation:"p",
+
+unit:"mm",
+
+format:"a4"
+
+});
+
+
+const pageWidth = 210;
+
+const pageHeight = 297;
+
+
+const imgWidth =
+pageWidth;
+
+
+const imgHeight =
+canvas.height *
+imgWidth /
+canvas.width;
+
+
+let heightLeft =
+imgHeight;
+
+
+let position = 0;
+
+
+pdf.addImage(
+
+imgData,
+
+"JPEG",
+
+0,
+
+position,
+
+imgWidth,
+
+imgHeight,
+
+undefined,
+
+"FAST"
+
+);
+
+
+heightLeft -= pageHeight;
+
+
+while(heightLeft > 0){
+
+position =
+heightLeft -
+imgHeight;
+
+
+pdf.addPage();
+
+
+pdf.addImage(
+
+imgData,
+
+"JPEG",
+
+0,
+
+position,
+
+imgWidth,
+
+imgHeight,
+
+undefined,
+
+"FAST"
+
+);
+
+
+heightLeft -= pageHeight;
+
+}
+
+
+const safeTitle =
+
+(
+document
+.getElementById("qTitle")
+.value
+.trim()
+||
+"اختبار"
+)
+.replace(
+/[\\/:*?"<>|]/g,
+"_"
+);
+
+
+const fileName =
+
+answered
+
+?
+
+`${safeTitle} - نسخة مجابة - كنترول المستشار.pdf`
+
+:
+
+`${safeTitle} - نسخة غير مجابة.pdf`;
+
+
+pdf.save(fileName);
+
+
+Swal.fire({
+
+icon:"success",
+
+title:"تم التصدير",
+
+text:"تم إنشاء ملف PDF بنجاح.",
+
+confirmButtonText:"موافق"
+
+});
+
+
+}catch(error){
+
+console.error(error);
+
+Swal.fire(
+"خطأ",
+"حدث خطأ أثناء إنشاء PDF",
+"error"
+);
+
+}
+
+
+container.style.display =
+"none";
+
+container.innerHTML = "";
+
+}
+
+
+/* =========================================================
+BUILD USERS PDF
+========================================================= */
+
+function buildUsersPDFHTML(){
+
+const title =
+document
+.getElementById("qTitle")
+.value
+.trim()
+|| "قائمة المستخدمين";
+
+
+const now =
+new Date()
+.toLocaleString(
+"ar-EG"
+);
+
+
+let html = `
+
+<div class="users-pdf-page">
+
+<div class="users-pdf-header">
+
+<h1>
+
+قائمة المستخدمين
+
+</h1>
+
+
+<h3>
+
+${escapeHtml(title)}
+
+</h3>
+
+
+<div>
+
+عدد المستخدمين:
+
+<strong>
+
+${finalStudents.length}
+
+</strong>
+
+</div>
+
+
+<div style="font-size:12px;margin-top:5px">
+
+تاريخ التصدير:
+${escapeHtml(now)}
+
+</div>
+
+</div>
+
+
+<table class="users-pdf-table">
+
+<thead>
+
+<tr>
+
+<th>
+
+#
+
+</th>
+
+<th>
+
+اسم الطالب
+
+</th>
+
+<th>
+
+Username
+
+</th>
+
+<th>
+
+Password
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+`;
+
+
+if(finalStudents.length === 0){
+
+html += `
+
+<tr>
+
+<td colspan="4">
+
+لا يوجد مستخدمون
+
+</td>
+
+</tr>
+
+`;
+
+}else{
+
+finalStudents.forEach((student,index)=>{
+
+html += `
+
+<tr>
+
+<td>
+
+${index+1}
+
+</td>
+
+
+<td>
+
+${escapeHtml(student.name || "")}
+
+</td>
+
+
+<td>
+
+${escapeHtml(student.username || "")}
+
+</td>
+
+
+<td>
+
+${escapeHtml(student.password || "")}
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+}
+
+
+html += `
+
+</tbody>
+
+</table>
+
+
+<div class="users-pdf-footer">
+
+المستشار | نظام إدارة الاختبارات
+
+</div>
+
+</div>
+
+`;
+
+
+return html;
+
+}
+
+
+/* =========================================================
+EXPORT USERS PDF
+========================================================= */
+
+async function exportUsersPDF(){
+
+if(finalStudents.length === 0){
+
+Swal.fire(
+
+"تنبيه",
+
+"لا توجد قائمة مستخدمين لتصديرها.",
+
+"warning"
+
+);
+
+return;
+
+}
+
+
+const container =
+document.getElementById("printContainer");
+
+
+container.innerHTML =
+buildUsersPDFHTML();
+
+
+container.style.display =
+"block";
+
+
+Swal.fire({
+
+title:"جاري تجهيز قائمة المستخدمين...",
+
+text:"يرجى الانتظار",
+
+allowOutsideClick:false,
+
+didOpen:()=>Swal.showLoading()
+
+});
+
+
+try{
+
+const page =
+container.querySelector(".users-pdf-page");
+
+
+const canvas =
+await html2canvas(page,{
+
+scale:2,
+
+useCORS:true,
+
+backgroundColor:"#ffffff",
+
+logging:false
+
+});
+
+
+const imgData =
+canvas.toDataURL(
+"image/jpeg",
+0.95
+);
+
+
+const {jsPDF} =
+window.jspdf;
+
+
+const pdf =
+new jsPDF({
+
+orientation:"p",
+
+unit:"mm",
+
+format:"a4"
+
+});
+
+
+const pageWidth = 210;
+
+const pageHeight = 297;
+
+
+const imgWidth =
+pageWidth;
+
+
+const imgHeight =
+canvas.height *
+imgWidth /
+canvas.width;
+
+
+let heightLeft =
+imgHeight;
+
+
+let position = 0;
+
+
+pdf.addImage(
+
+imgData,
+
+"JPEG",
+
+0,
+
+position,
+
+imgWidth,
+
+imgHeight,
+
+undefined,
+
+"FAST"
+
+);
+
+
+heightLeft -= pageHeight;
+
+
+while(heightLeft > 0){
+
+position =
+heightLeft -
+imgHeight;
+
+
+pdf.addPage();
+
+
+pdf.addImage(
+
+imgData,
+
+"JPEG",
+
+0,
+
+position,
+
+imgWidth,
+
+imgHeight,
+
+undefined,
+
+"FAST"
+
+);
+
+
+heightLeft -= pageHeight;
+
+}
+
+
+const safeTitle =
+
+(
+document
+.getElementById("qTitle")
+.value
+.trim()
+||
+"اختبار"
+)
+.replace(
+/[\\/:*?"<>|]/g,
+"_"
+);
+
+
+const fileName =
+
+`${safeTitle} - قائمة المستخدمين.pdf`;
+
+
+pdf.save(fileName);
+
+
+Swal.fire({
+
+icon:"success",
+
+title:"تم التصدير بنجاح",
+
+text:"تم إنشاء PDF يحتوي على جميع المستخدمين.",
+
+confirmButtonText:"موافق"
+
+});
+
+
+}catch(error){
+
+console.error(error);
+
+Swal.fire(
+
+"خطأ",
+
+"حدث خطأ أثناء إنشاء PDF المستخدمين.",
+
+"error"
+
+);
+
+}
+
+
+container.style.display =
+"none";
+
+container.innerHTML = "";
+
+}
+
+
+/* =========================================================
+VALIDATE EXPORT
+========================================================= */
+
+function validateExport(){
+
+if(
+!document
+.getElementById("qTitle")
+.value
+.trim()
+){
+
+Swal.fire(
+
+"تنبيه",
+
+"اكتب عنوان الاختبار أولاً",
+
+"warning"
+
+);
+
+return false;
+
+}
+
+
+if(finalQuestions.length === 0){
+
+Swal.fire(
+
+"تنبيه",
+
+"لا توجد أسئلة للتصدير",
+
+"warning"
+
+);
+
+return false;
+
+}
+
+
+return true;
+
+}
+
+
+/* =========================================================
+CLEAN EXCEL / INPUT VALUES
+========================================================= */
+
+function getCleanCell(value){
+
+if(value === null || value === undefined){
+
+return "";
+
+}
+
+
+if(typeof value === "number"){
+
+if(Number.isInteger(value)){
+
+return String(value);
+
+}
+
+return String(value)
+.trim();
+
+}
+
+
+if(value instanceof Date){
+
+return value.toLocaleDateString("ar-EG");
+
+}
+
+
+return String(value)
+.replace(/\u00A0/g," ")
+.trim();
+
+}
+
+
+/* =========================================================
+ESCAPE HTML
+========================================================= */
+
+function escapeHtml(value){
+
+return String(value ?? "")
+
+.replace(/&/g,"&amp;")
+
+.replace(/</g,"&lt;")
+
+.replace(/>/g,"&gt;")
+
+.replace(/"/g,"&quot;")
+
+.replace(/'/g,"&#039;");
+
+}
+
+</script>
+
+</body>
+
+        </html>
