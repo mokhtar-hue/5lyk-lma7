@@ -4661,3 +4661,1019 @@ async function saveManualGrades() {
 
             ans.remark =
                 remark?.value ||
+                "";
+
+
+            newScore += pts;
+
+        }
+    );
+
+
+    const isGraded =
+        document.getElementById(
+            "gradeStatus"
+        ).value === "true";
+
+
+    const cheatAttempt =
+        document.getElementById(
+            "cheatStatus"
+        ).value === "true";
+
+
+    try {
+
+        showLoading(
+            "جاري حفظ الدرجات والحالة..."
+        );
+
+
+        await db
+            .collection("results2")
+            .doc(activeResultId)
+            .update({
+
+                score:
+                    newScore,
+
+                isGraded:
+                    isGraded,
+
+                cheatAttempt:
+                    cheatAttempt,
+
+                answers:
+                    res.answers
+
+            });
+
+
+        res.score =
+            newScore;
+
+        res.isGraded =
+            isGraded;
+
+        res.cheatAttempt =
+            cheatAttempt;
+
+
+        hideLoading();
+
+
+        await Swal.fire({
+
+            icon: "success",
+
+            title: "تم الحفظ",
+
+            text:
+                "تم حفظ الدرجات وحالة الطالب والتعقيبات بنجاح",
+
+            timer: 1500,
+
+            showConfirmButton: false
+
+        });
+
+
+        closeModal();
+
+
+        renderTable();
+
+        updateStats();
+
+
+    } catch (error) {
+
+        hideLoading();
+
+
+        console.error(error);
+
+
+        Swal.fire(
+            "خطأ",
+            "تعذر حفظ البيانات: " +
+            error.message,
+            "error"
+        );
+
+    }
+
+}
+
+
+/* ==================================================
+DELETE ACTIVE STUDENT
+================================================== */
+
+async function deleteActiveStudent() {
+
+    const res =
+        currentResults.find(
+            r =>
+                r.id ===
+                activeResultId
+        );
+
+
+    if (!res) {
+
+        Swal.fire(
+            "خطأ",
+            "لم يتم العثور على الطالب",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    const confirm =
+        await Swal.fire({
+
+            icon: "warning",
+
+            title: "تأكيد حذف الطالب",
+
+            html:
+                `
+                هل تريد حذف نتيجة الطالب:
+
+                <br>
+
+                <strong>
+                    ${escapeHtml(
+                        res.name ||
+                        "بدون اسم"
+                    )}
+                </strong>
+
+                <br><br>
+
+                <span style="color:#b91c1c">
+                    سيتم حذف النتيجة نهائياً من قاعدة البيانات.
+                </span>
+                `,
+
+            showCancelButton: true,
+
+            confirmButtonText:
+                "نعم، احذف الطالب",
+
+            cancelButtonText:
+                "إلغاء",
+
+            confirmButtonColor:
+                "#dc2626",
+
+            cancelButtonColor:
+                "#64748b"
+
+        });
+
+
+    if (!confirm.isConfirmed)
+        return;
+
+
+    try {
+
+        showLoading(
+            "جاري حذف الطالب..."
+        );
+
+
+        await db
+            .collection("results2")
+            .doc(activeResultId)
+            .delete();
+
+
+        currentResults =
+            currentResults.filter(
+                r =>
+                    r.id !==
+                    activeResultId
+            );
+
+
+        selectedIds.delete(
+            activeResultId
+        );
+
+
+        activeResultId = null;
+
+
+        closeModal();
+
+
+        renderTable();
+
+        updateStats();
+
+
+        hideLoading();
+
+
+        Swal.fire({
+
+            icon: "success",
+
+            title: "تم الحذف",
+
+            text:
+                "تم حذف الطالب ونتيجته بنجاح",
+
+            timer: 1500,
+
+            showConfirmButton: false
+
+        });
+
+
+    } catch (error) {
+
+        hideLoading();
+
+
+        console.error(error);
+
+
+        Swal.fire(
+            "خطأ",
+            "تعذر حذف الطالب: " +
+            error.message,
+            "error"
+        );
+
+    }
+
+}
+
+
+/* ==================================================
+BUILD ANSWERS PRINT
+================================================== */
+
+function buildAnswersPrintReport(
+    results,
+    essayOnly
+) {
+
+    const title =
+        getExamTitle();
+
+
+    const now =
+        new Date().toLocaleString(
+            "ar-EG",
+            {
+                dateStyle: "medium",
+                timeStyle: "short"
+            }
+        );
+
+
+    let studentsHTML = "";
+
+
+    results.forEach(
+        (student, studentIndex) => {
+
+            let answersHTML = "";
+
+
+            const answers =
+                Array.isArray(student.answers)
+                    ?
+                    student.answers
+                    :
+                    [];
+
+
+            answers.forEach(
+                (ans, i) => {
+
+                    if (
+                        essayOnly &&
+                        ans.type !== "essay"
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    const isEssay =
+                        ans.type === "essay";
+
+
+                    const questionClass =
+                        isEssay
+                            ?
+                            "essay"
+                            :
+                            (
+                                ans.isCorrect
+                                    ?
+                                    "correct"
+                                    :
+                                    "wrong"
+                            );
+
+
+                    const remark =
+                        String(
+                            ans.remark ||
+                            ""
+                        ).trim();
+
+
+                    answersHTML += `
+
+                        <div
+                            class="
+                                answer-print-question
+                                ${questionClass}
+                            "
+                        >
+
+                            <div class="answer-print-q">
+
+                                س${i + 1}:
+
+                                ${escapeHtml(
+                                    ans.text ||
+                                    ""
+                                )}
+
+                            </div>
+
+
+                            <div class="answer-print-line">
+
+                                <span class="answer-print-label">
+
+                                    إجابة الطالب:
+
+                                </span>
+
+                                <strong>
+
+                                    ${escapeHtml(
+                                        ans.studentAns ||
+                                        "-"
+                                    )}
+
+                                </strong>
+
+                            </div>
+
+
+                            ${
+                                isEssay
+                                ?
+                                `
+                                <div class="answer-print-line">
+
+                                    <span class="answer-print-label">
+
+                                        نوع السؤال:
+
+                                    </span>
+
+                                    <strong>
+
+                                        مقالي
+
+                                    </strong>
+
+                                </div>
+                                `
+                                :
+                                `
+                                <div class="answer-print-line">
+
+                                    <span class="answer-print-label">
+
+                                        الإجابة الصحيحة:
+
+                                    </span>
+
+                                    <strong>
+
+                                        ${escapeHtml(
+                                            ans.correctAns ||
+                                            "-"
+                                        )}
+
+                                    </strong>
+
+                                </div>
+
+                                <div class="answer-print-line">
+
+                                    <span class="answer-print-label">
+
+                                        النتيجة:
+
+                                    </span>
+
+                                    <strong>
+
+                                        ${
+                                            ans.isCorrect
+                                                ?
+                                                "صحيحة"
+                                                :
+                                                "خاطئة"
+                                        }
+
+                                    </strong>
+
+                                </div>
+                                `
+                            }
+
+
+                            <div class="answer-print-line">
+
+                                <span class="answer-print-label">
+
+                                    الدرجة:
+
+                                </span>
+
+                                <strong>
+
+                                    ${
+                                        Number(
+                                            ans.pointsEarned
+                                        ) || 0
+                                    }
+
+                                    /
+
+                                    ${
+                                        Number(
+                                            ans.maxPoints
+                                        ) || 0
+                                    }
+
+                                </strong>
+
+                            </div>
+
+
+                            ${
+                                remark
+                                ?
+                                `
+                                <div class="answer-print-remark">
+
+                                    <strong>
+
+                                        <i class="fas fa-comment-dots"></i>
+
+                                        التعقيب:
+
+                                    </strong>
+
+                                    ${escapeHtml(
+                                        remark
+                                    )}
+
+                                </div>
+                                `
+                                :
+                                `
+                                <div class="answer-print-remark">
+
+                                    <strong>
+
+                                        <i class="fas fa-comment"></i>
+
+                                        التعقيب:
+
+                                    </strong>
+
+                                    لا يوجد تعقيب
+
+                                </div>
+                                `
+                            }
+
+                        </div>
+
+                    `;
+
+                }
+            );
+
+
+            if (!answersHTML) {
+
+                answersHTML = `
+
+                    <div
+                        style="
+                            text-align:center;
+                            padding:15px;
+                            color:#64748b;
+                            font-size:11px;
+                        "
+                    >
+
+                        لا توجد إجابات مطابقة لهذا التقرير.
+
+                    </div>
+
+                `;
+
+            }
+
+
+            studentsHTML += `
+
+                <section
+                    style="
+                        page-break-inside:auto;
+                        margin-bottom:20px;
+                    "
+                >
+
+                    <div class="answer-student-card">
+
+                        <div class="answer-student-grid">
+
+                            <div class="answer-student-item">
+
+                                اسم الطالب
+
+                                <strong>
+
+                                    ${escapeHtml(
+                                        student.name ||
+                                        "بدون اسم"
+                                    )}
+
+                                </strong>
+
+                            </div>
+
+
+                            <div class="answer-student-item">
+
+                                اليوزر / الكود
+
+                                <strong dir="ltr">
+
+                                    ${escapeHtml(
+                                        student.username ||
+                                        "-"
+                                    )}
+
+                                </strong>
+
+                            </div>
+
+
+                            <div class="answer-student-item">
+
+                                الدرجة
+
+                                <strong>
+
+                                    ${
+                                        Number(
+                                            student.score
+                                        ) || 0
+                                    }
+
+                                    /
+
+                                    ${
+                                        Number(
+                                            student.maxScore
+                                        ) || 0
+                                    }
+
+                                </strong>
+
+                            </div>
+
+
+                            <div class="answer-student-item">
+
+                                حالة الغش
+
+                                <strong
+                                    style="
+                                        color:
+                                        ${
+                                            student.cheatAttempt
+                                                ?
+                                                "#b91c1c"
+                                                :
+                                                "#047857"
+                                        };
+                                    "
+                                >
+
+                                    ${
+                                        student.cheatAttempt
+                                            ?
+                                            "غشاش"
+                                            :
+                                            "سليم"
+                                    }
+
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    ${answersHTML}
+
+                </section>
+
+            `;
+
+        }
+    );
+
+
+    return `
+
+        <div class="print-container">
+
+            <div class="answer-print-header">
+
+                <h1 class="answer-print-title">
+
+                    ${
+                        essayOnly
+                            ?
+                            "إجابات الأسئلة المقالية"
+                            :
+                            "إجابات الطلاب"
+                    }
+
+                </h1>
+
+
+                <p class="answer-print-subtitle">
+
+                    ${escapeHtml(title)}
+
+                    -
+
+                    عدد الطلاب:
+
+                    ${results.length}
+
+                </p>
+
+
+                <div
+                    style="
+                        margin-top:5px;
+                        font-size:9px;
+                        color:#64748b;
+                    "
+                >
+
+                    تاريخ الإصدار:
+
+                    ${escapeHtml(now)}
+
+                </div>
+
+            </div>
+
+
+            ${studentsHTML}
+
+
+            <div class="answer-print-footer">
+
+                <span>
+
+                    نظام المستشار - كنترول النتائج
+
+                </span>
+
+
+                <span>
+
+                    ${escapeHtml(now)}
+
+                </span>
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+/* ==================================================
+PRINT ANSWERS
+================================================== */
+
+function printAnswersPDF(
+    results,
+    essayOnly
+) {
+
+    if (
+        !results ||
+        !results.length
+    ) {
+
+        Swal.fire(
+            "تنبيه",
+            "لا توجد بيانات أو إجابات للطباعة",
+            "warning"
+        );
+
+        return;
+
+    }
+
+
+    try {
+
+        showLoading(
+            "جاري تجهيز إجابات الطلاب..."
+        );
+
+
+        const printArea =
+            document.getElementById(
+                "printReport"
+            );
+
+
+        printArea.innerHTML =
+            buildAnswersPrintReport(
+                results,
+                essayOnly
+            );
+
+
+        setTimeout(
+            () => {
+
+                hideLoading();
+
+                window.print();
+
+
+                setTimeout(
+                    () => {
+
+                        printArea.innerHTML =
+                            "";
+
+                    },
+                    1000
+                );
+
+            },
+            400
+        );
+
+
+    } catch (error) {
+
+        hideLoading();
+
+        console.error(error);
+
+
+        Swal.fire(
+            "خطأ",
+            "تعذر تجهيز إجابات الطلاب: " +
+            error.message,
+            "error"
+        );
+
+    }
+
+}
+
+
+/* ==================================================
+SELECTED ANSWERS PDF
+================================================== */
+
+function exportSelectedAnswersPDF() {
+
+    const results =
+        getSelectedResults();
+
+
+    if (!results.length) {
+
+        Swal.fire(
+            "تنبيه",
+            "حدد الطلاب أولاً من الجدول",
+            "warning"
+        );
+
+        return;
+
+    }
+
+
+    printAnswersPDF(
+        results,
+        false
+    );
+
+}
+
+
+/* ==================================================
+SELECTED ESSAY PDF
+================================================== */
+
+function exportSelectedEssayPDF() {
+
+    const results =
+        getSelectedResults();
+
+
+    if (!results.length) {
+
+        Swal.fire(
+            "تنبيه",
+            "حدد الطلاب أولاً من الجدول",
+            "warning"
+        );
+
+        return;
+
+    }
+
+
+    printAnswersPDF(
+        results,
+        true
+    );
+
+}
+
+
+/* ==================================================
+ALL ANSWERS PDF
+================================================== */
+
+function exportAllAnswersPDF() {
+
+    if (!currentResults.length) {
+
+        Swal.fire(
+            "تنبيه",
+            "اختر اختباراً أولاً",
+            "warning"
+        );
+
+        return;
+
+    }
+
+
+    printAnswersPDF(
+        currentResults,
+        false
+    );
+
+}
+
+
+/* ==================================================
+ALL ESSAY PDF
+================================================== */
+
+function exportAllEssayPDF() {
+
+    if (!currentResults.length) {
+
+        Swal.fire(
+            "تنبيه",
+            "اختر اختباراً أولاً",
+            "warning"
+        );
+
+        return;
+
+    }
+
+
+    printAnswersPDF(
+        currentResults,
+        true
+    );
+
+}
+
+
+/* ==================================================
+CLOSE MODAL
+================================================== */
+
+function closeModal() {
+
+    document.getElementById(
+        "gradeModal"
+    ).style.display =
+        "none";
+
+}
+
+
+/* ==================================================
+CLICK OUTSIDE MODAL
+================================================== */
+
+document.getElementById(
+    "gradeModal"
+).addEventListener(
+    "click",
+    function(e) {
+
+        if (
+            e.target === this
+        ) {
+
+            closeModal();
+
+        }
+
+    }
+);
+
+
+/* ==================================================
+ESC KEY
+================================================== */
+
+document.addEventListener(
+    "keydown",
+    function(e) {
+
+        if (
+            e.key === "Escape"
+        ) {
+
+            closeModal();
+
+        }
+
+    }
+);
+
+
+/* ==================================================
+AFTER PRINT
+================================================== */
+
+window.addEventListener(
+    "afterprint",
+    function() {
+
+        const printArea =
+            document.getElementById(
+                "printReport"
+            );
+
+
+        if (printArea) {
+
+            printArea.innerHTML =
+                "";
+
+        }
+
+    }
+);
+
+</script>
+
+</body>
+
+        </html>
