@@ -1,347 +1,2911 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم | منصة المستشار حازم سالم</title>
-    
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        لوحة التحكم | منصة المستشار حازم سالم
+    </title>
+
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-    
+
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap"
+        rel="stylesheet">
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+
+
     <style>
+
         :root {
+
             --primary: #6366f1;
+
             --primary-dark: #4f46e5;
+
             --secondary: #a855f7;
+
             --bg: #0b0f1a;
+
             --card: #161e2d;
+
             --text-main: #ffffff;
+
             --text-dim: #94a3b8;
+
             --accent-gold: #fbbf24;
-            --glass: rgba(22, 30, 45, 0.8);
+
+            --glass:
+                rgba(22, 30, 45, 0.8);
+
         }
+
+
+        * {
+
+            box-sizing: border-box;
+
+        }
+
 
         body {
-            font-family: 'Cairo', sans-serif;
-            background-color: var(--bg);
-            color: var(--text-main);
+
+            font-family:
+                'Cairo',
+                sans-serif;
+
+            background-color:
+                var(--bg);
+
+            color:
+                var(--text-main);
+
             margin: 0;
+
             padding-bottom: 80px;
+
             overflow-x: hidden;
+
         }
 
-        /* ----- شريط المحفظة العلوي ----- */
+
+        /* =====================================================
+           الشريط العلوي
+        ===================================================== */
+
         .top-bar {
-            background: var(--glass);
-            backdrop-filter: blur(15px);
-            padding: 12px 5%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
+
+            background:
+                var(--glass);
+
+            backdrop-filter:
+                blur(15px);
+
+            padding:
+                12px 5%;
+
+            display:
+                flex;
+
+            justify-content:
+                space-between;
+
+            align-items:
+                center;
+
+            position:
+                sticky;
+
             top: 0;
+
             z-index: 1000;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+
+            border-bottom:
+                1px solid
+                rgba(255,255,255,0.05);
+
         }
 
-        .user-identity { display: flex; align-items: center; gap: 12px; cursor: pointer; }
-        .user-avatar {
-            width: 45px; height: 45px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border-radius: 12px; display: flex; align-items: center; justify-content: center;
-            font-size: 20px; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+
+        .user-identity {
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            gap: 12px;
+
+            cursor: pointer;
+
         }
+
+
+        .user-avatar {
+
+            width: 45px;
+
+            height: 45px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    var(--primary),
+                    var(--secondary)
+                );
+
+            border-radius: 12px;
+
+            display:
+                flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 20px;
+
+            box-shadow:
+                0 4px 15px
+                rgba(99,102,241,0.3);
+
+        }
+
 
         .wallet-badge {
-            background: rgba(251, 191, 36, 0.1);
-            border: 1px solid var(--accent-gold);
-            padding: 6px 15px;
+
+            background:
+                rgba(251,191,36,0.1);
+
+            border:
+                1px solid
+                var(--accent-gold);
+
+            padding:
+                6px 15px;
+
             border-radius: 50px;
-            display: flex;
+
+            display:
+                flex;
+
             align-items: center;
+
             gap: 8px;
-            color: var(--accent-gold);
+
+            color:
+                var(--accent-gold);
+
             font-weight: 800;
+
             font-size: 14px;
+
             cursor: pointer;
+
         }
 
-        /* ----- التصميم الشبكي (The Grid) ----- */
+
+        /* =====================================================
+           Hero
+        ===================================================== */
+
         .hero-section {
-            padding: 40px 5%;
-            text-align: center;
-            background: radial-gradient(circle at top, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
-        }
-        .hero-section h1 { font-size: clamp(24px, 5vw, 36px); font-weight: 900; margin-bottom: 10px; }
-        .hero-section p { color: var(--text-dim); }
 
-        .main-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+            padding:
+                40px 5%;
+
+            text-align:
+                center;
+
+            background:
+                radial-gradient(
+                    circle at top,
+                    rgba(99,102,241,0.15) 0%,
+                    transparent 70%
+                );
+
+        }
+
+
+        .hero-section h1 {
+
+            font-size:
+                clamp(24px,5vw,36px);
+
+            font-weight:
+                900;
+
+            margin-bottom:
+                10px;
+
+        }
+
+
+        .hero-section p {
+
+            color:
+                var(--text-dim);
+
+        }
+
+
+        /* =====================================================
+           Main
+        ===================================================== */
+
+        .main-container {
+
+            max-width:
+                1200px;
+
+            margin:
+                0 auto;
+
+            padding:
+                20px;
+
+        }
+
 
         .grid-layout {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
+
+            display:
+                grid;
+
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(280px,1fr)
+                );
+
+            gap:
+                20px;
+
         }
+
 
         .pro-card {
-            background: var(--card);
-            border-radius: 24px;
-            padding: 30px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-decoration: none;
-            color: white;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 1px solid rgba(255,255,255,0.03);
-            position: relative;
-            overflow: hidden;
+
+            background:
+                var(--card);
+
+            border-radius:
+                24px;
+
+            padding:
+                30px;
+
+            display:
+                flex;
+
+            flex-direction:
+                column;
+
+            align-items:
+                center;
+
+            text-decoration:
+                none;
+
+            color:
+                white;
+
+            transition:
+                all 0.4s
+                cubic-bezier(
+                    0.175,
+                    0.885,
+                    0.32,
+                    1.275
+                );
+
+            border:
+                1px solid
+                rgba(255,255,255,0.03);
+
+            position:
+                relative;
+
+            overflow:
+                hidden;
+
         }
+
 
         .pro-card:hover {
-            transform: translateY(-10px);
-            border-color: var(--primary);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+
+            transform:
+                translateY(-10px);
+
+            border-color:
+                var(--primary);
+
+            box-shadow:
+                0 20px 40px
+                rgba(0,0,0,0.4);
+
         }
+
 
         .pro-card i {
-            font-size: 40px;
-            margin-bottom: 20px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+
+            font-size:
+                40px;
+
+            margin-bottom:
+                20px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    var(--primary),
+                    var(--secondary)
+                );
+
+            -webkit-background-clip:
+                text;
+
+            -webkit-text-fill-color:
+                transparent;
+
         }
 
-        .pro-card h3 { font-size: 20px; margin: 0 0 10px 0; font-weight: 800; }
-        .pro-card p { font-size: 13px; color: var(--text-dim); margin: 0; text-align: center; }
+
+        .pro-card h3 {
+
+            font-size:
+                20px;
+
+            margin:
+                0 0 10px 0;
+
+            font-weight:
+                800;
+
+        }
+
+
+        .pro-card p {
+
+            font-size:
+                13px;
+
+            color:
+                var(--text-dim);
+
+            margin:
+                0;
+
+            text-align:
+                center;
+
+        }
+
 
         .badge-new {
-            position: absolute; top: 15px; right: 15px;
-            background: var(--accent-gold); color: #000;
-            font-size: 10px; font-weight: 900; padding: 3px 8px;
-            border-radius: 6px;
+
+            position:
+                absolute;
+
+            top:
+                15px;
+
+            right:
+                15px;
+
+            background:
+                var(--accent-gold);
+
+            color:
+                #000;
+
+            font-size:
+                10px;
+
+            font-weight:
+                900;
+
+            padding:
+                3px 8px;
+
+            border-radius:
+                6px;
+
         }
 
-        /* ----- Sidebar & Menu ----- */
+
+        /* =====================================================
+           Sidebar
+        ===================================================== */
+
         .side-panel {
-            position: fixed; top: 0; right: -320px; width: 300px; height: 100%;
-            background: #1a2233; z-index: 3000; transition: 0.4s;
-            padding: 40px 20px; box-shadow: -10px 0 30px rgba(0,0,0,0.5);
-        }
-        .side-panel.open { right: 0; }
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; z-index: 2500; backdrop-filter: blur(4px); }
 
-        .menu-list { list-style: none; padding: 0; margin-top: 40px; }
+            position:
+                fixed;
+
+            top:
+                0;
+
+            right:
+                -320px;
+
+            width:
+                300px;
+
+            height:
+                100%;
+
+            background:
+                #1a2233;
+
+            z-index:
+                3000;
+
+            transition:
+                0.4s;
+
+            padding:
+                40px 20px;
+
+            box-shadow:
+                -10px 0 30px
+                rgba(0,0,0,0.5);
+
+        }
+
+
+        .side-panel.open {
+
+            right:
+                0;
+
+        }
+
+
+        .overlay {
+
+            position:
+                fixed;
+
+            inset:
+                0;
+
+            background:
+                rgba(0,0,0,0.8);
+
+            display:
+                none;
+
+            z-index:
+                2500;
+
+            backdrop-filter:
+                blur(4px);
+
+        }
+
+
+        .menu-list {
+
+            list-style:
+                none;
+
+            padding:
+                0;
+
+            margin-top:
+                40px;
+
+        }
+
+
         .menu-list li {
-            padding: 15px; border-radius: 12px; margin-bottom: 10px;
-            display: flex; align-items: center; gap: 15px; cursor: pointer;
-            transition: 0.3s; color: var(--text-dim);
-        }
-        .menu-list li:hover { background: rgba(255,255,255,0.05); color: white; }
-        .menu-list li.active { background: var(--primary); color: white; }
 
-        /* الشات بوت */
-        .chat-bot-fab {
-            position: fixed; bottom: 30px; left: 30px;
-            width: 65px; height: 65px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 28px; color: white;
-            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.5);
-            cursor: pointer; z-index: 2000;
-            animation: pulse 2s infinite;
+            padding:
+                15px;
+
+            border-radius:
+                12px;
+
+            margin-bottom:
+                10px;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            gap:
+                15px;
+
+            cursor:
+                pointer;
+
+            transition:
+                0.3s;
+
+            color:
+                var(--text-dim);
+
         }
+
+
+        .menu-list li:hover {
+
+            background:
+                rgba(255,255,255,0.05);
+
+            color:
+                white;
+
+        }
+
+
+        .menu-list li.active {
+
+            background:
+                var(--primary);
+
+            color:
+                white;
+
+        }
+
+
+        /* =====================================================
+           Chat Bot
+        ===================================================== */
+
+        .chat-bot-fab {
+
+            position:
+                fixed;
+
+            bottom:
+                30px;
+
+            left:
+                30px;
+
+            width:
+                65px;
+
+            height:
+                65px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    var(--primary),
+                    var(--secondary)
+                );
+
+            border-radius:
+                50%;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+            font-size:
+                28px;
+
+            color:
+                white;
+
+            box-shadow:
+                0 10px 25px
+                rgba(99,102,241,0.5);
+
+            cursor:
+                pointer;
+
+            z-index:
+                2000;
+
+            animation:
+                pulse 2s infinite;
+
+        }
+
 
         @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7); }
-            70% { box-shadow: 0 0 0 15px rgba(99, 102, 241, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+
+            0% {
+
+                box-shadow:
+                    0 0 0 0
+                    rgba(99,102,241,0.7);
+
+            }
+
+            70% {
+
+                box-shadow:
+                    0 0 0 15px
+                    rgba(99,102,241,0);
+
+            }
+
+            100% {
+
+                box-shadow:
+                    0 0 0 0
+                    rgba(99,102,241,0);
+
+            }
+
         }
+
+
+        /* =====================================================
+           Alert
+        ===================================================== */
 
         #customAlert {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-            background: var(--card); border: 1px solid var(--primary);
-            padding: 15px 30px; border-radius: 15px; z-index: 5000;
-            display: none; animation: fadeInDown 0.5s;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.5); color: white;
+
+            position:
+                fixed;
+
+            top:
+                20px;
+
+            left:
+                50%;
+
+            transform:
+                translateX(-50%);
+
+            background:
+                var(--card);
+
+            border:
+                1px solid
+                var(--primary);
+
+            padding:
+                15px 30px;
+
+            border-radius:
+                15px;
+
+            z-index:
+                5000;
+
+            display:
+                none;
+
+            animation:
+                fadeInDown 0.5s;
+
+            box-shadow:
+                0 15px 30px
+                rgba(0,0,0,0.5);
+
+            color:
+                white;
+
+            text-align:
+                center;
+
+            min-width:
+                260px;
+
         }
+
+
+        /* =====================================================
+           شاشة التحقق
+        ===================================================== */
+
+        #sessionLoader {
+
+            position:
+                fixed;
+
+            inset:
+                0;
+
+            background:
+                var(--bg);
+
+            z-index:
+                99999;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+            flex-direction:
+                column;
+
+        }
+
+
+        .session-spinner {
+
+            width:
+                55px;
+
+            height:
+                55px;
+
+            border:
+                5px solid
+                rgba(255,255,255,0.1);
+
+            border-top-color:
+                var(--accent-gold);
+
+            border-radius:
+                50%;
+
+            animation:
+                sessionSpin 1s linear infinite;
+
+            margin-bottom:
+                20px;
+
+        }
+
+
+        @keyframes sessionSpin {
+
+            to {
+
+                transform:
+                    rotate(360deg);
+
+            }
+
+        }
+
+
+        .session-loader-text {
+
+            color:
+                var(--text-dim);
+
+            font-size:
+                14px;
+
+            font-weight:
+                700;
+
+        }
+
+
+        /* =====================================================
+           Mobile
+        ===================================================== */
+
+        @media(max-width:600px) {
+
+            .top-bar {
+
+                padding:
+                    12px 4%;
+
+            }
+
+
+            .wallet-badge {
+
+                padding:
+                    6px 10px;
+
+            }
+
+
+            .chat-bot-fab {
+
+                left:
+                    20px;
+
+                bottom:
+                    20px;
+
+                width:
+                    58px;
+
+                height:
+                    58px;
+
+            }
+
+        }
+
     </style>
+
 </head>
+
+
 <body>
 
-    <div id="customAlert">قريباً في عالم المستشار 🚀</div>
-    <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
 
-    <nav class="top-bar">
-        <div class="user-identity" onclick="openSidebar()">
-            <div class="user-avatar"><i class="fas fa-user-graduate"></i></div>
-            <div>
-                <div style="font-size: 12px; color: var(--text-dim);">أهلاً بك،</div>
-                <div id="navUserName" style="font-weight: 800; font-size: 15px;">...</div>
-            </div>
+<!-- =====================================================
+     Session Loader
+===================================================== -->
+
+<div id="sessionLoader">
+
+    <div class="session-spinner"></div>
+
+    <div class="session-loader-text">
+        جاري التحقق من جلسة الدخول...
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     Alert
+===================================================== -->
+
+<div
+    id="customAlert"
+>
+    قريباً في عالم المستشار 🚀
+</div>
+
+
+<!-- =====================================================
+     Overlay
+===================================================== -->
+
+<div
+    class="overlay"
+    id="overlay"
+    onclick="closeSidebar()"
+></div>
+
+
+<!-- =====================================================
+     Top Bar
+===================================================== -->
+
+<nav class="top-bar">
+
+
+    <div
+        class="user-identity"
+        onclick="openSidebar()"
+    >
+
+        <div class="user-avatar">
+
+            <i class="fas fa-user-graduate"></i>
+
         </div>
 
-        <div class="wallet-badge" onclick="showSoon()">
+
+        <div>
+
+            <div
+                style="
+                    font-size:12px;
+                    color:var(--text-dim);
+                "
+            >
+                أهلاً بك،
+            </div>
+
+
+            <div
+                id="navUserName"
+                style="
+                    font-weight:800;
+                    font-size:15px;
+                "
+            >
+                ...
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div
+        class="wallet-badge"
+        onclick="showSoon()"
+    >
+
+        <i class="fas fa-wallet"></i>
+
+        <span id="userWallet">
+            0.00
+        </span>
+
+        <small>
+            ج.م
+        </small>
+
+    </div>
+
+</nav>
+
+
+<!-- =====================================================
+     Hero
+===================================================== -->
+
+<header class="hero-section">
+
+    <h1
+        class="animate__animated animate__fadeInUp"
+    >
+        منصة المستشار حازم سالم ⚖️
+    </h1>
+
+
+    <p
+        class="animate__animated animate__fadeInUp"
+    >
+        بوابتك الرقمية نحو التفوق والتميز
+    </p>
+
+</header>
+
+
+<!-- =====================================================
+     Main
+===================================================== -->
+
+<main class="main-container">
+
+    <div class="grid-layout">
+
+
+        <a
+            href="lessons.html"
+            class="pro-card"
+        >
+
+            <i class="fas fa-play-circle"></i>
+
+            <h3>
+                المحاضرات
+            </h3>
+
+            <p>
+                شاهد حصصك بأعلى جودة وتفاعل
+            </p>
+
+        </a>
+
+
+        <a
+            href="courses-catalog.html"
+            class="pro-card"
+        >
+
+            <span class="badge-new">
+                NEW
+            </span>
+
+            <i class="fas fa-graduation-cap"></i>
+
+            <h3>
+                كورساتي
+            </h3>
+
+            <p>
+                الدورات التدريبية المسجلة الخاصة بك
+            </p>
+
+        </a>
+
+
+        <a
+            href="homework.html"
+            class="pro-card"
+        >
+
+            <i class="fas fa-cloud-download-alt"></i>
+
+            <h3>
+                بنك الملفات
+            </h3>
+
+            <p>
+                تحميل المذكرات والملخصات PDF
+            </p>
+
+        </a>
+
+
+        <a
+            href="exams.html"
+            class="pro-card"
+        >
+
+            <i class="fas fa-edit"></i>
+
+            <h3>
+                الاختبارات
+            </h3>
+
+            <p>
+                قيم مستواك مع أقوى امتحانات
+            </p>
+
+        </a>
+
+
+        <a
+            href="#"
+            onclick="showSoon(); return false;"
+            class="pro-card"
+        >
+
+            <i class="fas fa-users"></i>
+
+            <h3>
+                منتدى الأبطال
+            </h3>
+
+            <p>
+                ناقش أسئلتك مع زملائك والمستشار
+            </p>
+
+        </a>
+
+
+        <a
+            href="student-dash.html"
+            class="pro-card"
+        >
+
+            <i class="fas fa-chart-line"></i>
+
+            <h3>
+                تقارير الأداء
+            </h3>
+
+            <p>
+                تابع درجاتك وترتيبك على المنصة
+            </p>
+
+        </a>
+
+
+    </div>
+
+</main>
+
+
+<!-- =====================================================
+     Sidebar
+===================================================== -->
+
+<div
+    class="side-panel"
+    id="sidePanel"
+>
+
+
+    <div
+        style="
+            text-align:center;
+            border-bottom:1px solid rgba(255,255,255,0.05);
+            padding-bottom:20px;
+        "
+    >
+
+        <div
+            style="
+                width:70px;
+                height:70px;
+                background:var(--primary);
+                border-radius:20px;
+                margin:0 auto;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                font-size:30px;
+            "
+        >
+
+            <i class="fas fa-id-card"></i>
+
+        </div>
+
+
+        <h3
+            id="sideUserName"
+            style="
+                margin:15px 0 5px;
+            "
+        >
+            ...
+        </h3>
+
+
+        <p
+            id="sideUserEmail"
+            style="
+                font-size:12px;
+                color:var(--text-dim);
+                margin-bottom:15px;
+            "
+        ></p>
+
+    </div>
+
+
+    <ul class="menu-list">
+
+
+        <li
+            class="active"
+            onclick="closeSidebar()"
+        >
+
+            <i class="fas fa-home"></i>
+
+            الرئيسية
+
+        </li>
+
+
+        <li onclick="showSoon()">
+
+            <i class="fas fa-credit-card"></i>
+
+            المدفوعات والاشتراكات
+
+        </li>
+
+
+        <li onclick="showSoon()">
+
             <i class="fas fa-wallet"></i>
-            <span id="userWallet">0.00</span> 
-            <small>ج.م</small>
-        </div>
-    </nav>
 
-    <header class="hero-section">
-        <h1 class="animate__animated animate__fadeInUp">منصة المستشار حازم سالم ⚖️</h1>
-        <p class="animate__animated animate__fadeInUp">بوابتك الرقمية نحو التفوق والتميز</p>
-    </header>
+            شحن المحفظة
 
-    <main class="main-container">
-        <div class="grid-layout">
-            <a href="lessons.html" class="pro-card">
-                <i class="fas fa-play-circle"></i>
-                <h3>المحاضرات</h3>
-                <p>شاهد حصصك بأعلى جودة وتفاعل</p>
-            </a>
-
-            <a href="courses-catalog.html" class="pro-card">
-    <span class="badge-new">NEW</span>
-    <i class="fas fa-graduation-cap"></i>
-    <h3>كورساتي</h3>
-    <p>الدورات التدريبية المسجلة الخاصة بك</p>
-</a>
+        </li>
 
 
-            <a href="homework.html" class="pro-card">
-                <i class="fas fa-cloud-download-alt"></i>
-                <h3>بنك الملفات</h3>
-                <p>تحميل المذكرات والملخصات PDF</p>
-            </a>
+        <li onclick="showSoon()">
 
-            <a href="exams.html" class="pro-card">
-                <i class="fas fa-edit"></i>
-                <h3>الاختبارات</h3>
-                <p>قيم مستواك مع أقوى امتحانات</p>
-            </a>
+            <i class="fas fa-user-cog"></i>
 
-            <a href="#" onclick="showSoon()" class="pro-card">
-                <i class="fas fa-users"></i>
-                <h3>منتدى الأبطال</h3>
-                <p>ناقش أسئلتك مع زملائك والمستشار</p>
-            </a>
+            إعدادات الحساب
 
-            <a href="student-dash.html" class="pro-card">
-                <i class="fas fa-chart-line"></i>
-                <h3>تقارير الأداء</h3>
-                <p>تابع درجاتك وترتيبك على المنصة</p>
-            </a>
-        </div>
-    </main>
+        </li>
 
-    <div class="side-panel" id="sidePanel">
-        <div style="text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 20px;">
-            <div style="width: 70px; height: 70px; background: var(--primary); border-radius: 20px; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 30px;">
-                <i class="fas fa-id-card"></i>
-            </div>
-            <h3 id="sideUserName" style="margin: 15px 0 5px;">...</h3>
-            <p id="sideUserEmail" style="font-size: 12px; color: var(--text-dim); margin-bottom: 15px;"></p>
-        </div>
 
-        <ul class="menu-list">
-            <li class="active" onclick="closeSidebar()"><i class="fas fa-home"></i> الرئيسية</li>
-            <li onclick="showSoon()"><i class="fas fa-credit-card"></i> المدفوعات والاشتراكات</li>
-            <li onclick="showSoon()"><i class="fas fa-wallet"></i> شحن المحفظة</li>
-            <li onclick="showSoon()"><i class="fas fa-user-cog"></i> إعدادات الحساب</li>
-            <a href="https://wa.me/201060234399" style="text-decoration:none; color:inherit;">
-                <li><i class="fab fa-whatsapp"></i> الدعم الفني</li>
-            </a>
-            <li onclick="logout()" style="color: #ff4d4d; margin-top: 30px;"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</li>
-        </ul>
-    </div>
+        <a
+            href="https://wa.me/201060234399"
+            style="
+                text-decoration:none;
+                color:inherit;
+            "
+        >
 
-    <div class="chat-bot-fab" onclick="showSoon()">
-        <i class="fas fa-comment-dots"></i>
-    </div>
+            <li>
 
-    <script>
-        const firebaseConfig = { 
-            apiKey: "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws", 
-            authDomain: "zomaapp-744fc.firebaseapp.com", 
-            projectId: "zomaapp-744fc" 
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+                <i class="fab fa-whatsapp"></i>
 
-        // نظام التحقق من التوكن والجلسة
-        async function checkSession() {
-            const email = localStorage.getItem("userEmail");
-            const localToken = localStorage.getItem("sessionToken");
+                الدعم الفني
 
-            if (!email || !localToken) {
-                location.replace("index.html");
-                return;
+            </li>
+
+        </a>
+
+
+        <li
+            onclick="logout()"
+            style="
+                color:#ff4d4d;
+                margin-top:30px;
+            "
+        >
+
+            <i class="fas fa-sign-out-alt"></i>
+
+            تسجيل الخروج
+
+        </li>
+
+
+    </ul>
+
+</div>
+
+
+<!-- =====================================================
+     Chat Bot
+===================================================== -->
+
+<div
+    class="chat-bot-fab"
+    onclick="showSoon()"
+>
+
+    <i class="fas fa-comment-dots"></i>
+
+</div>
+
+
+<script>
+
+
+/* =========================================================
+   Firebase Configuration
+========================================================= */
+
+const firebaseConfig = {
+
+    apiKey:
+        "AIzaSyCMoBEhaxmm8qEl6rti_ybAL-my9bDC5Ws",
+
+    authDomain:
+        "zomaapp-744fc.firebaseapp.com",
+
+    projectId:
+        "zomaapp-744fc"
+
+};
+
+
+if (
+    !firebase.apps.length
+) {
+
+    firebase.initializeApp(
+        firebaseConfig
+    );
+
+}
+
+
+const db =
+    firebase.firestore();
+
+
+const auth =
+    firebase.auth();
+
+
+
+/* =========================================================
+   متغيرات الجلسة
+========================================================= */
+
+let currentUserDocId = null;
+
+let currentUserEmail = null;
+
+let currentSessionToken = null;
+
+let unsubscribeUserListener = null;
+
+let sessionCheckRunning = false;
+
+let redirected = false;
+
+
+
+/* =========================================================
+   أدوات LocalStorage
+========================================================= */
+
+function getStorage(
+    key
+) {
+
+    return localStorage.getItem(
+        key
+    );
+
+}
+
+
+function setStorage(
+    key,
+    value
+) {
+
+    localStorage.setItem(
+        key,
+        String(value)
+    );
+
+}
+
+
+
+/* =========================================================
+   إنشاء Token
+========================================================= */
+
+function createSessionToken() {
+
+    const randomPart =
+        Math.random()
+        .toString(36)
+        .substring(2, 15);
+
+
+    const randomPart2 =
+        Math.random()
+        .toString(36)
+        .substring(2, 15);
+
+
+    return (
+        "student_" +
+        Date.now() +
+        "_" +
+        randomPart +
+        randomPart2
+    );
+
+}
+
+
+
+/* =========================================================
+   تحديد Role
+   متوافق مع الكود الأول
+========================================================= */
+
+function getAccountRole(
+    userData
+) {
+
+    const role =
+        String(
+            userData.role ||
+            "student"
+        )
+        .trim()
+        .toLowerCase();
+
+
+    if (
+
+        role === "admin" ||
+
+        role === "administrator" ||
+
+        role === "أدمن" ||
+
+        role === "ادمن" ||
+
+        role === "مدير"
+
+    ) {
+
+        return "admin";
+
+    }
+
+
+    return "student";
+
+}
+
+
+
+/* =========================================================
+   تسجيل خروج نهائي
+========================================================= */
+
+async function logoutSilently(
+    redirect = true
+) {
+
+    if (
+        redirected
+    ) {
+
+        return;
+
+    }
+
+
+    redirected = true;
+
+
+    /*
+     * إلغاء مراقبة المستخدم
+     */
+
+    if (
+        unsubscribeUserListener
+    ) {
+
+        try {
+
+            unsubscribeUserListener();
+
+        }
+        catch(e) {
+
+            console.error(e);
+
+        }
+
+        unsubscribeUserListener =
+            null;
+
+    }
+
+
+    /*
+     * تسجيل الخروج من Firebase
+     */
+
+    try {
+
+        await auth.signOut();
+
+    }
+    catch(e) {
+
+        console.error(
+            "Firebase signOut:",
+            e
+        );
+
+    }
+
+
+    /*
+     * مسح بيانات الطالب فقط
+     */
+
+    localStorage.removeItem(
+        "accountType"
+    );
+
+    localStorage.removeItem(
+        "accountId"
+    );
+
+    localStorage.removeItem(
+        "userEmail"
+    );
+
+    localStorage.removeItem(
+        "username"
+    );
+
+    localStorage.removeItem(
+        "studentName"
+    );
+
+    localStorage.removeItem(
+        "firebaseUID"
+    );
+
+    localStorage.removeItem(
+        "studentSessionToken"
+    );
+
+    localStorage.removeItem(
+        "sessionToken"
+    );
+
+    localStorage.removeItem(
+        "adminName"
+    );
+
+
+    if (
+        redirect
+    ) {
+
+        location.replace(
+            "index.html"
+        );
+
+    }
+
+}
+
+
+
+/* =========================================================
+   خروج بسبب جهاز آخر
+========================================================= */
+
+function logoutBecauseAnotherDevice() {
+
+    alert(
+        "تم تسجيل الدخول إلى هذا الحساب من جهاز أو متصفح آخر.\nسيتم تحويلك إلى صفحة الدخول."
+    );
+
+
+    logoutSilently(
+        true
+    );
+
+}
+
+
+
+/* =========================================================
+   التحقق من البيانات الأساسية
+========================================================= */
+
+function getSavedStudentInfo() {
+
+    return {
+
+        email:
+            getStorage("userEmail"),
+
+        accountId:
+            getStorage("accountId"),
+
+        accountType:
+            getStorage("accountType"),
+
+        firebaseUID:
+            getStorage("firebaseUID"),
+
+        sessionToken:
+            getStorage("studentSessionToken") ||
+            getStorage("sessionToken")
+
+    };
+
+}
+
+
+
+/* =========================================================
+   البحث عن الطالب
+========================================================= */
+
+async function findStudentDocument(
+    info
+) {
+
+    /*
+     * الأفضل الاعتماد على accountId
+     */
+
+    if (
+        info.accountId
+    ) {
+
+        try {
+
+            const directDoc =
+                await db
+                .collection("users")
+                .doc(info.accountId)
+                .get();
+
+
+            if (
+                directDoc.exists
+            ) {
+
+                return directDoc;
+
             }
 
-            // مراقبة حية لبيانات المستخدم والتوكن
-            db.collection("users").where("email", "==", email).onSnapshot((snapshot) => {
-                if (snapshot.empty) {
-                    logoutSilently();
-                    return;
-                }
+        }
+        catch(error) {
 
-                const userData = snapshot.docs[0].data();
+            console.error(
+                "Direct document error:",
+                error
+            );
 
-                // 1. فحص التوكن (لو دخلت من جهاز تاني التوكن هيتغير في الداتابيز فـ الجهاز ده يخرج)
-                if (userData.lastSessionToken !== localToken) {
-                    alert("تم تسجيل الدخول من جهاز آخر. سيتم تحويلك لصفحة الدخول.");
-                    logoutSilently();
-                    return;
-                }
+        }
 
-                // 2. فحص حالة الحساب
-                if (userData.status === 'inactive' || userData.status === 'banned') {
-                    logoutSilently();
-                    return;
-                }
+    }
 
-                // 3. تحديث البيانات في الواجهة
-                document.getElementById('navUserName').innerText = userData.name || "طالبنا المميز";
-                document.getElementById('sideUserName').innerText = userData.name || "طالبنا المميز";
-                document.getElementById('sideUserEmail').innerText = email;
-                document.getElementById('userWallet').innerText = parseFloat(userData.wallet || 0).toFixed(2);
+
+    /*
+     * البحث بالإيميل
+     */
+
+    if (
+        info.email
+    ) {
+
+        const snap =
+            await db
+            .collection("users")
+            .where(
+                "email",
+                "==",
+                info.email
+            )
+            .limit(1)
+            .get();
+
+
+        if (
+            !snap.empty
+        ) {
+
+            return snap.docs[0];
+
+        }
+
+    }
+
+
+    return null;
+
+}
+
+
+
+/* =========================================================
+   إنشاء جلسة الطالب إذا لم تكن موجودة
+========================================================= */
+
+async function ensureStudentSession(
+    userDoc
+) {
+
+    const data =
+        userDoc.data();
+
+
+    /*
+     * لو يوجد Token محفوظ محلياً
+     * نستخدمه.
+     */
+
+    let token =
+        getStorage(
+            "studentSessionToken"
+        );
+
+
+    /*
+     * دعم sessionToken القديم
+     */
+
+    if (
+        !token
+    ) {
+
+        token =
+            getStorage(
+                "sessionToken"
+            );
+
+    }
+
+
+    /*
+     * لو لا يوجد Token محلي
+     */
+
+    if (
+        !token
+    ) {
+
+        /*
+         * نحاول استخدام التوكن الموجود
+         * في Firestore أولاً.
+         */
+
+        if (
+            data.studentSessionToken
+        ) {
+
+            token =
+                String(
+                    data.studentSessionToken
+                );
+
+        }
+
+        else if (
+            data.lastSessionToken
+        ) {
+
+            token =
+                String(
+                    data.lastSessionToken
+                );
+
+        }
+
+    }
+
+
+    /*
+     * لو لا يوجد Token نهائياً
+     * ننشئ Token جديد.
+     */
+
+    if (
+        !token
+    ) {
+
+        token =
+            createSessionToken();
+
+    }
+
+
+    /*
+     * حفظه محلياً
+     */
+
+    setStorage(
+        "studentSessionToken",
+        token
+    );
+
+
+    /*
+     * لو Firestore لا يحتوي عليه
+     * نحاول إنشاءه.
+     */
+
+    const currentFirestoreToken =
+        data.studentSessionToken ||
+        data.lastSessionToken;
+
+
+    if (
+        !currentFirestoreToken
+    ) {
+
+        try {
+
+            await db
+            .collection("users")
+            .doc(userDoc.id)
+            .update({
+
+                studentSessionToken:
+                    token,
+
+                lastLogin:
+                    firebase.firestore
+                    .FieldValue
+                    .serverTimestamp()
+
             });
+
+        }
+        catch(error) {
+
+            /*
+             * لو Rules تمنع الطالب من التعديل
+             * لا نخرج مباشرة.
+             *
+             * لأن الكود الأول قد يكون هو المسؤول
+             * عن إنشاء الـ Token.
+             */
+
+            console.warn(
+                "Could not create student session token:",
+                error
+            );
+
         }
 
-        window.onload = checkSession;
+    }
 
-        function logoutSilently() {
-            localStorage.clear();
-            location.replace("index.html");
+
+    /*
+     * تحديد التوكن النهائي
+     */
+
+    currentSessionToken =
+        token;
+
+}
+
+
+
+/* =========================================================
+   التحقق من Role والحالة
+========================================================= */
+
+function validateStudentData(
+    data
+) {
+
+    /*
+     * الحساب لازم يكون طالب.
+     */
+
+    const role =
+        getAccountRole(
+            data
+        );
+
+
+    if (
+        role !== "student"
+    ) {
+
+        return {
+
+            valid: false,
+
+            reason:
+                "admin"
+
+        };
+
+    }
+
+
+    /*
+     * الحساب معطل
+     */
+
+    if (
+
+        data.status === "inactive" ||
+
+        data.status === "banned"
+
+    ) {
+
+        return {
+
+            valid: false,
+
+            reason:
+                "disabled"
+
+        };
+
+    }
+
+
+    return {
+
+        valid: true,
+
+        reason: null
+
+    };
+
+}
+
+
+
+/* =========================================================
+   تحديث بيانات الواجهة
+========================================================= */
+
+function updateUserInterface(
+    data,
+    email
+) {
+
+    const studentName =
+        data.name ||
+        data.studentName ||
+        data.username ||
+        data.userName ||
+        "طالبنا المميز";
+
+
+    document.getElementById(
+        "navUserName"
+    ).innerText =
+        studentName;
+
+
+    document.getElementById(
+        "sideUserName"
+    ).innerText =
+        studentName;
+
+
+    document.getElementById(
+        "sideUserEmail"
+    ).innerText =
+        email || "";
+
+
+    const wallet =
+        parseFloat(
+            data.wallet || 0
+        );
+
+
+    document.getElementById(
+        "userWallet"
+    ).innerText =
+        Number.isFinite(wallet)
+            ? wallet.toFixed(2)
+            : "0.00";
+
+}
+
+
+
+/* =========================================================
+   مراقبة جلسة الطالب Live
+========================================================= */
+
+function startLiveSessionListener(
+    userDoc
+) {
+
+    if (
+        unsubscribeUserListener
+    ) {
+
+        try {
+
+            unsubscribeUserListener();
+
         }
+        catch(e) {}
 
-        function logout() {
-            if(confirm("هل تريد تسجيل الخروج؟")) {
-                logoutSilently();
+    }
+
+
+    const docRef =
+        db
+        .collection("users")
+        .doc(userDoc.id);
+
+
+    unsubscribeUserListener =
+        docRef.onSnapshot(
+
+            function(snapshot) {
+
+
+                if (
+                    redirected
+                ) {
+
+                    return;
+
+                }
+
+
+                if (
+                    !snapshot.exists
+                ) {
+
+                    logoutSilently();
+
+                    return;
+
+                }
+
+
+                const data =
+                    snapshot.data();
+
+
+                /*
+                 * التأكد من أن الحساب ما زال طالباً
+                 */
+
+                const validation =
+                    validateStudentData(
+                        data
+                    );
+
+
+                if (
+                    !validation.valid
+                ) {
+
+                    if (
+                        validation.reason ===
+                        "admin"
+                    ) {
+
+                        /*
+                         * الحساب أصبح أدمن.
+                         * لا نسمح له بالبقاء في home.
+                         */
+
+                        logoutSilently();
+
+                        return;
+
+                    }
+
+
+                    if (
+                        validation.reason ===
+                        "disabled"
+                    ) {
+
+                        alert(
+                            "تم تعطيل حسابك من إدارة المنصة."
+                        );
+
+                        logoutSilently();
+
+                        return;
+
+                    }
+
+                }
+
+
+                /*
+                 * Token الموجود في Firestore
+                 */
+
+                const firestoreToken =
+                    data.studentSessionToken ||
+                    data.lastSessionToken ||
+                    null;
+
+
+                /*
+                 * Token المحلي
+                 */
+
+                const localToken =
+                    currentSessionToken ||
+                    getStorage(
+                        "studentSessionToken"
+                    ) ||
+                    getStorage(
+                        "sessionToken"
+                    );
+
+
+                /*
+                 * إذا كان هناك Token في Firestore
+                 * ويختلف عن الجهاز الحالي
+                 * فهذا يعني تسجيل الدخول من جهاز آخر.
+                 */
+
+                if (
+
+                    firestoreToken &&
+
+                    localToken &&
+
+                    String(firestoreToken) !==
+                    String(localToken)
+
+                ) {
+
+                    logoutBecauseAnotherDevice();
+
+                    return;
+
+                }
+
+
+                /*
+                 * تحديث الواجهة
+                 */
+
+                updateUserInterface(
+                    data,
+                    currentUserEmail ||
+                    data.email ||
+                    getStorage("userEmail")
+                );
+
+
+                /*
+                 * حفظ البيانات الأساسية
+                 */
+
+                if (
+                    data.name
+                ) {
+
+                    setStorage(
+                        "studentName",
+                        data.name
+                    );
+
+                }
+
+
+                if (
+                    data.username
+                ) {
+
+                    setStorage(
+                        "username",
+                        data.username
+                    );
+
+                }
+
+                else if (
+                    data.userName
+                ) {
+
+                    setStorage(
+                        "username",
+                        data.userName
+                    );
+
+                }
+
+            },
+
+            function(error) {
+
+                console.error(
+                    "Live session listener error:",
+                    error
+                );
+
+
+                /*
+                 * لو المشكلة Permission
+                 * لا نمسح الجلسة فوراً.
+                 */
+
+                if (
+                    error.code ===
+                    "permission-denied"
+                ) {
+
+                    console.warn(
+                        "Firestore permission denied."
+                    );
+
+                    return;
+
+                }
+
             }
+
+        );
+
+}
+
+
+
+/* =========================================================
+   التحقق الرئيسي من الجلسة
+========================================================= */
+
+async function checkSession() {
+
+    if (
+        sessionCheckRunning
+    ) {
+
+        return;
+
+    }
+
+
+    sessionCheckRunning =
+        true;
+
+
+    const info =
+        getSavedStudentInfo();
+
+
+    /*
+     * =====================================================
+     * 1
+     * لازم يكون الحساب طالب.
+     * =====================================================
+     */
+
+    if (
+        info.accountType &&
+        info.accountType !== "student"
+    ) {
+
+        location.replace(
+            "index.html"
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * =====================================================
+     * 2
+     * نبحث عن Firebase Authentication الحالي.
+     * =====================================================
+     */
+
+    let firebaseUser =
+        auth.currentUser;
+
+
+    /*
+     * Firebase قد يحتاج لحظة لاستعادة الجلسة.
+     */
+
+    if (
+        !firebaseUser
+    ) {
+
+        try {
+
+            firebaseUser =
+                await new Promise(
+                    function(resolve) {
+
+                        let finished =
+                            false;
+
+
+                        const unsubscribe =
+                            auth.onAuthStateChanged(
+                                function(user) {
+
+                                    if (
+                                        !finished
+                                    ) {
+
+                                        finished =
+                                            true;
+
+                                        unsubscribe();
+
+                                        resolve(
+                                            user
+                                        );
+
+                                    }
+
+                                }
+                            );
+
+
+                        /*
+                         * fallback
+                         */
+
+                        setTimeout(
+                            function() {
+
+                                if (
+                                    !finished
+                                ) {
+
+                                    finished =
+                                        true;
+
+                                    unsubscribe();
+
+                                    resolve(
+                                        auth.currentUser
+                                    );
+
+                                }
+
+                            },
+                            1500
+                        );
+
+                    }
+                );
+
+        }
+        catch(error) {
+
+            console.error(
+                "Auth restore error:",
+                error
+            );
+
         }
 
-        function showSoon() {
-            const alertBox = document.getElementById('customAlert');
-            alertBox.style.display = 'block';
-            setTimeout(() => { alertBox.style.display = 'none'; }, 3000);
+    }
+
+
+    /*
+     * =====================================================
+     * 3
+     * البحث عن Document الطالب
+     * =====================================================
+     */
+
+    let userDoc =
+        null;
+
+
+    try {
+
+        userDoc =
+            await findStudentDocument(
+                info
+            );
+
+    }
+    catch(error) {
+
+        console.error(
+            "Find user error:",
+            error
+        );
+
+        document.getElementById(
+            "sessionLoader"
+        ).style.display =
+            "none";
+
+        sessionCheckRunning =
+            false;
+
+        return;
+
+    }
+
+
+    /*
+     * لا يوجد حساب في Firestore
+     */
+
+    if (
+        !userDoc
+    ) {
+
+        await logoutSilently();
+
+        return;
+
+    }
+
+
+    const data =
+        userDoc.data();
+
+
+    currentUserDocId =
+        userDoc.id;
+
+
+    currentUserEmail =
+        data.email ||
+        info.email ||
+        (
+            firebaseUser
+                ? firebaseUser.email
+                : ""
+        );
+
+
+    /*
+     * =====================================================
+     * 4
+     * التحقق من Role
+     * =====================================================
+     */
+
+    const validation =
+        validateStudentData(
+            data
+        );
+
+
+    if (
+        !validation.valid
+    ) {
+
+        if (
+            validation.reason ===
+            "admin"
+        ) {
+
+            /*
+             * لو الحساب أدمن،
+             * يرجع للـ login حتى يقوم
+             * نظام الأدمن بتوجيهه إلى admin1.
+             */
+
+            await logoutSilently();
+
+            return;
+
         }
 
-        function openSidebar() {
-            document.getElementById('sidePanel').classList.add('open');
-            document.getElementById('overlay').style.display = 'block';
+
+        if (
+            validation.reason ===
+            "disabled"
+        ) {
+
+            alert(
+                "تم تعطيل حسابك من إدارة المنصة."
+            );
+
+            await logoutSilently();
+
+            return;
+
         }
 
-        function closeSidebar() {
-            document.getElementById('sidePanel').classList.remove('open');
-            document.getElementById('overlay').style.display = 'none';
+    }
+
+
+    /*
+     * =====================================================
+     * 5
+     * التحقق من Firebase UID لو موجود
+     * =====================================================
+     */
+
+    if (
+        firebaseUser &&
+        data.uid &&
+        String(data.uid) !==
+        String(firebaseUser.uid)
+    ) {
+
+        console.warn(
+            "Firebase UID mismatch."
+        );
+
+        /*
+         * لا نطرد الطالب مباشرة إذا كان
+         * الحساب يعتمد على Firestore password
+         * كما في الكود الأول.
+         */
+
+    }
+
+
+    /*
+     * =====================================================
+     * 6
+     * تجهيز Token
+     * =====================================================
+     */
+
+    try {
+
+        await ensureStudentSession(
+            userDoc
+        );
+
+    }
+    catch(error) {
+
+        console.error(
+            "Session token error:",
+            error
+        );
+
+    }
+
+
+    /*
+     * =====================================================
+     * 7
+     * التحقق النهائي من Token
+     * =====================================================
+     */
+
+    const firestoreToken =
+        data.studentSessionToken ||
+        data.lastSessionToken ||
+        null;
+
+
+    const localToken =
+        currentSessionToken ||
+        getStorage(
+            "studentSessionToken"
+        ) ||
+        getStorage(
+            "sessionToken"
+        );
+
+
+    /*
+     * لو يوجد Token في Firestore
+     * ويختلف عن الجهاز الحالي
+     */
+
+    if (
+
+        firestoreToken &&
+
+        localToken &&
+
+        String(firestoreToken) !==
+        String(localToken)
+
+    ) {
+
+        await logoutBecauseAnotherDevice();
+
+        return;
+
+    }
+
+
+    /*
+     * =====================================================
+     * 8
+     * حفظ بيانات الجلسة
+     * =====================================================
+     */
+
+    setStorage(
+        "accountType",
+        "student"
+    );
+
+
+    setStorage(
+        "accountId",
+        userDoc.id
+    );
+
+
+    if (
+        currentUserEmail
+    ) {
+
+        setStorage(
+            "userEmail",
+            currentUserEmail
+        );
+
+    }
+
+
+    if (
+        firebaseUser
+    ) {
+
+        setStorage(
+            "firebaseUID",
+            firebaseUser.uid
+        );
+
+    }
+
+
+    /*
+     * اسم الطالب
+     */
+
+    if (
+        data.name
+    ) {
+
+        setStorage(
+            "studentName",
+            data.name
+        );
+
+    }
+
+    else if (
+        data.studentName
+    ) {
+
+        setStorage(
+            "studentName",
+            data.studentName
+        );
+
+    }
+
+
+    /*
+     * username
+     */
+
+    if (
+        data.username
+    ) {
+
+        setStorage(
+            "username",
+            data.username
+        );
+
+    }
+
+    else if (
+        data.userName
+    ) {
+
+        setStorage(
+            "username",
+            data.userName
+        );
+
+    }
+
+
+    /*
+     * =====================================================
+     * 9
+     * تحديث الواجهة
+     * =====================================================
+     */
+
+    updateUserInterface(
+        data,
+        currentUserEmail
+    );
+
+
+    /*
+     * =====================================================
+     * 10
+     * تشغيل المراقبة الحية
+     * =====================================================
+     */
+
+    startLiveSessionListener(
+        userDoc
+    );
+
+
+    /*
+     * =====================================================
+     * 11
+     * إخفاء شاشة التحميل
+     * =====================================================
+     */
+
+    document.getElementById(
+        "sessionLoader"
+    ).style.display =
+        "none";
+
+
+    sessionCheckRunning =
+        false;
+
+}
+
+
+
+/* =========================================================
+   Firebase Auth State
+========================================================= */
+
+auth.onAuthStateChanged(
+    function(user) {
+
+        if (
+            redirected
+        ) {
+
+            return;
+
         }
-    </script>
+
+
+        if (
+            user
+        ) {
+
+            console.log(
+                "Firebase user:",
+                user.email
+            );
+
+        }
+
+    }
+);
+
+
+
+/* =========================================================
+   Logout
+========================================================= */
+
+async function logout() {
+
+    if (
+        !confirm(
+            "هل تريد تسجيل الخروج؟"
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    await logoutSilently(
+        true
+    );
+
+}
+
+
+
+/* =========================================================
+   Show Soon
+========================================================= */
+
+function showSoon() {
+
+    const alertBox =
+        document.getElementById(
+            "customAlert"
+        );
+
+
+    alertBox.style.display =
+        "block";
+
+
+    setTimeout(
+        function() {
+
+            alertBox.style.display =
+                "none";
+
+        },
+        3000
+    );
+
+}
+
+
+
+/* =========================================================
+   Sidebar
+========================================================= */
+
+function openSidebar() {
+
+    document.getElementById(
+        "sidePanel"
+    )
+    .classList
+    .add(
+        "open"
+    );
+
+
+    document.getElementById(
+        "overlay"
+    ).style.display =
+        "block";
+
+}
+
+
+
+function closeSidebar() {
+
+    document.getElementById(
+        "sidePanel"
+    )
+    .classList
+    .remove(
+        "open"
+    );
+
+
+    document.getElementById(
+        "overlay"
+    ).style.display =
+        "none";
+
+}
+
+
+
+/* =========================================================
+   حماية الصفحة عند العودة من Back/Forward
+========================================================= */
+
+window.addEventListener(
+    "pageshow",
+    function(event) {
+
+        if (
+            event.persisted
+        ) {
+
+            checkSession();
+
+        }
+
+    }
+);
+
+
+
+/* =========================================================
+   تشغيل الصفحة
+========================================================= */
+
+window.addEventListener(
+    "load",
+    function() {
+
+        setTimeout(
+            function() {
+
+                checkSession();
+
+            },
+            100
+        );
+
+    }
+);
+
+
+/* =========================================================
+   عند إغلاق/إخفاء الصفحة
+========================================================= */
+
+document.addEventListener(
+    "visibilitychange",
+    function() {
+
+        if (
+            document.visibilityState ===
+            "visible"
+        ) {
+
+            /*
+             * إعادة فحص الجلسة عند رجوع
+             * المستخدم للصفحة.
+             */
+
+            if (
+                !redirected
+            ) {
+
+                checkSession();
+
+            }
+
+        }
+
+    }
+);
+
+</script>
+
 </body>
-</html>
+        </html>
