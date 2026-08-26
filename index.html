@@ -3,668 +3,668 @@
 
 <head>
 
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
 
-    <title>
-        منصة المستشار حـازم سالم | الدخول السحري
-    </title>
+<title>
+    منصة المستشار حـازم سالم | الدخول السحري
+</title>
 
-    <meta name="description"
-          content="المنصة التعليمية الرسمية للمستشار حازم سالم.">
+<meta name="description"
+      content="المنصة التعليمية الرسمية للمستشار حازم سالم.">
 
-    <meta name="geo.region"
-          content="EG">
+<meta name="geo.region"
+      content="EG">
 
-    <link
-        href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;900&family=Reem+Kufi:wght@700&display=swap"
-        rel="stylesheet">
+<link
+    href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;900&family=Reem+Kufi:wght@700&display=swap"
+    rel="stylesheet">
 
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 
-    <!-- =========================================================
-         Firebase App
-    ========================================================= -->
+<!-- =========================================================
+     Firebase App
+========================================================= -->
 
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 
 
-    <!-- =========================================================
-         Firebase Authentication
-    ========================================================= -->
+<!-- =========================================================
+     Firebase Authentication
+========================================================= -->
 
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
 
-    <!-- =========================================================
-         Firebase Firestore
-    ========================================================= -->
+<!-- =========================================================
+     Firebase Firestore
+========================================================= -->
 
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 
-    <style>
+<style>
 
-        :root {
+:root {
 
-            --primary: #6366f1;
+    --primary: #6366f1;
 
-            --bg: #0f172a;
+    --bg: #0f172a;
 
-            --card: #1e293b;
+    --card: #1e293b;
 
-            --text: #f1f5f9;
+    --text: #f1f5f9;
 
-            --input: #334155;
+    --input: #334155;
 
-            --accent: #fbbf24;
+    --accent: #fbbf24;
 
-            --danger: #ef4444;
+    --danger: #ef4444;
 
-            --trans:
-                all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    --trans:
+        all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 
-        }
+}
 
 
-        body.light-mode {
+body.light-mode {
 
-            --bg: #f8fafc;
+    --bg: #f8fafc;
 
-            --card: #ffffff;
+    --card: #ffffff;
 
-            --text: #1e293b;
+    --text: #1e293b;
 
-            --input: #f1f5f9;
+    --input: #f1f5f9;
 
-            --accent: #d97706;
+    --accent: #d97706;
 
-        }
+}
 
 
-        * {
+* {
 
-            box-sizing: border-box;
+    box-sizing: border-box;
 
-        }
+}
 
 
-        body {
+body {
 
-            font-family: 'Cairo', sans-serif;
+    font-family: 'Cairo', sans-serif;
 
-            background-color: var(--bg);
+    background-color: var(--bg);
 
-            color: var(--text);
+    color: var(--text);
 
-            margin: 0;
+    margin: 0;
 
-            display: flex;
+    display: flex;
 
-            justify-content: center;
+    justify-content: center;
 
-            align-items: center;
+    align-items: center;
 
-            min-height: 100vh;
+    min-height: 100vh;
 
-            overflow: hidden;
+    overflow: hidden;
 
-            transition: var(--trans);
+    transition: var(--trans);
 
-        }
+}
 
 
-        /* =====================================================
-           زر تغيير الوضع
-        ===================================================== */
+/* =====================================================
+   زر تغيير الوضع
+===================================================== */
 
-        .settings-fab {
+.settings-fab {
 
-            position: fixed;
+    position: fixed;
 
-            top: 20px;
+    top: 20px;
 
-            left: 20px;
+    left: 20px;
 
-            z-index: 10001;
+    z-index: 10001;
 
-            width: 45px;
+    width: 45px;
 
-            height: 45px;
+    height: 45px;
 
-            background: var(--card);
+    background: var(--card);
 
-            border-radius: 50%;
+    border-radius: 50%;
 
-            display: flex;
+    display: flex;
 
-            align-items: center;
+    align-items: center;
 
-            justify-content: center;
+    justify-content: center;
 
-            cursor: pointer;
+    cursor: pointer;
 
-            box-shadow:
-                0 4px 15px rgba(0,0,0,0.2);
+    box-shadow:
+        0 4px 15px rgba(0,0,0,0.2);
 
-            color: var(--accent);
+    color: var(--accent);
 
-            font-size: 20px;
+    font-size: 20px;
 
-            border:
-                1px solid rgba(255,255,255,0.1);
+    border:
+        1px solid rgba(255,255,255,0.1);
 
-        }
+}
 
 
-        /* =====================================================
-           شاشة الدخول السحرية
-        ===================================================== */
+/* =====================================================
+   شاشة الدخول السحرية
+===================================================== */
 
-        #magicOverlay {
+#magicOverlay {
 
-            position: fixed;
+    position: fixed;
 
-            inset: 0;
+    inset: 0;
 
-            background: var(--bg);
+    background: var(--bg);
 
-            display: flex;
+    display: flex;
 
-            flex-direction: column;
+    flex-direction: column;
 
-            justify-content: center;
+    justify-content: center;
 
-            align-items: center;
+    align-items: center;
 
-            z-index: 10000;
+    z-index: 10000;
 
-            transition: 1.2s ease;
+    transition: 1.2s ease;
 
-        }
+}
 
 
-        .intro-content {
+.intro-content {
 
-            text-align: center;
+    text-align: center;
 
-            opacity: 0;
+    opacity: 0;
 
-            transform: scale(0.8);
+    transform: scale(0.8);
 
-            animation:
-                fadeInScale 1.5s forwards 0.5s;
+    animation:
+        fadeInScale 1.5s forwards 0.5s;
 
-        }
+}
 
 
-        .magic-scale-large {
+.magic-scale-large {
 
-            font-size: 150px;
+    font-size: 150px;
 
-            color: var(--accent);
+    color: var(--accent);
 
-            filter:
-                drop-shadow(0 0 30px var(--accent));
+    filter:
+        drop-shadow(0 0 30px var(--accent));
 
-            animation:
-                scaleFloat 3s infinite ease-in-out;
+    animation:
+        scaleFloat 3s infinite ease-in-out;
 
-        }
+}
 
 
-        .calligraphy-text {
+.calligraphy-text {
 
-            font-family: 'Reem Kufi', serif;
+    font-family: 'Reem Kufi', serif;
 
-            font-size: 35px;
+    font-size: 35px;
 
-            color: var(--text);
+    color: var(--text);
 
-            background:
-                linear-gradient(
-                    to right,
-                    #fff,
-                    var(--accent),
-                    #fff
-                );
+    background:
+        linear-gradient(
+            to right,
+            #fff,
+            var(--accent),
+            #fff
+        );
 
-            -webkit-background-clip: text;
+    -webkit-background-clip: text;
 
-            -webkit-text-fill-color: transparent;
+    -webkit-text-fill-color: transparent;
 
-            margin-top: 20px;
+    margin-top: 20px;
 
-        }
+}
 
 
-        @keyframes fadeInScale {
+@keyframes fadeInScale {
 
-            to {
+    to {
 
-                opacity: 1;
+        opacity: 1;
 
-                transform: scale(1);
+        transform: scale(1);
 
-            }
+    }
 
-        }
+}
 
 
-        @keyframes scaleFloat {
+@keyframes scaleFloat {
 
-            0%, 100% {
+    0%, 100% {
 
-                transform:
-                    translateY(0)
-                    rotate(-5deg);
+        transform:
+            translateY(0)
+            rotate(-5deg);
 
-            }
+    }
 
-            50% {
+    50% {
 
-                transform:
-                    translateY(-20px)
-                    rotate(5deg);
+        transform:
+            translateY(-20px)
+            rotate(5deg);
 
-            }
+    }
 
-        }
+}
 
 
-        /* =====================================================
-           Login Card
-        ===================================================== */
+/* =====================================================
+   Login Card
+===================================================== */
 
-        .login-card {
+.login-card {
 
-            background: var(--card);
+    background: var(--card);
 
-            padding: 50px 40px;
+    padding: 50px 40px;
 
-            border-radius: 40px;
+    border-radius: 40px;
 
-            box-shadow:
-                0 30px 60px -12px
-                rgba(0, 0, 0, 0.5);
+    box-shadow:
+        0 30px 60px -12px
+        rgba(0, 0, 0, 0.5);
 
-            width: 90%;
+    width: 90%;
 
-            max-width: 440px;
+    max-width: 440px;
 
-            text-align: center;
+    text-align: center;
 
-            border:
-                1px solid rgba(255,255,255,0.05);
+    border:
+        1px solid rgba(255,255,255,0.05);
 
-            display: none;
+    display: none;
 
-            opacity: 0;
+    opacity: 0;
 
-            transform: translateY(30px);
+    transform: translateY(30px);
 
-            transition: var(--trans);
+    transition: var(--trans);
 
-        }
+}
 
 
-        /* =====================================================
-           Fields
-        ===================================================== */
+/* =====================================================
+   Fields
+===================================================== */
 
-        .field {
+.field {
 
-            position: relative;
+    position: relative;
 
-            margin-bottom: 20px;
+    margin-bottom: 20px;
 
-            text-align: right;
+    text-align: right;
 
-        }
+}
 
 
-        .field i.main-icon {
+.field i.main-icon {
 
-            position: absolute;
+    position: absolute;
 
-            right: 18px;
+    right: 18px;
 
-            top: 50%;
+    top: 50%;
 
-            transform:
-                translateY(-50%);
+    transform:
+        translateY(-50%);
 
-            color: var(--accent);
+    color: var(--accent);
 
-        }
+}
 
 
-        .field .toggle-pass {
+.field .toggle-pass {
 
-            position: absolute;
+    position: absolute;
 
-            left: 18px;
+    left: 18px;
 
-            top: 50%;
+    top: 50%;
 
-            transform:
-                translateY(-50%);
+    transform:
+        translateY(-50%);
 
-            color: #94a3b8;
+    color: #94a3b8;
 
-            cursor: pointer;
+    cursor: pointer;
 
-            transition: 0.3s;
+    transition: 0.3s;
 
-        }
+}
 
 
-        .field .toggle-pass:hover {
+.field .toggle-pass:hover {
 
-            color: var(--accent);
+    color: var(--accent);
 
-        }
+}
 
 
-        .field input {
+.field input {
 
-            width: 100%;
+    width: 100%;
 
-            padding:
-                18px 55px 18px 45px;
+    padding:
+        18px 55px 18px 45px;
 
-            border-radius: 20px;
+    border-radius: 20px;
 
-            border:
-                2px solid transparent;
+    border:
+        2px solid transparent;
 
-            background: var(--input);
+    background: var(--input);
 
-            color: var(--text);
+    color: var(--text);
 
-            font-family: 'Cairo';
+    font-family: 'Cairo';
 
-            outline: none;
+    outline: none;
 
-            transition: 0.3s;
+    transition: 0.3s;
 
-            font-size: 16px;
+    font-size: 16px;
 
-        }
+}
 
 
-        .field input:focus {
+.field input:focus {
 
-            border-color:
-                var(--primary);
+    border-color:
+        var(--primary);
 
-        }
+}
 
 
-        /* =====================================================
-           زر الدخول
-        ===================================================== */
+/* =====================================================
+   زر الدخول
+===================================================== */
 
-        .login-btn {
+.login-btn {
 
-            width: 100%;
+    width: 100%;
 
-            padding: 18px;
+    padding: 18px;
 
-            border: none;
+    border: none;
 
-            border-radius: 22px;
+    border-radius: 22px;
 
-            background:
-                linear-gradient(
-                    135deg,
-                    var(--primary),
-                    #4f46e5
-                );
+    background:
+        linear-gradient(
+            135deg,
+            var(--primary),
+            #4f46e5
+        );
 
-            color: white;
+    color: white;
 
-            font-weight: 900;
+    font-weight: 900;
 
-            font-size: 18px;
+    font-size: 18px;
 
-            cursor: pointer;
+    cursor: pointer;
 
-            transition: 0.3s;
+    transition: 0.3s;
 
-            box-shadow:
-                0 10px 25px
-                rgba(79, 70, 229, 0.4);
+    box-shadow:
+        0 10px 25px
+        rgba(79, 70, 229, 0.4);
 
-        }
+}
 
 
-        .login-btn:hover {
+.login-btn:hover {
 
-            transform:
-                translateY(-2px);
+    transform:
+        translateY(-2px);
 
-        }
+}
 
 
-        /* =====================================================
-           زر الاختبارات
-        ===================================================== */
+/* =====================================================
+   زر الاختبارات
+===================================================== */
 
-        .exams-btn {
+.exams-btn {
 
-            display: block;
+    display: block;
 
-            width: 100%;
+    width: 100%;
 
-            padding: 16px;
+    padding: 16px;
 
-            margin-top: 15px;
+    margin-top: 15px;
 
-            border: none;
+    border: none;
 
-            border-radius: 22px;
+    border-radius: 22px;
 
-            background:
-                linear-gradient(
-                    135deg,
-                    #f59e0b,
-                    #d97706
-                );
+    background:
+        linear-gradient(
+            135deg,
+            #f59e0b,
+            #d97706
+        );
 
-            color: white;
+    color: white;
 
-            font-family: 'Cairo';
+    font-family: 'Cairo';
 
-            font-weight: 900;
+    font-weight: 900;
 
-            font-size: 17px;
+    font-size: 17px;
 
-            cursor: pointer;
+    cursor: pointer;
 
-            text-decoration: none;
+    text-decoration: none;
 
-            transition: 0.3s;
+    transition: 0.3s;
 
-            box-shadow:
-                0 10px 25px
-                rgba(217,119,6,0.3);
+    box-shadow:
+        0 10px 25px
+        rgba(217,119,6,0.3);
 
-        }
+}
 
 
-        .exams-btn:hover {
+.exams-btn:hover {
 
-            transform:
-                translateY(-2px);
+    transform:
+        translateY(-2px);
 
-            box-shadow:
-                0 14px 30px
-                rgba(217,119,6,0.4);
+    box-shadow:
+        0 14px 30px
+        rgba(217,119,6,0.4);
 
-        }
+}
 
 
-        /* =====================================================
-           Error
-        ===================================================== */
+/* =====================================================
+   Error
+===================================================== */
 
-        .error-msg {
+.error-msg {
 
-            background:
-                rgba(239,68,68,0.1);
+    background:
+        rgba(239,68,68,0.1);
 
-            color: var(--danger);
+    color: var(--danger);
 
-            padding: 15px;
+    padding: 15px;
 
-            border-radius: 15px;
+    border-radius: 15px;
 
-            margin-top: 20px;
+    margin-top: 20px;
 
-            display: none;
+    display: none;
 
-            border:
-                1px solid var(--danger);
+    border:
+        1px solid var(--danger);
 
-            font-size: 14px;
+    font-size: 14px;
 
-            font-weight: bold;
+    font-weight: bold;
 
-        }
+}
 
 
-        /* =====================================================
-           WhatsApp
-        ===================================================== */
+/* =====================================================
+   WhatsApp
+===================================================== */
 
-        .support-btn {
+.support-btn {
 
-            display: none;
+    display: none;
 
-            margin-top: 15px;
+    margin-top: 15px;
 
-            background: #128c7e;
+    background: #128c7e;
 
-            color: white;
+    color: white;
 
-            text-decoration: none;
+    text-decoration: none;
 
-            padding: 12px;
+    padding: 12px;
 
-            border-radius: 15px;
+    border-radius: 15px;
 
-            font-weight: 700;
+    font-weight: 700;
 
-            transition: 0.3s;
+    transition: 0.3s;
 
-        }
+}
 
 
-        .support-btn:hover {
+.support-btn:hover {
 
-            background: #075e54;
+    background: #075e54;
 
-            transform:
-                scale(1.02);
+    transform:
+        scale(1.02);
 
-        }
+}
 
 
-        /* =====================================================
-           Loader
-        ===================================================== */
+/* =====================================================
+   Loader
+===================================================== */
 
-        #loader {
+#loader {
 
-            position: fixed;
+    position: fixed;
 
-            inset: 0;
+    inset: 0;
 
-            background:
-                rgba(0,0,0,0.8);
+    background:
+        rgba(0,0,0,0.8);
 
-            display: none;
+    display: none;
 
-            justify-content: center;
+    justify-content: center;
 
-            align-items: center;
+    align-items: center;
 
-            z-index: 11000;
+    z-index: 11000;
 
-        }
+}
 
 
-        .spinner {
+.spinner {
 
-            width: 50px;
+    width: 50px;
 
-            height: 50px;
+    height: 50px;
 
-            border:
-                5px solid
-                rgba(255,255,255,0.1);
+    border:
+        5px solid
+        rgba(255,255,255,0.1);
 
-            border-top-color:
-                var(--accent);
+    border-top-color:
+        var(--accent);
 
-            border-radius: 50%;
+    border-radius: 50%;
 
-            animation:
-                rot 1s linear infinite;
+    animation:
+        rot 1s linear infinite;
 
-        }
+}
 
 
-        @keyframes rot {
+@keyframes rot {
 
-            to {
+    to {
 
-                transform:
-                    rotate(360deg);
+        transform:
+            rotate(360deg);
 
-            }
+    }
 
-        }
+}
 
 
-        /* =====================================================
-           Mobile
-        ===================================================== */
+/* =====================================================
+   Mobile
+===================================================== */
 
-        @media (max-width: 600px) {
+@media (max-width: 600px) {
 
-            .login-card {
+    .login-card {
 
-                padding:
-                    40px 25px;
+        padding:
+            40px 25px;
 
-                border-radius: 30px;
+        border-radius: 30px;
 
-            }
+    }
 
 
-            .magic-scale-large {
+    .magic-scale-large {
 
-                font-size: 110px;
+        font-size: 110px;
 
-            }
+    }
 
 
-            .calligraphy-text {
+    .calligraphy-text {
 
-                font-size: 27px;
+        font-size: 27px;
 
-            }
+    }
 
-        }
+}
 
-    </style>
+</style>
 
 </head>
 
@@ -748,7 +748,6 @@
     class="login-card"
     id="loginCard"
 >
-
 
     <div
         style="
@@ -899,7 +898,6 @@
 
     </a>
 
-
 </div>
 
 
@@ -935,6 +933,66 @@ const db =
 
 const auth =
     firebase.auth();
+
+
+
+/* =========================================================
+   توليد Session Token قوي
+========================================================= */
+
+function generateSessionToken() {
+
+    try {
+
+        if (
+            window.crypto &&
+            window.crypto.getRandomValues
+        ) {
+
+            const array =
+                new Uint32Array(8);
+
+            window.crypto.getRandomValues(array);
+
+            return (
+                "zoma_" +
+                Array.from(array)
+                    .map(
+                        n =>
+                            n.toString(36)
+                    )
+                    .join("") +
+                "_" +
+                Date.now().toString(36)
+            );
+
+        }
+
+    }
+
+    catch (e) {
+
+        console.warn(
+            "Crypto token generation failed",
+            e
+        );
+
+    }
+
+
+    return (
+        "zoma_" +
+        Math.random()
+            .toString(36)
+            .substring(2, 15) +
+        Math.random()
+            .toString(36)
+            .substring(2, 15) +
+        "_" +
+        Date.now()
+    );
+
+}
 
 
 
@@ -1084,13 +1142,6 @@ function showLoginInterface() {
 
 /* =========================================================
    تحديد نوع الحساب
-   مهم جداً:
-   
-   admin  -> admin1.html
-   student -> home.html
-   
-   وأي حساب قديم بدون role
-   يعتبر student
 ========================================================= */
 
 function getAccountRole(userData) {
@@ -1102,10 +1153,6 @@ function getAccountRole(userData) {
         .trim()
         .toLowerCase();
 
-
-    /*
-     * دعم القيم العربية أيضاً
-     */
 
     if (
         role === "admin" ||
@@ -1134,11 +1181,6 @@ function redirectByRole(
     role
 ) {
 
-    /*
-     * حماية إضافية:
-     * لا نسمح إلا بقيمتين.
-     */
-
     if (
         role === "admin"
     ) {
@@ -1158,11 +1200,6 @@ function redirectByRole(
 
     }
 
-
-    /*
-     * أي شيء غير admin
-     * يعتبر طالب
-     */
 
     localStorage.setItem(
         "accountType",
@@ -1333,11 +1370,6 @@ async function checkFirebaseAuthentication(
     catch (error) {
 
 
-        /*
-         * الحساب موجود في Authentication
-         * ولكن كلمة المرور غير صحيحة.
-         */
-
         if (
             error.code ===
             'auth/wrong-password'
@@ -1357,10 +1389,6 @@ async function checkFirebaseAuthentication(
 
         }
 
-
-        /*
-         * Firebase الحديث
-         */
 
         if (
             error.code ===
@@ -1382,10 +1410,6 @@ async function checkFirebaseAuthentication(
         }
 
 
-        /*
-         * الحساب معطل
-         */
-
         if (
             error.code ===
             'auth/user-disabled'
@@ -1405,10 +1429,6 @@ async function checkFirebaseAuthentication(
 
         }
 
-
-        /*
-         * محاولات كثيرة
-         */
 
         if (
             error.code ===
@@ -1430,10 +1450,6 @@ async function checkFirebaseAuthentication(
         }
 
 
-        /*
-         * الحساب غير موجود
-         */
-
         if (
             error.code ===
             'auth/user-not-found'
@@ -1453,10 +1469,6 @@ async function checkFirebaseAuthentication(
 
         }
 
-
-        /*
-         * إيميل غير صحيح
-         */
 
         if (
             error.code ===
@@ -1509,10 +1521,6 @@ async function saveAdminSession(
         userDoc.data();
 
 
-    /*
-     * تأكيد أن الحساب أدمن فعلاً
-     */
-
     const role =
         getAccountRole(
             userData
@@ -1531,15 +1539,8 @@ async function saveAdminSession(
 
 
     const newToken =
-        "zoma_" +
-        Math.random()
-        .toString(36)
-        .substring(2, 12);
+        generateSessionToken();
 
-
-    /*
-     * تحديث الجلسة
-     */
 
     await db
         .collection("users")
@@ -1559,10 +1560,6 @@ async function saveAdminSession(
 
         });
 
-
-    /*
-     * حفظ بيانات الجلسة
-     */
 
     localStorage.setItem(
         "userEmail",
@@ -1594,10 +1591,6 @@ async function saveAdminSession(
     );
 
 
-    /*
-     * username
-     */
-
     if (
         userData.username
     ) {
@@ -1608,6 +1601,7 @@ async function saveAdminSession(
         );
 
     }
+
     else if (
         userData.userName
     ) {
@@ -1619,10 +1613,6 @@ async function saveAdminSession(
 
     }
 
-
-    /*
-     * اسم الأدمن
-     */
 
     if (
         userData.name
@@ -1641,10 +1631,12 @@ async function saveAdminSession(
 
 /* =========================================================
    حفظ جلسة الطالب
+   تم تعديلها لتصبح Session حقيقية
 ========================================================= */
 
-function saveStudentSession(
-    userDoc
+async function saveStudentSession(
+    userDoc,
+    firebaseUser = null
 ) {
 
     const userData =
@@ -1652,7 +1644,59 @@ function saveStudentSession(
 
 
     /*
-     * إجبار الجلسة على الطالب
+     * توليد Session Token جديد.
+     *
+     * بمجرد تسجيل الدخول من جهاز/متصفح آخر
+     * يتم استبدال هذا التوكن في Firestore،
+     * وبالتالي الجلسة القديمة تصبح غير صالحة.
+     */
+
+    const newToken =
+        generateSessionToken();
+
+
+    const updateData = {
+
+        lastSessionToken:
+            newToken,
+
+        lastLogin:
+            firebase.firestore
+            .FieldValue
+            .serverTimestamp()
+
+    };
+
+
+    /*
+     * حفظ UID إذا كان موجودًا
+     */
+
+    if (
+        firebaseUser &&
+        firebaseUser.uid
+    ) {
+
+        updateData.uid =
+            firebaseUser.uid;
+
+    }
+
+
+    /*
+     * تحديث جلسة الطالب في Firestore
+     */
+
+    await db
+        .collection("users")
+        .doc(userDoc.id)
+        .update(
+            updateData
+        );
+
+
+    /*
+     * نوع الحساب
      */
 
     localStorage.setItem(
@@ -1661,6 +1705,10 @@ function saveStudentSession(
     );
 
 
+    /*
+     * ID الحساب
+     */
+
     localStorage.setItem(
         "accountId",
         userDoc.id
@@ -1668,7 +1716,7 @@ function saveStudentSession(
 
 
     /*
-     * حفظ الإيميل
+     * الإيميل
      */
 
     if (
@@ -1684,7 +1732,7 @@ function saveStudentSession(
 
 
     /*
-     * حفظ username
+     * Username
      */
 
     if (
@@ -1697,6 +1745,7 @@ function saveStudentSession(
         );
 
     }
+
     else if (
         userData.userName
     ) {
@@ -1710,7 +1759,7 @@ function saveStudentSession(
 
 
     /*
-     * حفظ اسم الطالب
+     * اسم الطالب
      */
 
     if (
@@ -1723,6 +1772,7 @@ function saveStudentSession(
         );
 
     }
+
     else if (
         userData.studentName
     ) {
@@ -1736,16 +1786,42 @@ function saveStudentSession(
 
 
     /*
-     * إزالة بيانات أدمن قديمة
+     * حفظ Session Token للطالب
      */
 
-    localStorage.removeItem(
-        "sessionToken"
+    localStorage.setItem(
+        "sessionToken",
+        newToken
     );
+
+
+    /*
+     * حفظ Firebase UID
+     */
+
+    if (
+        firebaseUser &&
+        firebaseUser.uid
+    ) {
+
+        localStorage.setItem(
+            "firebaseUID",
+            firebaseUser.uid
+        );
+
+    }
+
+
+    /*
+     * إزالة بيانات الأدمن القديمة
+     */
 
     localStorage.removeItem(
         "adminName"
     );
+
+
+    return newToken;
 
 }
 
@@ -1764,10 +1840,6 @@ function checkStudentPassword(
         userData.password;
 
 
-    /*
-     * دعم pass
-     */
-
     if (
         storedPassword === undefined
     ) {
@@ -1777,10 +1849,6 @@ function checkStudentPassword(
 
     }
 
-
-    /*
-     * دعم studentPassword
-     */
 
     if (
         storedPassword === undefined
@@ -1846,10 +1914,6 @@ async function handleLogin() {
         .getElementById('supportBtn');
 
 
-    /*
-     * تنظيف الرسائل
-     */
-
     errBox.style.display =
         'none';
 
@@ -1857,10 +1921,6 @@ async function handleLogin() {
     supBtn.style.display =
         'none';
 
-
-    /*
-     * التحقق
-     */
 
     if (
         !loginValue ||
@@ -1890,10 +1950,6 @@ async function handleLogin() {
             );
 
 
-        /*
-         * الحساب غير موجود
-         */
-
         if (
             !userDoc
         ) {
@@ -1911,12 +1967,6 @@ async function handleLogin() {
             userDoc.data();
 
 
-        /*
-         * تحديد الـ role من Firestore
-         *
-         * هذه هي أهم نقطة في التعديل.
-         */
-
         const role =
             getAccountRole(
                 userData
@@ -1928,10 +1978,6 @@ async function handleLogin() {
             role
         );
 
-
-        /*
-         * الإيميل المستخدم في Firebase
-         */
 
         const authEmail =
             userData.email ||
@@ -1984,23 +2030,21 @@ async function handleLogin() {
         }
 
 
+
         /* =====================================================
-           3 - لو الحساب طالب
-           
-           الطالب يعتمد على Firestore
-           حتى لو لم يكن له Authentication.
+           3 - الطالب
         ===================================================== */
 
         if (
             role === "student"
         ) {
 
+
+            let firebaseUser = null;
+
+
             /*
-             * لو يوجد Firebase Authentication
-             * نحاول استخدامه أولاً.
-             *
-             * ولو لم يوجد، نستخدم password
-             * المخزنة في Firestore.
+             * لو للطالب Firebase Authentication
              */
 
             if (
@@ -2016,78 +2060,26 @@ async function handleLogin() {
 
                 /*
                  * دخول Firebase ناجح
-                 *
-                 * لكن ما زال role = student
-                 * لذلك يذهب إلى home.html
                  */
 
                 if (
                     authResult.authenticated === true
                 ) {
 
-                    /*
-                     * تنظيف أي جلسة أدمن قديمة
-                     */
-
-                    localStorage.removeItem(
-                        "sessionToken"
-                    );
-
-
-                    localStorage.removeItem(
-                        "adminName"
-                    );
-
-
-                    saveStudentSession(
-                        userDoc
-                    );
-
-
-                    /*
-                     * حفظ UID للطالب
-                     */
-
-                    if (
-                        authResult.user
-                    ) {
-
-                        localStorage.setItem(
-                            "firebaseUID",
-                            authResult.user.uid
-                        );
-
-                    }
-
-
-                    showLoader(false);
-
-
-                    redirectByRole(
-                        "student"
-                    );
-
-
-                    return;
+                    firebaseUser =
+                        authResult.user;
 
                 }
 
 
                 /*
-                 * Firebase موجود لكن كلمة المرور خاطئة.
+                 * Firebase موجود وكلمة المرور خطأ
                  */
 
-                if (
+                else if (
                     authResult.exists === true &&
                     authResult.authenticated === false
                 ) {
-
-                    /*
-                     * إذا كان الطالب لديه password
-                     * في Firestore، لا نتجاوز خطأ
-                     * Firebase إلا إذا كانت كلمة Firestore
-                     * صحيحة.
-                     */
 
                     const passwordCorrect =
                         checkStudentPassword(
@@ -2114,35 +2106,43 @@ async function handleLogin() {
 
 
             /*
-             * Firestore Student Login
+             * لو لم يدخل عن طريق Firebase
+             * نتحقق من كلمة Firestore
              */
 
-            const passwordCorrect =
-                checkStudentPassword(
-                    userData,
-                    pass
-                );
-
-
             if (
-                !passwordCorrect
+                !firebaseUser
             ) {
 
-                showLoader(false);
+                const passwordCorrect =
+                    checkStudentPassword(
+                        userData,
+                        pass
+                    );
 
-                return showError(
-                    "كلمة المرور غير صحيحة."
-                );
+
+                if (
+                    !passwordCorrect
+                ) {
+
+                    showLoader(false);
+
+                    return showError(
+                        "كلمة المرور غير صحيحة."
+                    );
+
+                }
 
             }
 
 
             /*
-             * حفظ جلسة الطالب
+             * إنشاء جلسة جديدة للطالب
              */
 
-            saveStudentSession(
-                userDoc
+            await saveStudentSession(
+                userDoc,
+                firebaseUser
             );
 
 
@@ -2163,20 +2163,15 @@ async function handleLogin() {
         }
 
 
+
         /* =====================================================
-           4 - لو الحساب أدمن
-           
-           لازم يكون موجود في Firebase Authentication.
+           4 - الأدمن
         ===================================================== */
 
         if (
             role === "admin"
         ) {
 
-
-            /*
-             * الأدمن لازم يكون عنده إيميل.
-             */
 
             if (
                 !authEmail
@@ -2191,20 +2186,12 @@ async function handleLogin() {
             }
 
 
-            /*
-             * التحقق من Firebase Authentication
-             */
-
             const authResult =
                 await checkFirebaseAuthentication(
                     authEmail,
                     pass
                 );
 
-
-            /*
-             * تسجيل دخول ناجح
-             */
 
             if (
                 authResult.authenticated === true
@@ -2215,7 +2202,7 @@ async function handleLogin() {
 
 
                 /*
-                 * تأكيد أخير أن role ما زال admin
+                 * قراءة أحدث بيانات الحساب
                  */
 
                 const freshDoc =
@@ -2229,7 +2216,17 @@ async function handleLogin() {
                     !freshDoc.exists
                 ) {
 
-                    await auth.signOut();
+                    try {
+
+                        await auth.signOut();
+
+                    }
+
+                    catch(e) {
+
+                        console.error(e);
+
+                    }
 
 
                     showLoader(false);
@@ -2252,31 +2249,29 @@ async function handleLogin() {
 
 
                 /*
-                 * لو تم تغيير الحساب إلى طالب
-                 * أثناء تسجيل الدخول
+                 * لو تغير إلى طالب
                  */
 
                 if (
                     freshRole !== "admin"
                 ) {
 
-                    /*
-                     * تسجيل الخروج من Firebase
-                     */
-
                     try {
 
                         await auth.signOut();
 
-                    } catch(e) {
+                    }
+
+                    catch(e) {
 
                         console.error(e);
 
                     }
 
 
-                    saveStudentSession(
-                        freshDoc
+                    await saveStudentSession(
+                        freshDoc,
+                        null
                     );
 
 
@@ -2306,10 +2301,6 @@ async function handleLogin() {
                 showLoader(false);
 
 
-                /*
-                 * الأدمن -> admin1.html
-                 */
-
                 redirectByRole(
                     "admin"
                 );
@@ -2319,11 +2310,6 @@ async function handleLogin() {
 
             }
 
-
-            /*
-             * Firebase Authentication موجود
-             * لكن كلمة المرور غير صحيحة
-             */
 
             if (
                 authResult.exists === true &&
@@ -2366,13 +2352,6 @@ async function handleLogin() {
             }
 
 
-            /*
-             * أدمن موجود في Firestore فقط
-             * وليس في Authentication.
-             *
-             * لا نسمح له بالدخول.
-             */
-
             showLoader(false);
 
 
@@ -2381,6 +2360,7 @@ async function handleLogin() {
             );
 
         }
+
 
 
         /* =====================================================
@@ -2396,6 +2376,7 @@ async function handleLogin() {
 
 
     }
+
     catch (e) {
 
 
@@ -2497,53 +2478,270 @@ async function handleLogin() {
 
 
 /* =========================================================
-   عرض رسالة الخطأ
+   فحص جلسة الطالب القديمة
 ========================================================= */
 
-function showError(
-    msg
-) {
+async function checkOldStudentSession() {
 
-    const err =
-        document.getElementById(
-            'errorArea'
+    const email =
+        localStorage.getItem(
+            "userEmail"
         );
 
 
-    err.innerText =
-        msg;
+    const accountId =
+        localStorage.getItem(
+            "accountId"
+        );
 
 
-    err.style.display =
-        'block';
+    const token =
+        localStorage.getItem(
+            "sessionToken"
+        );
+
+
+    /*
+     * لازم تكون البيانات الثلاثة موجودة
+     */
+
+    if (
+        !accountId ||
+        !token
+    ) {
+
+        return false;
+
+    }
+
+
+    try {
+
+
+        /*
+         * نستخدم ID مباشرة بدل البحث بالإيميل
+         */
+
+        const userDoc =
+            await db
+            .collection("users")
+            .doc(accountId)
+            .get();
+
+
+        if (
+            !userDoc.exists
+        ) {
+
+            clearStudentSession();
+
+            return false;
+
+        }
+
+
+        const data =
+            userDoc.data();
+
+
+        /*
+         * التأكد أن الحساب ما زال طالبًا
+         */
+
+        const role =
+            getAccountRole(
+                data
+            );
+
+
+        if (
+            role !== "student"
+        ) {
+
+            clearStudentSession();
+
+            return false;
+
+        }
+
+
+        /*
+         * حالة الحساب
+         */
+
+        if (
+            data.status === 'inactive' ||
+            data.status === 'banned'
+        ) {
+
+            clearStudentSession();
+
+            return false;
+
+        }
+
+
+        /*
+         * أهم نقطة:
+         * مقارنة Token المتصفح مع Firestore
+         */
+
+        if (
+            data.lastSessionToken !== token
+        ) {
+
+            clearStudentSession();
+
+            return false;
+
+        }
+
+
+        /*
+         * تحديث البيانات المحلية
+         */
+
+        localStorage.setItem(
+            "accountType",
+            "student"
+        );
+
+
+        localStorage.setItem(
+            "accountId",
+            userDoc.id
+        );
+
+
+        if (
+            data.email
+        ) {
+
+            localStorage.setItem(
+                "userEmail",
+                data.email
+            );
+
+        }
+
+
+        if (
+            data.username
+        ) {
+
+            localStorage.setItem(
+                "username",
+                data.username
+            );
+
+        }
+
+        else if (
+            data.userName
+        ) {
+
+            localStorage.setItem(
+                "username",
+                data.userName
+            );
+
+        }
+
+
+        if (
+            data.name
+        ) {
+
+            localStorage.setItem(
+                "studentName",
+                data.name
+            );
+
+        }
+
+        else if (
+            data.studentName
+        ) {
+
+            localStorage.setItem(
+                "studentName",
+                data.studentName
+            );
+
+        }
+
+
+        return true;
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Old student session error:",
+            error
+        );
+
+
+        /*
+         * لا نحذف الجلسة عند مشكلة
+         * اتصال مؤقتة.
+         *
+         * لكن لن ندخل تلقائيًا.
+         */
+
+        return false;
+
+    }
 
 }
 
 
 
 /* =========================================================
-   Loader
+   تنظيف جلسة الطالب
 ========================================================= */
 
-function showLoader(
-    show
-) {
+function clearStudentSession() {
 
-    document.getElementById(
-        'loader'
-    )
-    .style
-    .display =
-        show
-            ? 'flex'
-            : 'none';
+    localStorage.removeItem(
+        "sessionToken"
+    );
+
+    localStorage.removeItem(
+        "accountId"
+    );
+
+    localStorage.removeItem(
+        "accountType"
+    );
+
+    localStorage.removeItem(
+        "studentName"
+    );
+
+    localStorage.removeItem(
+        "username"
+    );
+
+    localStorage.removeItem(
+        "firebaseUID"
+    );
+
+    localStorage.removeItem(
+        "adminName"
+    );
+
+    localStorage.removeItem(
+        "userEmail"
+    );
 
 }
 
 
 
 /* =========================================================
-   فحص الجلسة القديمة
+   فحص جلسة الأدمن القديمة
 ========================================================= */
 
 async function checkOldAdminSession() {
@@ -2559,10 +2757,6 @@ async function checkOldAdminSession() {
             "sessionToken"
         );
 
-
-    /*
-     * لا توجد جلسة
-     */
 
     if (
         !email ||
@@ -2606,47 +2800,20 @@ async function checkOldAdminSession() {
             userDoc.data();
 
 
-        /*
-         * التحقق من role
-         */
-
         const role =
             getAccountRole(
                 data
             );
 
 
-        /*
-         * الجلسة القديمة لا تعمل
-         * إلا لو الحساب أدمن فعلاً.
-         */
-
         if (
             role !== "admin"
         ) {
-
-            /*
-             * تنظيف جلسة أدمن قديمة
-             */
-
-            localStorage.removeItem(
-                "sessionToken"
-            );
-
-
-            localStorage.removeItem(
-                "adminName"
-            );
-
 
             return false;
 
         }
 
-
-        /*
-         * الحساب معطل
-         */
 
         if (
             data.status === 'inactive' ||
@@ -2657,29 +2824,28 @@ async function checkOldAdminSession() {
                 "sessionToken"
             );
 
-
             return false;
 
         }
 
-
-        /*
-         * التحقق من Session Token
-         */
 
         if (
             data.lastSessionToken !==
             token
         ) {
 
+            localStorage.removeItem(
+                "sessionToken"
+            );
+
+            localStorage.removeItem(
+                "adminName"
+            );
+
             return false;
 
         }
 
-
-        /*
-         * الجلسة صحيحة
-         */
 
         localStorage.setItem(
             "accountType",
@@ -2696,10 +2862,11 @@ async function checkOldAdminSession() {
         return true;
 
     }
+
     catch (error) {
 
         console.error(
-            "Old session error:",
+            "Old admin session error:",
             error
         );
 
@@ -2722,10 +2889,6 @@ async function checkCurrentFirebaseUser() {
         auth.currentUser;
 
 
-    /*
-     * لا يوجد مستخدم
-     */
-
     if (
         !currentUser
     ) {
@@ -2737,10 +2900,6 @@ async function checkCurrentFirebaseUser() {
 
     try {
 
-
-        /*
-         * البحث عن المستخدم
-         */
 
         const snap =
             await db
@@ -2754,16 +2913,11 @@ async function checkCurrentFirebaseUser() {
             .get();
 
 
-        /*
-         * Firebase فقط بدون Firestore
-         */
-
         if (
             snap.empty
         ) {
 
             await auth.signOut();
-
 
             return false;
 
@@ -2778,10 +2932,6 @@ async function checkCurrentFirebaseUser() {
             userDoc.data();
 
 
-        /*
-         * فحص الحالة
-         */
-
         if (
             data.status === 'inactive' ||
             data.status === 'banned'
@@ -2790,13 +2940,11 @@ async function checkCurrentFirebaseUser() {
             await auth.signOut();
 
 
+            clearStudentSession();
+
+
             localStorage.removeItem(
                 "accountType"
-            );
-
-
-            localStorage.removeItem(
-                "sessionToken"
             );
 
 
@@ -2804,10 +2952,6 @@ async function checkCurrentFirebaseUser() {
 
         }
 
-
-        /*
-         * قراءة role الحقيقي
-         */
 
         const role =
             getAccountRole(
@@ -2821,44 +2965,162 @@ async function checkCurrentFirebaseUser() {
         );
 
 
+
         /* =====================================================
            Firebase User + Student
-           
-           يدخل home.html
         ===================================================== */
 
         if (
             role === "student"
         ) {
 
+
             /*
-             * تنظيف بيانات الأدمن
+             * أولًا:
+             * نحاول استخدام جلسة الطالب الموجودة.
              */
 
-            localStorage.removeItem(
-                "sessionToken"
-            );
+            const oldToken =
+                localStorage.getItem(
+                    "sessionToken"
+                );
 
 
-            localStorage.removeItem(
-                "adminName"
-            );
-
-
-            saveStudentSession(
-                userDoc
-            );
-
-
-            localStorage.setItem(
-                "firebaseUID",
-                currentUser.uid
-            );
+            const oldAccountId =
+                localStorage.getItem(
+                    "accountId"
+                );
 
 
             /*
-             * الطالب
+             * لو لدينا Session Token
+             * يجب التحقق منه.
              */
+
+            if (
+                oldToken &&
+                oldAccountId === userDoc.id
+            ) {
+
+                if (
+                    data.lastSessionToken ===
+                    oldToken
+                ) {
+
+                    localStorage.setItem(
+                        "accountType",
+                        "student"
+                    );
+
+
+                    localStorage.setItem(
+                        "accountId",
+                        userDoc.id
+                    );
+
+
+                    localStorage.setItem(
+                        "userEmail",
+                        currentUser.email
+                    );
+
+
+                    localStorage.setItem(
+                        "firebaseUID",
+                        currentUser.uid
+                    );
+
+
+                    if (
+                        data.name
+                    ) {
+
+                        localStorage.setItem(
+                            "studentName",
+                            data.name
+                        );
+
+                    }
+
+
+                    if (
+                        data.username
+                    ) {
+
+                        localStorage.setItem(
+                            "username",
+                            data.username
+                        );
+
+                    }
+
+                    else if (
+                        data.userName
+                    ) {
+
+                        localStorage.setItem(
+                            "username",
+                            data.userName
+                        );
+
+                    }
+
+
+                    window.location.replace(
+                        "home.html"
+                    );
+
+
+                    return true;
+
+                }
+
+
+                /*
+                 * Token مختلف:
+                 * يوجد دخول أحدث من جهاز آخر.
+                 */
+
+                clearStudentSession();
+
+
+                /*
+                 * نخرج Firebase أيضًا
+                 * حتى لا يعيد تسجيل الدخول تلقائيًا.
+                 */
+
+                try {
+
+                    await auth.signOut();
+
+                }
+
+                catch(e) {
+
+                    console.error(e);
+
+                }
+
+
+                return false;
+
+            }
+
+
+            /*
+             * Firebase موجود لكن لا يوجد
+             * Session Token محلي.
+             *
+             * هذا يعني أن Firebase فقط هو الذي
+             * يحتفظ بالجلسة، لذلك ننشئ Session Token
+             * جديدة لهذه الجلسة.
+             */
+
+            await saveStudentSession(
+                userDoc,
+                currentUser
+            );
+
 
             window.location.replace(
                 "home.html"
@@ -2870,19 +3132,15 @@ async function checkCurrentFirebaseUser() {
         }
 
 
+
         /* =====================================================
            Firebase User + Admin
-           
-           يدخل admin1.html
         ===================================================== */
 
         if (
             role === "admin"
         ) {
 
-            /*
-             * حفظ بيانات الأدمن
-             */
 
             localStorage.setItem(
                 "userEmail",
@@ -2921,35 +3179,49 @@ async function checkCurrentFirebaseUser() {
 
 
             /*
-             * مهم:
-             * إذا لم يكن هناك sessionToken،
-             * لا ننشئ واحداً من مجرد وجود
-             * Firebase Authentication.
-             *
-             * لكن يسمح بالدخول لأن Firebase
-             * Authentication صالح والـ role admin.
+             * الأدمن يتم فحص Session Token
              */
 
-            window.location.replace(
-                "admin1.html"
-            );
+            const adminToken =
+                localStorage.getItem(
+                    "sessionToken"
+                );
 
 
-            return true;
+            if (
+                adminToken &&
+                data.lastSessionToken ===
+                adminToken
+            ) {
+
+                window.location.replace(
+                    "admin1.html"
+                );
+
+
+                return true;
+
+            }
+
+
+            /*
+             * لو Firebase موجود ولكن Session Token
+             * غير موجود، لا ندخله تلقائيًا.
+             *
+             * هذا يحافظ على نظام الأدمن.
+             */
+
+            return false;
 
         }
 
 
-        /*
-         * نوع غير معروف
-         */
-
         await auth.signOut();
-
 
         return false;
 
     }
+
     catch (error) {
 
         console.error(
@@ -2986,7 +3258,55 @@ window.onload = async function() {
 
                 /* =================================================
                    1
-                   فحص Firebase Authentication الحالي
+                   فحص جلسة الطالب القديمة
+                ================================================= */
+
+                const oldStudentSession =
+                    await checkOldStudentSession();
+
+
+                if (
+                    oldStudentSession
+                ) {
+
+                    window.location.replace(
+                        "home.html"
+                    );
+
+
+                    return;
+
+                }
+
+
+
+                /* =================================================
+                   2
+                   فحص جلسة الأدمن القديمة
+                ================================================= */
+
+                const oldAdminSession =
+                    await checkOldAdminSession();
+
+
+                if (
+                    oldAdminSession
+                ) {
+
+                    window.location.replace(
+                        "admin1.html"
+                    );
+
+
+                    return;
+
+                }
+
+
+
+                /* =================================================
+                   3
+                   فحص Firebase Authentication
                 ================================================= */
 
                 const firebaseRedirected =
@@ -3001,30 +3321,8 @@ window.onload = async function() {
 
                 }
 
-
-                /* =================================================
-                   2
-                   فحص Session Token
-                ================================================= */
-
-                const oldSession =
-                    await checkOldAdminSession();
-
-
-                if (
-                    oldSession
-                ) {
-
-                    window.location.replace(
-                        "admin1.html"
-                    );
-
-
-                    return;
-
-                }
-
             }
+
             catch (error) {
 
                 console.error(
@@ -3036,7 +3334,7 @@ window.onload = async function() {
 
 
             /*
-             * لا يوجد دخول تلقائي
+             * لا توجد جلسة صالحة
              */
 
             showLoginInterface();
@@ -3067,6 +3365,7 @@ auth.onAuthStateChanged(
             );
 
         }
+
         else {
 
             console.log(
@@ -3077,6 +3376,52 @@ auth.onAuthStateChanged(
 
     }
 );
+
+
+
+/* =========================================================
+   عرض رسالة الخطأ
+========================================================= */
+
+function showError(
+    msg
+) {
+
+    const err =
+        document.getElementById(
+            'errorArea'
+        );
+
+
+    err.innerText =
+        msg;
+
+
+    err.style.display =
+        'block';
+
+}
+
+
+
+/* =========================================================
+   Loader
+========================================================= */
+
+function showLoader(
+    show
+) {
+
+    document.getElementById(
+        'loader'
+    )
+    .style
+    .display =
+        show
+            ? 'flex'
+            : 'none';
+
+}
 
 </script>
 
