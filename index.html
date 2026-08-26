@@ -27,15 +27,23 @@
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 
-    <!-- Firebase App -->
+    <!-- =========================================================
+         Firebase App
+    ========================================================= -->
 
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 
-    <!-- Firebase Authentication -->
+
+    <!-- =========================================================
+         Firebase Authentication
+    ========================================================= -->
 
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
-    <!-- Firebase Firestore -->
+
+    <!-- =========================================================
+         Firebase Firestore
+    ========================================================= -->
 
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
@@ -664,7 +672,9 @@
 <body class="dark-mode">
 
 
-<!-- Loader -->
+<!-- =========================================================
+     Loader
+========================================================= -->
 
 <div id="loader">
 
@@ -673,7 +683,9 @@
 </div>
 
 
-<!-- Theme Button -->
+<!-- =========================================================
+     Theme Button
+========================================================= -->
 
 <div
     class="settings-fab"
@@ -688,7 +700,9 @@
 </div>
 
 
-<!-- Magic Intro -->
+<!-- =========================================================
+     Magic Intro
+========================================================= -->
 
 <div id="magicOverlay">
 
@@ -726,7 +740,9 @@
 </div>
 
 
-<!-- Login -->
+<!-- =========================================================
+     Login
+========================================================= -->
 
 <div
     class="login-card"
@@ -772,7 +788,9 @@
     </p>
 
 
-    <!-- Username / Email -->
+    <!-- =====================================================
+         Username / Email
+    ====================================================== -->
 
     <div class="field">
 
@@ -792,7 +810,9 @@
     </div>
 
 
-    <!-- Password -->
+    <!-- =====================================================
+         Password
+    ====================================================== -->
 
     <div class="field">
 
@@ -822,7 +842,9 @@
     </div>
 
 
-    <!-- Login Button -->
+    <!-- =====================================================
+         Login Button
+    ====================================================== -->
 
     <button
         class="login-btn"
@@ -834,7 +856,9 @@
     </button>
 
 
-    <!-- Exams Button -->
+    <!-- =====================================================
+         Exams Button
+    ====================================================== -->
 
     <a
         href="exams_list.html"
@@ -848,7 +872,9 @@
     </a>
 
 
-    <!-- Error -->
+    <!-- =====================================================
+         Error
+    ====================================================== -->
 
     <div
         id="errorArea"
@@ -856,7 +882,9 @@
     ></div>
 
 
-    <!-- Support -->
+    <!-- =====================================================
+         Support
+    ====================================================== -->
 
     <a
         id="supportBtn"
@@ -907,48 +935,6 @@ const db =
 
 const auth =
     firebase.auth();
-
-
-
-/* =========================================================
-   منع Redirect Loop
-========================================================= */
-
-let redirectInProgress = false;
-
-
-/*
- * عند الرجوع لصفحة الدخول من home.html
- * لا نسمح بفحص الجلسة أكثر من مرة
- * في نفس دورة الصفحة.
- */
-
-function isRedirecting() {
-
-    return redirectInProgress === true;
-
-}
-
-
-function safeRedirect(url) {
-
-    if (
-        redirectInProgress
-    ) {
-
-        return;
-
-    }
-
-
-    redirectInProgress = true;
-
-
-    window.location.replace(
-        url
-    );
-
-}
 
 
 
@@ -1041,15 +1027,7 @@ if (
     ) === 'light'
 ) {
 
-    document.body.classList.add(
-        'light-mode'
-    );
-
-
-    document.getElementById(
-        'themeIcon'
-    ).className =
-        'fas fa-sun';
+    toggleTheme();
 
 }
 
@@ -1106,11 +1084,16 @@ function showLoginInterface() {
 
 /* =========================================================
    تحديد نوع الحساب
+   مهم جداً:
+   
+   admin  -> admin1.html
+   student -> home.html
+   
+   وأي حساب قديم بدون role
+   يعتبر student
 ========================================================= */
 
-function getAccountRole(
-    userData
-) {
+function getAccountRole(userData) {
 
     const role =
         String(
@@ -1119,6 +1102,10 @@ function getAccountRole(
         .trim()
         .toLowerCase();
 
+
+    /*
+     * دعم القيم العربية أيضاً
+     */
 
     if (
         role === "admin" ||
@@ -1147,14 +1134,10 @@ function redirectByRole(
     role
 ) {
 
-    if (
-        isRedirecting()
-    ) {
-
-        return;
-
-    }
-
+    /*
+     * حماية إضافية:
+     * لا نسمح إلا بقيمتين.
+     */
 
     if (
         role === "admin"
@@ -1166,7 +1149,7 @@ function redirectByRole(
         );
 
 
-        safeRedirect(
+        window.location.replace(
             "admin1.html"
         );
 
@@ -1176,13 +1159,18 @@ function redirectByRole(
     }
 
 
+    /*
+     * أي شيء غير admin
+     * يعتبر طالب
+     */
+
     localStorage.setItem(
         "accountType",
         "student"
     );
 
 
-    safeRedirect(
+    window.location.replace(
         "home.html"
     );
 
@@ -1202,7 +1190,7 @@ async function findFirestoreUser(
 
 
     /*
-     * البحث بالإيميل
+     * البحث باستخدام الإيميل
      */
 
     if (
@@ -1233,7 +1221,7 @@ async function findFirestoreUser(
 
 
     /*
-     * البحث username
+     * البحث باستخدام username
      */
 
     snap =
@@ -1289,7 +1277,7 @@ async function findFirestoreUser(
 
 
 /* =========================================================
-   Firebase Authentication
+   التحقق من Firebase Authentication
 ========================================================= */
 
 async function checkFirebaseAuthentication(
@@ -1344,6 +1332,12 @@ async function checkFirebaseAuthentication(
 
     catch (error) {
 
+
+        /*
+         * الحساب موجود في Authentication
+         * ولكن كلمة المرور غير صحيحة.
+         */
+
         if (
             error.code ===
             'auth/wrong-password'
@@ -1363,6 +1357,10 @@ async function checkFirebaseAuthentication(
 
         }
 
+
+        /*
+         * Firebase الحديث
+         */
 
         if (
             error.code ===
@@ -1384,6 +1382,10 @@ async function checkFirebaseAuthentication(
         }
 
 
+        /*
+         * الحساب معطل
+         */
+
         if (
             error.code ===
             'auth/user-disabled'
@@ -1403,6 +1405,10 @@ async function checkFirebaseAuthentication(
 
         }
 
+
+        /*
+         * محاولات كثيرة
+         */
 
         if (
             error.code ===
@@ -1424,6 +1430,10 @@ async function checkFirebaseAuthentication(
         }
 
 
+        /*
+         * الحساب غير موجود
+         */
+
         if (
             error.code ===
             'auth/user-not-found'
@@ -1443,6 +1453,10 @@ async function checkFirebaseAuthentication(
 
         }
 
+
+        /*
+         * إيميل غير صحيح
+         */
 
         if (
             error.code ===
@@ -1495,6 +1509,10 @@ async function saveAdminSession(
         userDoc.data();
 
 
+    /*
+     * تأكيد أن الحساب أدمن فعلاً
+     */
+
     const role =
         getAccountRole(
             userData
@@ -1519,6 +1537,10 @@ async function saveAdminSession(
         .substring(2, 12);
 
 
+    /*
+     * تحديث الجلسة
+     */
+
     await db
         .collection("users")
         .doc(userDoc.id)
@@ -1537,6 +1559,10 @@ async function saveAdminSession(
 
         });
 
+
+    /*
+     * حفظ بيانات الجلسة
+     */
 
     localStorage.setItem(
         "userEmail",
@@ -1568,6 +1594,10 @@ async function saveAdminSession(
     );
 
 
+    /*
+     * username
+     */
+
     if (
         userData.username
     ) {
@@ -1578,7 +1608,6 @@ async function saveAdminSession(
         );
 
     }
-
     else if (
         userData.userName
     ) {
@@ -1590,6 +1619,10 @@ async function saveAdminSession(
 
     }
 
+
+    /*
+     * اسم الأدمن
+     */
 
     if (
         userData.name
@@ -1618,6 +1651,10 @@ function saveStudentSession(
         userDoc.data();
 
 
+    /*
+     * إجبار الجلسة على الطالب
+     */
+
     localStorage.setItem(
         "accountType",
         "student"
@@ -1629,6 +1666,10 @@ function saveStudentSession(
         userDoc.id
     );
 
+
+    /*
+     * حفظ الإيميل
+     */
 
     if (
         userData.email
@@ -1642,6 +1683,10 @@ function saveStudentSession(
     }
 
 
+    /*
+     * حفظ username
+     */
+
     if (
         userData.username
     ) {
@@ -1652,7 +1697,6 @@ function saveStudentSession(
         );
 
     }
-
     else if (
         userData.userName
     ) {
@@ -1665,6 +1709,10 @@ function saveStudentSession(
     }
 
 
+    /*
+     * حفظ اسم الطالب
+     */
+
     if (
         userData.name
     ) {
@@ -1675,7 +1723,6 @@ function saveStudentSession(
         );
 
     }
-
     else if (
         userData.studentName
     ) {
@@ -1689,15 +1736,12 @@ function saveStudentSession(
 
 
     /*
-     * مهم جداً:
-     * الطالب لا يحمل أي Session Token
-     * خاص بالأدمن.
+     * إزالة بيانات أدمن قديمة
      */
 
     localStorage.removeItem(
         "sessionToken"
     );
-
 
     localStorage.removeItem(
         "adminName"
@@ -1720,6 +1764,10 @@ function checkStudentPassword(
         userData.password;
 
 
+    /*
+     * دعم pass
+     */
+
     if (
         storedPassword === undefined
     ) {
@@ -1729,6 +1777,10 @@ function checkStudentPassword(
 
     }
 
+
+    /*
+     * دعم studentPassword
+     */
 
     if (
         storedPassword === undefined
@@ -1741,8 +1793,7 @@ function checkStudentPassword(
 
 
     /*
-     * عدم وجود كلمة مرور
-     * يعني السماح كما في النظام القديم.
+     * إذا لم توجد كلمة مرور
      */
 
     if (
@@ -1765,44 +1816,10 @@ function checkStudentPassword(
 
 
 /* =========================================================
-   تنظيف جلسة الأدمن
-========================================================= */
-
-function clearAdminSession() {
-
-    localStorage.removeItem(
-        "sessionToken"
-    );
-
-
-    localStorage.removeItem(
-        "adminName"
-    );
-
-
-    /*
-     * لا نمسح accountId هنا
-     * لأنه قد يكون للطالب.
-     */
-
-}
-
-
-
-/* =========================================================
    تسجيل الدخول الرئيسي
 ========================================================= */
 
 async function handleLogin() {
-
-
-    if (
-        isRedirecting()
-    ) {
-
-        return;
-
-    }
 
 
     const loginValue =
@@ -1829,6 +1846,10 @@ async function handleLogin() {
         .getElementById('supportBtn');
 
 
+    /*
+     * تنظيف الرسائل
+     */
+
     errBox.style.display =
         'none';
 
@@ -1836,6 +1857,10 @@ async function handleLogin() {
     supBtn.style.display =
         'none';
 
+
+    /*
+     * التحقق
+     */
 
     if (
         !loginValue ||
@@ -1856,8 +1881,7 @@ async function handleLogin() {
 
 
         /* =====================================================
-           1
-           البحث في Firestore
+           1 - البحث في Firestore
         ===================================================== */
 
         const userDoc =
@@ -1865,6 +1889,10 @@ async function handleLogin() {
                 loginValue
             );
 
+
+        /*
+         * الحساب غير موجود
+         */
 
         if (
             !userDoc
@@ -1883,10 +1911,11 @@ async function handleLogin() {
             userDoc.data();
 
 
-        /* =====================================================
-           2
-           تحديد الدور
-        ===================================================== */
+        /*
+         * تحديد الـ role من Firestore
+         *
+         * هذه هي أهم نقطة في التعديل.
+         */
 
         const role =
             getAccountRole(
@@ -1900,10 +1929,9 @@ async function handleLogin() {
         );
 
 
-        /* =====================================================
-           3
-           الإيميل
-        ===================================================== */
+        /*
+         * الإيميل المستخدم في Firebase
+         */
 
         const authEmail =
             userData.email ||
@@ -1915,8 +1943,7 @@ async function handleLogin() {
 
 
         /* =====================================================
-           4
-           حالة الحساب
+           2 - حالة الحساب
         ===================================================== */
 
         if (
@@ -1958,8 +1985,10 @@ async function handleLogin() {
 
 
         /* =====================================================
-           5
-           STUDENT
+           3 - لو الحساب طالب
+           
+           الطالب يعتمد على Firestore
+           حتى لو لم يكن له Authentication.
         ===================================================== */
 
         if (
@@ -1967,23 +1996,12 @@ async function handleLogin() {
         ) {
 
             /*
-             * تنظيف أي بيانات أدمن قديمة
+             * لو يوجد Firebase Authentication
+             * نحاول استخدامه أولاً.
+             *
+             * ولو لم يوجد، نستخدم password
+             * المخزنة في Firestore.
              */
-
-            clearAdminSession();
-
-
-            /*
-             * هل الطالب مرتبط بـ Authentication؟
-             */
-
-            let firebaseLoginSucceeded =
-                false;
-
-
-            let firebaseStudentUser =
-                null;
-
 
             if (
                 authEmail
@@ -1998,32 +2016,80 @@ async function handleLogin() {
 
                 /*
                  * دخول Firebase ناجح
+                 *
+                 * لكن ما زال role = student
+                 * لذلك يذهب إلى home.html
                  */
 
                 if (
                     authResult.authenticated === true
                 ) {
 
-                    firebaseLoginSucceeded =
-                        true;
+                    /*
+                     * تنظيف أي جلسة أدمن قديمة
+                     */
+
+                    localStorage.removeItem(
+                        "sessionToken"
+                    );
 
 
-                    firebaseStudentUser =
-                        authResult.user;
+                    localStorage.removeItem(
+                        "adminName"
+                    );
+
+
+                    saveStudentSession(
+                        userDoc
+                    );
+
+
+                    /*
+                     * حفظ UID للطالب
+                     */
+
+                    if (
+                        authResult.user
+                    ) {
+
+                        localStorage.setItem(
+                            "firebaseUID",
+                            authResult.user.uid
+                        );
+
+                    }
+
+
+                    showLoader(false);
+
+
+                    redirectByRole(
+                        "student"
+                    );
+
+
+                    return;
 
                 }
 
 
                 /*
-                 * Firebase موجود وكلمة السر غلط
+                 * Firebase موجود لكن كلمة المرور خاطئة.
                  */
 
-                else if (
+                if (
                     authResult.exists === true &&
                     authResult.authenticated === false
                 ) {
 
-                    const firestorePasswordCorrect =
+                    /*
+                     * إذا كان الطالب لديه password
+                     * في Firestore، لا نتجاوز خطأ
+                     * Firebase إلا إذا كانت كلمة Firestore
+                     * صحيحة.
+                     */
+
+                    const passwordCorrect =
                         checkStudentPassword(
                             userData,
                             pass
@@ -2031,7 +2097,7 @@ async function handleLogin() {
 
 
                     if (
-                        !firestorePasswordCorrect
+                        !passwordCorrect
                     ) {
 
                         showLoader(false);
@@ -2048,62 +2114,25 @@ async function handleLogin() {
 
 
             /*
-             * لو لم ينجح Firebase
-             * نتحقق من كلمة Firestore.
+             * Firestore Student Login
              */
 
+            const passwordCorrect =
+                checkStudentPassword(
+                    userData,
+                    pass
+                );
+
+
             if (
-                !firebaseLoginSucceeded
+                !passwordCorrect
             ) {
 
-                const passwordCorrect =
-                    checkStudentPassword(
-                        userData,
-                        pass
-                    );
+                showLoader(false);
 
-
-                if (
-                    !passwordCorrect
-                ) {
-
-                    showLoader(false);
-
-                    return showError(
-                        "كلمة المرور غير صحيحة."
-                    );
-
-                }
-
-                /*
-                 * الطالب Firestore فقط.
-                 *
-                 * لو كان فيه Firebase User قديم
-                 * وتم الاعتماد على Firestore password،
-                 * نعمل Sign Out حتى لا تسبب الجلسة
-                 * القديمة Redirect Loop.
-                 */
-
-                if (
-                    auth.currentUser
-                ) {
-
-                    try {
-
-                        await auth.signOut();
-
-                    }
-
-                    catch (signOutError) {
-
-                        console.warn(
-                            "Student Firebase signOut:",
-                            signOutError
-                        );
-
-                    }
-
-                }
+                return showError(
+                    "كلمة المرور غير صحيحة."
+                );
 
             }
 
@@ -2117,47 +2146,11 @@ async function handleLogin() {
             );
 
 
-            /*
-             * حفظ Firebase UID
-             * فقط لو دخل Authentication فعلاً.
-             */
-
-            if (
-                firebaseLoginSucceeded &&
-                firebaseStudentUser
-            ) {
-
-                localStorage.setItem(
-                    "firebaseUID",
-                    firebaseStudentUser.uid
-                );
-
-            }
-
-            else {
-
-                localStorage.removeItem(
-                    "firebaseUID"
-                );
-
-            }
-
-
-            /*
-             * علامة واضحة أن الدخول تم كطالب.
-             */
-
-            sessionStorage.setItem(
-                "loginCompleted",
-                "student"
-            );
-
-
             showLoader(false);
 
 
             /*
-             * الطالب -> home
+             * الطالب -> home.html
              */
 
             redirectByRole(
@@ -2171,8 +2164,9 @@ async function handleLogin() {
 
 
         /* =====================================================
-           6
-           ADMIN
+           4 - لو الحساب أدمن
+           
+           لازم يكون موجود في Firebase Authentication.
         ===================================================== */
 
         if (
@@ -2181,7 +2175,7 @@ async function handleLogin() {
 
 
             /*
-             * الأدمن لازم يكون له إيميل
+             * الأدمن لازم يكون عنده إيميل.
              */
 
             if (
@@ -2198,7 +2192,7 @@ async function handleLogin() {
 
 
             /*
-             * تسجيل الدخول Authentication
+             * التحقق من Firebase Authentication
              */
 
             const authResult =
@@ -2209,7 +2203,7 @@ async function handleLogin() {
 
 
             /*
-             * نجاح الأدمن
+             * تسجيل دخول ناجح
              */
 
             if (
@@ -2221,8 +2215,7 @@ async function handleLogin() {
 
 
                 /*
-                 * إعادة قراءة بيانات الحساب
-                 * للتأكد من role الحقيقي.
+                 * تأكيد أخير أن role ما زال admin
                  */
 
                 const freshDoc =
@@ -2259,20 +2252,23 @@ async function handleLogin() {
 
 
                 /*
-                 * لو تغير من Admin إلى Student
+                 * لو تم تغيير الحساب إلى طالب
+                 * أثناء تسجيل الدخول
                  */
 
                 if (
                     freshRole !== "admin"
                 ) {
 
+                    /*
+                     * تسجيل الخروج من Firebase
+                     */
+
                     try {
 
                         await auth.signOut();
 
-                    }
-
-                    catch(e) {
+                    } catch(e) {
 
                         console.error(e);
 
@@ -2281,12 +2277,6 @@ async function handleLogin() {
 
                     saveStudentSession(
                         freshDoc
-                    );
-
-
-                    sessionStorage.setItem(
-                        "loginCompleted",
-                        "student"
                     );
 
 
@@ -2313,17 +2303,11 @@ async function handleLogin() {
                 );
 
 
-                sessionStorage.setItem(
-                    "loginCompleted",
-                    "admin"
-                );
-
-
                 showLoader(false);
 
 
                 /*
-                 * الأدمن -> admin1
+                 * الأدمن -> admin1.html
                  */
 
                 redirectByRole(
@@ -2337,8 +2321,8 @@ async function handleLogin() {
 
 
             /*
-             * Authentication موجود
-             * ولكن البيانات خاطئة.
+             * Firebase Authentication موجود
+             * لكن كلمة المرور غير صحيحة
              */
 
             if (
@@ -2383,7 +2367,10 @@ async function handleLogin() {
 
 
             /*
-             * Admin Firestore فقط
+             * أدمن موجود في Firestore فقط
+             * وليس في Authentication.
+             *
+             * لا نسمح له بالدخول.
              */
 
             showLoader(false);
@@ -2397,8 +2384,7 @@ async function handleLogin() {
 
 
         /* =====================================================
-           7
-           حماية
+           5 - حماية إضافية
         ===================================================== */
 
         showLoader(false);
@@ -2410,7 +2396,6 @@ async function handleLogin() {
 
 
     }
-
     catch (e) {
 
 
@@ -2449,4 +2434,652 @@ async function handleLogin() {
             case 'auth/invalid-credential':
 
                 showError(
-                    "بيانات الدخول غير صحيحة
+                    "بيانات الدخول غير صحيحة."
+                );
+
+                break;
+
+
+            case 'auth/user-disabled':
+
+                showError(
+                    "🚫 تم تعطيل هذا الحساب."
+                );
+
+                break;
+
+
+            case 'auth/too-many-requests':
+
+                showError(
+                    "تم إجراء محاولات دخول كثيرة. حاول مرة أخرى بعد قليل."
+                );
+
+                break;
+
+
+            case 'auth/network-request-failed':
+
+                showError(
+                    "تعذر الاتصال بالإنترنت. تأكد من الاتصال وحاول مرة أخرى."
+                );
+
+                break;
+
+
+            case 'permission-denied':
+
+                showError(
+                    "ليس لديك صلاحية للوصول إلى بيانات المستخدم."
+                );
+
+                break;
+
+
+            default:
+
+                showError(
+                    "حدث خطأ أثناء تسجيل الدخول: " +
+                    (
+                        e.message ||
+                        "خطأ غير معروف."
+                    )
+                );
+
+                break;
+
+        }
+
+    }
+
+}
+
+
+
+/* =========================================================
+   عرض رسالة الخطأ
+========================================================= */
+
+function showError(
+    msg
+) {
+
+    const err =
+        document.getElementById(
+            'errorArea'
+        );
+
+
+    err.innerText =
+        msg;
+
+
+    err.style.display =
+        'block';
+
+}
+
+
+
+/* =========================================================
+   Loader
+========================================================= */
+
+function showLoader(
+    show
+) {
+
+    document.getElementById(
+        'loader'
+    )
+    .style
+    .display =
+        show
+            ? 'flex'
+            : 'none';
+
+}
+
+
+
+/* =========================================================
+   فحص الجلسة القديمة
+========================================================= */
+
+async function checkOldAdminSession() {
+
+    const email =
+        localStorage.getItem(
+            "userEmail"
+        );
+
+
+    const token =
+        localStorage.getItem(
+            "sessionToken"
+        );
+
+
+    /*
+     * لا توجد جلسة
+     */
+
+    if (
+        !email ||
+        !token
+    ) {
+
+        return false;
+
+    }
+
+
+    try {
+
+
+        const snap =
+            await db
+            .collection("users")
+            .where(
+                "email",
+                "==",
+                email
+            )
+            .limit(1)
+            .get();
+
+
+        if (
+            snap.empty
+        ) {
+
+            return false;
+
+        }
+
+
+        const userDoc =
+            snap.docs[0];
+
+
+        const data =
+            userDoc.data();
+
+
+        /*
+         * التحقق من role
+         */
+
+        const role =
+            getAccountRole(
+                data
+            );
+
+
+        /*
+         * الجلسة القديمة لا تعمل
+         * إلا لو الحساب أدمن فعلاً.
+         */
+
+        if (
+            role !== "admin"
+        ) {
+
+            /*
+             * تنظيف جلسة أدمن قديمة
+             */
+
+            localStorage.removeItem(
+                "sessionToken"
+            );
+
+
+            localStorage.removeItem(
+                "adminName"
+            );
+
+
+            return false;
+
+        }
+
+
+        /*
+         * الحساب معطل
+         */
+
+        if (
+            data.status === 'inactive' ||
+            data.status === 'banned'
+        ) {
+
+            localStorage.removeItem(
+                "sessionToken"
+            );
+
+
+            return false;
+
+        }
+
+
+        /*
+         * التحقق من Session Token
+         */
+
+        if (
+            data.lastSessionToken !==
+            token
+        ) {
+
+            return false;
+
+        }
+
+
+        /*
+         * الجلسة صحيحة
+         */
+
+        localStorage.setItem(
+            "accountType",
+            "admin"
+        );
+
+
+        localStorage.setItem(
+            "accountId",
+            userDoc.id
+        );
+
+
+        return true;
+
+    }
+    catch (error) {
+
+        console.error(
+            "Old session error:",
+            error
+        );
+
+
+        return false;
+
+    }
+
+}
+
+
+
+/* =========================================================
+   التحقق من جلسة Firebase الحالية
+========================================================= */
+
+async function checkCurrentFirebaseUser() {
+
+    const currentUser =
+        auth.currentUser;
+
+
+    /*
+     * لا يوجد مستخدم
+     */
+
+    if (
+        !currentUser
+    ) {
+
+        return false;
+
+    }
+
+
+    try {
+
+
+        /*
+         * البحث عن المستخدم
+         */
+
+        const snap =
+            await db
+            .collection("users")
+            .where(
+                "email",
+                "==",
+                currentUser.email
+            )
+            .limit(1)
+            .get();
+
+
+        /*
+         * Firebase فقط بدون Firestore
+         */
+
+        if (
+            snap.empty
+        ) {
+
+            await auth.signOut();
+
+
+            return false;
+
+        }
+
+
+        const userDoc =
+            snap.docs[0];
+
+
+        const data =
+            userDoc.data();
+
+
+        /*
+         * فحص الحالة
+         */
+
+        if (
+            data.status === 'inactive' ||
+            data.status === 'banned'
+        ) {
+
+            await auth.signOut();
+
+
+            localStorage.removeItem(
+                "accountType"
+            );
+
+
+            localStorage.removeItem(
+                "sessionToken"
+            );
+
+
+            return false;
+
+        }
+
+
+        /*
+         * قراءة role الحقيقي
+         */
+
+        const role =
+            getAccountRole(
+                data
+            );
+
+
+        console.log(
+            "Current Firebase Role:",
+            role
+        );
+
+
+        /* =====================================================
+           Firebase User + Student
+           
+           يدخل home.html
+        ===================================================== */
+
+        if (
+            role === "student"
+        ) {
+
+            /*
+             * تنظيف بيانات الأدمن
+             */
+
+            localStorage.removeItem(
+                "sessionToken"
+            );
+
+
+            localStorage.removeItem(
+                "adminName"
+            );
+
+
+            saveStudentSession(
+                userDoc
+            );
+
+
+            localStorage.setItem(
+                "firebaseUID",
+                currentUser.uid
+            );
+
+
+            /*
+             * الطالب
+             */
+
+            window.location.replace(
+                "home.html"
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           Firebase User + Admin
+           
+           يدخل admin1.html
+        ===================================================== */
+
+        if (
+            role === "admin"
+        ) {
+
+            /*
+             * حفظ بيانات الأدمن
+             */
+
+            localStorage.setItem(
+                "userEmail",
+                currentUser.email
+            );
+
+
+            localStorage.setItem(
+                "firebaseUID",
+                currentUser.uid
+            );
+
+
+            localStorage.setItem(
+                "accountId",
+                userDoc.id
+            );
+
+
+            localStorage.setItem(
+                "accountType",
+                "admin"
+            );
+
+
+            if (
+                data.name
+            ) {
+
+                localStorage.setItem(
+                    "adminName",
+                    data.name
+                );
+
+            }
+
+
+            /*
+             * مهم:
+             * إذا لم يكن هناك sessionToken،
+             * لا ننشئ واحداً من مجرد وجود
+             * Firebase Authentication.
+             *
+             * لكن يسمح بالدخول لأن Firebase
+             * Authentication صالح والـ role admin.
+             */
+
+            window.location.replace(
+                "admin1.html"
+            );
+
+
+            return true;
+
+        }
+
+
+        /*
+         * نوع غير معروف
+         */
+
+        await auth.signOut();
+
+
+        return false;
+
+    }
+    catch (error) {
+
+        console.error(
+            "Current Firebase user check failed:",
+            error
+        );
+
+
+        return false;
+
+    }
+
+}
+
+
+
+/* =========================================================
+   تشغيل الصفحة
+========================================================= */
+
+window.onload = async function() {
+
+
+    /*
+     * وقت شاشة البداية
+     */
+
+    setTimeout(
+        async function() {
+
+
+            try {
+
+
+                /* =================================================
+                   1
+                   فحص Firebase Authentication الحالي
+                ================================================= */
+
+                const firebaseRedirected =
+                    await checkCurrentFirebaseUser();
+
+
+                if (
+                    firebaseRedirected
+                ) {
+
+                    return;
+
+                }
+
+
+                /* =================================================
+                   2
+                   فحص Session Token
+                ================================================= */
+
+                const oldSession =
+                    await checkOldAdminSession();
+
+
+                if (
+                    oldSession
+                ) {
+
+                    window.location.replace(
+                        "admin1.html"
+                    );
+
+
+                    return;
+
+                }
+
+            }
+            catch (error) {
+
+                console.error(
+                    "Automatic login check failed:",
+                    error
+                );
+
+            }
+
+
+            /*
+             * لا يوجد دخول تلقائي
+             */
+
+            showLoginInterface();
+
+
+        },
+        2200
+    );
+
+};
+
+
+
+/* =========================================================
+   Firebase Authentication State
+========================================================= */
+
+auth.onAuthStateChanged(
+    function(user) {
+
+        if (
+            user
+        ) {
+
+            console.log(
+                "Firebase Authentication User:",
+                user.email
+            );
+
+        }
+        else {
+
+            console.log(
+                "No Firebase Authentication User"
+            );
+
+        }
+
+    }
+);
+
+</script>
+
+</body>
+
+        </html>
